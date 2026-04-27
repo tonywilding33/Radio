@@ -21,4 +21,4 @@
 
 ### Credits
 **Credits:** Developer Tony Wilding  
-**Original National Request Chart Data (Top 500):** Contributed by Mark W Snowdon
+**All Original National Hospital Radio Request Chart Data (Top 40 & Top 500):** Contributed by Mark W Snowdon
