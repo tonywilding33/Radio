@@ -4,7 +4,7 @@
 *A digital producer for the Top 500 National Request Chart.*
 
 * **Purpose:** Automatically generates a balanced 60-minute show.
-* **Logic:** Uses artist separation and variety rules to build a professional playlist.
+* **Logic:** Uses artist separation together with Advanced Radio Scheduling Rules to build a professional playlist.
 * **Output:** 14 Essential Tracks + 4 Optional Fillers.
 * **Link:** [https://tonywilding33.github.io/NHRRC/](https://tonywilding33.github.io/NHRRC/)
 
