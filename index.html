@@ -10,8 +10,11 @@
         .tool-card { background: #f8f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 25px; margin-bottom: 25px; }
         h2 { margin-top: 0; color: #2980b9; font-size: 1.3em; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
         p { margin: 10px 0; }
-        .btn { display: inline-block; background: #2c3e50; color: white; text-decoration: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.85em; margin-top: 15px; transition: 0.3s; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        .btn { display: inline-block; background: #2c3e50; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.8em; transition: 0.3s; text-align: center; min-width: 140px; }
         .btn:hover { background: #34495e; transform: translateY(-2px); }
+        .btn-guide { background: #7f8c8d; }
+        .btn-guide:hover { background: #95a5a6; }
         footer { margin-top: 50px; text-align: center; font-size: 0.8em; color: #95a5a6; border-top: 1px solid #ddd; padding-top: 15px; }
     </style>
 </head>
@@ -25,8 +28,10 @@
         <p>A digital producer for the Top 500 National Request Chart.</p>
         <p><strong>Purpose:</strong> Automatically generates a balanced 60-minute show.</p>
         <p><strong>Logic:</strong> Uses artist separation and variety rules to build a professional playlist.</p>
-        <p><strong>Output:</strong> 14 Essential Tracks + 4 Optional Fillers.</p>
-        <a href="https://tonywilding33.github.io/NHRRC/" class="btn">Launch Selector</a>
+        <div class="btn-group">
+            <a href="https://tonywilding33.github.io/NHRRC/" class="btn">Launch Selector</a>
+            <a href="https://tonywilding33.github.io/Radio/National%20Hospital%20Radio%20Request%20Chart%20Selector%20(User%20Guide).pdf" class="btn btn-guide" download>Download Guide</a>
+        </div>
     </div>
 
     <div class="tool-card">
@@ -34,7 +39,10 @@
         <p>Access to the most requested tracks in hospital radio history.</p>
         <p><strong>Purpose:</strong> Search and browse the definitive "All Time Greats" chart.</p>
         <p><strong>Feature:</strong> Curated historical data for themed "Gold" segments.</p>
-        <a href="https://tonywilding33.github.io/ALLTIMEGREATS/" class="btn">Launch All Time Greats</a>
+        <div class="btn-group">
+            <a href="https://tonywilding33.github.io/ALLTIMEGREATS/" class="btn">Launch Tool</a>
+            <a href="https://tonywilding33.github.io/Radio/ALL%20TIME%20GREATS.pdf" class="btn btn-guide" download>Download Guide</a>
+        </div>
     </div>
 
     <footer>
