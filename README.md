@@ -11,8 +11,7 @@ Link: [https://tonywilding33.github.io/NHRRC/](https://tonywilding33.github.io/N
 Access to the most requested tracks in hospital radio history.
 Purpose: Search and browse the definitive "All Time Greats" chart.
 Feature: Curated historical data for themed "Gold" segments.
-Link: [https://tonywilding33.github.io/NHRRC/alltime.html](https://tonywilding33.github.io/NHRRC/alltime.html)
+Link: [https://tonywilding33.github.io/ALLTIMEGREATS/](https://tonywilding33.github.io/ALLTIMEGREATS/)
 
-Credits
-Technical Developer: Tony Wilding
-Original Data Contribution: Mark W Snowdon
+Credits: Developer Tony Wilding
+Original National Request Chart Data (Top 500) Contributed by Mark W Snowdon
