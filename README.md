@@ -5,7 +5,7 @@
 
 * **Purpose:** Automatically generates a balanced 60-minute show.
 * **Logic:** Uses artist separation together with Advanced Radio Scheduling Rules to build a professional playlist.
-* **Output:** 14 Essential Tracks + 4 Optional Fillers.
+* **Output:** 14 Essential Tracks + 4 Optional Fillers. Chart Position from the annual Top 500
 * **Link:** [https://tonywilding33.github.io/NHRRC/](https://tonywilding33.github.io/NHRRC/)
 
 ---
