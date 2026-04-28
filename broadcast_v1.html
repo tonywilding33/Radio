@@ -78,20 +78,16 @@
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
-                transformHeader: h => h.trim().toLowerCase(), // Case-insensitive headers
                 complete: function(results) {
-                    masterLibrary = results.data.filter(row => row.artist || row.title);
-                    console.log("Database Sync Successful. Songs:", masterLibrary.length);
-                    
+                    // Filter out any empty rows
+                    masterLibrary = results.data.filter(row => row.ID && row.Artist);
                     document.getElementById('setup-view').style.display = 'none';
                     document.getElementById('monitor').style.display = 'block';
-                    
-                    // Force the first pick
                     generateNext();
                 }
             });
         } catch (err) {
-            alert("Database Error: Check connection or branch name.");
+            alert("Database Error: Check your GitHub Radio branch.");
         }
     }
 
@@ -99,51 +95,51 @@
         const now = Date.now();
         const startHour = parseInt(document.getElementById('start-hour').value);
 
-        // 1. Separation Filter
+        // 1. Mandatory Separation Filter (Strict 4hr Song / 100min Artist)
         let pool = masterLibrary.filter(song => {
-            const lastS = playHistory.findLast(h => h.id === song.id);
-            const lastA = playHistory.findLast(h => h.artist === song.artist);
+            const lastS = playHistory.findLast(h => h.id === song.ID);
+            const lastA = playHistory.findLast(h => h.artist === song.Artist);
             return (!lastS || (now - lastS.time > SONG_SEP * 60000)) &&
                    (!lastA || (now - lastA.time > ARTIST_SEP * 60000));
         });
 
-        // 2. Daypart Logic
+        // 2. Daypart Logic (Weighting)
         let mode = "Standard";
         let subPool = [...pool];
 
         if (startHour >= 6 && startHour < 11) {
             mode = "Morning Gold";
-            const gold = pool.filter(s => s.decade <= 1970);
+            const gold = pool.filter(s => s.Decade <= 1970);
             if (gold.length > 0) subPool = gold;
         } else if (startHour >= 20 || startHour < 6) {
             mode = "Night Shift";
-            const night = pool.filter(s => s.length === 'L' || s.length === 'l');
+            const night = pool.filter(s => s.Length === 'L');
             if (night.length > 0) subPool = night;
         }
 
-        // 3. SAFETY FALLBACK: If filters are too tight, use anything from master
+        // 3. Failsafe: If Dayparting or Separation left us with nothing
         if (subPool.length === 0) {
             subPool = pool.length > 0 ? pool : masterLibrary;
-            mode = "Rotation Recovery";
+            mode = "Recovery Mode";
         }
 
-        // 4. Energy Kick
+        // 4. Energy Kick Check
         const last3 = playHistory.slice(-3);
         const avgE = last3.length === 3 ? last3.reduce((a,b)=>a+b.energy,0)/3 : 3;
 
         let pick;
         if (avgE < 3) {
-            const power = subPool.filter(s => s.energy === 5);
-            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : subPool[0];
+            const power = subPool.filter(s => s.Energy === 5);
+            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : subPool[Math.floor(Math.random()*subPool.length)];
             mode += " + Kick";
         } else {
             pick = subPool[Math.floor(Math.random()*subPool.length)];
         }
 
         if (pick) {
-            playHistory.push({id: pick.id, artist: pick.artist, energy: pick.energy, time: Date.now()});
-            document.getElementById('display-artist').innerText = pick.artist;
-            document.getElementById('display-track').innerText = pick.title;
+            playHistory.push({id: pick.ID, artist: pick.Artist, energy: pick.Energy, time: Date.now()});
+            document.getElementById('display-artist').innerText = pick.Artist;
+            document.getElementById('display-track').innerText = pick.Title;
             document.getElementById('logic-tag').innerText = `MODE: ${mode}`;
         }
     }
