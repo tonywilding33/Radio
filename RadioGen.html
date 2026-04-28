@@ -55,7 +55,8 @@
 </div>
 
 <script>
-    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152.csv';
+    // URL for the updated CSV (ensure the column "Daypart" exists)
+    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152A.csv';
     let masterLibrary = [];
     let currentPlaylist = [];
     
@@ -80,35 +81,64 @@
                 }
             });
         } catch (err) {
-            alert("Database Error: Check your CSV file name on the main branch.");
+            alert("Database Error: Ensure the CSV file on GitHub contains the 'Daypart' column.");
         }
     }
 
     function runLogic() {
-        const mins = parseInt(document.getElementById('duration').value);
+        const durationMins = parseInt(document.getElementById('duration').value);
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        
         currentPlaylist = [];
         let history = [];
         let totalSec = 0;
-        const targetSec = mins * 60;
-        let virtualTime = Date.now();
+        const targetSec = durationMins * 60;
+        
+        // Track virtual hour to handle daypart transitions
+        let currentVirtualHour = startHour;
 
         while (totalSec < targetSec) {
+            // Determine current Daypart based on the virtual hour
+            let dayPart = "Night";
+            if (currentVirtualHour >= 6 && currentVirtualHour < 12) dayPart = "Morning";
+            else if (currentVirtualHour >= 12 && currentVirtualHour < 18) dayPart = "Afternoon";
+            else if (currentVirtualHour >= 18 && currentVirtualHour < 22) dayPart = "Evening";
+
             let pool = masterLibrary.filter(s => {
+                // 1. Match the assigned Daypart from the CSV
+                const matchesTime = s.Daypart === dayPart;
+                
+                // 2. Artist & Song Separation Rules
                 const lastS = history.findLast(h => h.id === s.ID);
                 const lastA = history.findLast(h => h.artist === s.Artist);
-                return (!lastS || (virtualTime - lastS.time > 240 * 60000)) &&
-                       (!lastA || (virtualTime - lastA.time > 100 * 60000));
+                
+                // Rules: 4 hours (14400s) for songs, 100 mins (6000s) for artists
+                const separated = (!lastS || (totalSec - lastS.time > 14400)) &&
+                                  (!lastA || (totalSec - lastA.time > 6000));
+                
+                return matchesTime && separated;
             });
 
-            if (pool.length === 0) pool = masterLibrary;
+            // Fallback if the specific daypart pool is too restrictive
+            if (pool.length === 0) {
+                pool = masterLibrary.filter(s => {
+                    const lastA = history.findLast(h => h.artist === s.Artist);
+                    return !lastA || (totalSec - lastA.time > 6000);
+                });
+            }
+            
             let pick = pool[Math.floor(Math.random() * pool.length)];
             
             currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
-            history.push({ id: pick.ID, artist: pick.Artist, time: virtualTime });
+            history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
             
+            // Advance by average song length (3.5 mins)
             totalSec += 210; 
-            virtualTime += 210000;
-            if (currentPlaylist.length > 200) break;
+            
+            // Update the hour for the next song selection
+            currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
+
+            if (currentPlaylist.length > 300) break; 
         }
         render();
     }
@@ -129,13 +159,4 @@
     }
 
     function downloadTxt() {
-        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\n');
-        const blob = new Blob([content], { type: 'text/plain' });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "Hospital_Radio_Playlist.txt";
-        a.click();
-    }
-</script>
-</body>
-</html>
+        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\
