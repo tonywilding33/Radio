@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Hospital Radio | Full Session Mode</title>
+    <title>Hospital Radio | Playlist Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
@@ -15,15 +15,14 @@
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
         select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-        #monitor { display: none; text-align: left; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
-        .playlist-container { max-height: 400px; overflow-y: auto; margin-top: 15px; padding-right: 10px; }
-        .track-row { padding: 10px 0; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .track-row:last-child { border-bottom: none; }
-        .t-info { flex-grow: 1; }
-        .t-artist { color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
-        .t-title { font-size: 1rem; font-weight: 600; margin: 2px 0; }
-        .t-time { font-family: monospace; font-size: 0.8rem; color: #64748b; }
-        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        #monitor { display: none; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
+        .playlist-container { max-height: 450px; overflow-y: auto; margin-top: 15px; padding-right: 10px; border-top: 1px solid #334155; }
+        .track-row { padding: 12px 0; border-bottom: 1px solid #334155; display: flex; align-items: flex-start; }
+        .track-num { color: var(--accent); font-weight: 800; margin-right: 15px; min-width: 25px; font-size: 0.9rem; }
+        .t-artist { color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+        .t-title { font-size: 1.1rem; font-weight: 600; color: #fff; line-height: 1.2; }
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .btn-download { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -32,7 +31,7 @@
     <div id="setup-view" class="setup-card">
         <h1>STATION SETUP</h1>
         <div class="field">
-            <label>Broadcast Start</label>
+            <label>Start Hour</label>
             <select id="start-hour"></select>
         </div>
         <div class="field">
@@ -49,8 +48,8 @@
 
     <div id="monitor">
         <div class="status-header">
-            <span style="font-weight: 800; color: var(--accent);">LIVE PLAYLIST</span>
-            <span id="session-info" style="font-size: 0.7rem; color: #64748b;"></span>
+            <div style="font-weight: 800; color: var(--accent); font-size: 1.1rem;">STATION LOG</div>
+            <button class="btn-download" onclick="downloadTxt()">DOWNLOAD TXT</button>
         </div>
         <div id="playlist-box" class="playlist-container"></div>
     </div>
@@ -59,8 +58,8 @@
 <script>
     const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152.csv';
     let masterLibrary = [];
+    let currentPlaylist = [];
     
-    // Fill Hour Dropdown
     const hourBox = document.getElementById('start-hour');
     for(let i=0; i<24; i++) {
         hourBox.options.add(new Option(i.toString().padStart(2, '0') + ":00", i));
@@ -68,88 +67,75 @@
 
     async function connectAndBuild() {
         try {
-            const response = await fetch(CSV_URL);
-            if (!response.ok) throw new Error("Database Sync Failed");
-            const csvData = await response.text();
+            const resp = await fetch(CSV_URL);
+            if (!resp.ok) throw new Error("Sync Error");
+            const csv = await resp.text();
             
-            Papa.parse(csvData, {
+            Papa.parse(csv, {
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
                 complete: function(results) {
                     masterLibrary = results.data.filter(r => r.Artist && r.Title);
-                    runPlaylistLogic();
+                    runLogic();
                 }
             });
         } catch (err) {
-            alert("Connection Error. Check your manual path correction.");
+            alert("Database Error: Verify your manual path correction for HR3328152.csv");
         }
     }
 
-    function runPlaylistLogic() {
-        const durationMins = parseInt(document.getElementById('duration').value);
-        const startHour = parseInt(document.getElementById('start-hour').value);
-        let playlist = [];
-        let localHistory = [];
-        let totalTimeSec = 0;
-        const targetSec = durationMins * 60;
-        
-        let currentTime = new Date();
-        currentTime.setHours(startHour, 0, 0, 0);
+    function runLogic() {
+        const mins = parseInt(document.getElementById('duration').value);
+        currentPlaylist = [];
+        let history = [];
+        let totalSec = 0;
+        const targetSec = mins * 60;
+        let virtualTime = Date.now();
 
-        // Loop until we fill the requested hours
-        while (totalTimeSec < targetSec) {
-            const nowTimestamp = currentTime.getTime();
-
-            // Filter for 4hr Song / 100min Artist rules
+        while (totalSec < targetSec) {
             let pool = masterLibrary.filter(s => {
-                const lastS = localHistory.findLast(h => h.id === s.ID);
-                const lastA = localHistory.findLast(h => h.artist === s.Artist);
-                return (!lastS || (nowTimestamp - lastS.time > 240 * 60000)) &&
-                       (!lastA || (nowTimestamp - lastA.time > 100 * 60000));
+                const lastS = history.findLast(h => h.id === s.ID);
+                const lastA = history.findLast(h => h.artist === s.Artist);
+                return (!lastS || (virtualTime - lastS.time > 240 * 60000)) &&
+                       (!lastA || (virtualTime - lastA.time > 100 * 60000));
             });
 
-            // No recognizable indie fallback
             if (pool.length === 0) pool = masterLibrary;
-
-            // Pick a random song from the safe pool
             let pick = pool[Math.floor(Math.random() * pool.length)];
             
-            // Assume average song length of 3.5 minutes (210 seconds) if not in CSV
-            let songDuration = 210; 
+            currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
+            history.push({ id: pick.ID, artist: pick.Artist, time: virtualTime });
             
-            playlist.push({
-                artist: pick.Artist,
-                title: pick.Title,
-                startTime: currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
-
-            localHistory.push({id: pick.ID, artist: pick.Artist, time: nowTimestamp});
-            totalTimeSec += songDuration;
-            currentTime.setSeconds(currentTime.getSeconds() + songDuration);
-            
-            // Safety break to prevent infinite loops if library is too small
-            if (playlist.length > 100) break;
+            totalSec += 210; // Approx 3.5 mins
+            virtualTime += 210000;
+            if (currentPlaylist.length > 200) break;
         }
-
-        displayPlaylist(playlist, durationMins);
+        render();
     }
 
-    function displayPlaylist(list, mins) {
+    function render() {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('session-info').innerText = `${mins/60} HOUR SESSION`;
-
         const box = document.getElementById('playlist-box');
-        box.innerHTML = list.map(track => `
+        box.innerHTML = currentPlaylist.map((t, i) => `
             <div class="track-row">
-                <div class="t-info">
-                    <div class="t-artist">${track.artist}</div>
-                    <div class="t-title">${track.title}</div>
+                <div class="track-num">${i + 1}</div>
+                <div>
+                    <div class="t-artist">${t.artist}</div>
+                    <div class="t-title">${t.title}</div>
                 </div>
-                <div class="t-time">${track.startTime}</div>
             </div>
         `).join('');
+    }
+
+    function downloadTxt() {
+        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\\n');
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Hospital_Radio_Playlist.txt";
+        a.click();
     }
 </script>
 </body>
