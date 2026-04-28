@@ -6,118 +6,130 @@
     <title>Hospital Radio | Station Interface</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #0ea5e9; --text: #f8fafc; }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .wrapper { width: 100%; max-width: 500px; padding: 20px; }
-        .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid #334155; }
-        h1 { font-size: 1.5rem; margin: 0 0 20px 0; text-align: center; color: var(--accent); }
+        .wrapper { width: 100%; max-width: 480px; padding: 20px; }
+        .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); border: 1px solid #334155; }
+        h1 { font-size: 1.4rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 1px; }
         .field { margin-bottom: 20px; }
-        label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; }
-        select { width: 100%; background: #0f172a; color: white; border: 1px solid #334155; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-        .btn-start { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
-        .btn-start:hover { background: #0284c7; }
+        label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
+        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; appearance: none; cursor: pointer; }
+        .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.2s ease; margin-top: 10px; }
+        .btn-start:hover { background: #7dd3fc; transform: translateY(-1px); }
         #monitor { display: none; text-align: center; }
-        .now-artist { color: var(--accent); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .now-title { font-size: 2.2rem; font-weight: 800; margin: 0; line-height: 1.2; }
-        .status-pill { display: inline-block; margin-top: 25px; background: #0f172a; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-family: monospace; color: #64748b; }
+        .now-artist { color: var(--accent); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; }
+        .now-title { font-size: 2.4rem; font-weight: 900; margin: 0; line-height: 1.1; color: #fff; }
+        .status-pill { display: inline-block; margin-top: 30px; background: #0f172a; padding: 6px 15px; border-radius: 20px; font-size: 0.65rem; font-family: monospace; color: #64748b; border: 1px solid #1e293b; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
     <div id="setup-view" class="setup-card">
-        <h1>Station Setup</h1>
+        <h1>STATION SETUP</h1>
         <div class="field">
-            <label>Start Time</label>
+            <label>Broadcast Start</label>
             <select id="start-hour"></select>
         </div>
         <div class="field">
-            <label>Session Duration</label>
+            <label>Session Length</label>
             <select id="duration">
-                <option value="60">1 Hour</option>
-                <option value="120">2 Hours</option>
-                <option value="180">3 Hours</option>
-                <option value="240">4 Hours</option>
+                <option value="60">1 Hour Session</option>
+                <option value="120">2 Hour Session</option>
+                <option value="180">3 Hour Session</option>
+                <option value="240">4 Hour Session</option>
             </select>
         </div>
-        <button class="btn-start" onclick="connectAndStart()">Initialize Broadcast</button>
+        <button class="btn-start" onclick="initSystem()">INITIALIZE BROADCAST</button>
     </div>
 
     <div id="monitor">
-        <p id="display-artist" class="now-artist">Selecting Track...</p>
+        <p id="display-artist" class="now-artist">PREPARING FEED...</p>
         <h2 id="display-track" class="now-title">---</h2>
-        <div id="logic-tag" class="status-pill">CONNECTED</div>
+        <div id="logic-tag" class="status-pill">SYSTEM READY</div>
     </div>
 </div>
 
 <script>
-    // Relative path: Use this if HR2833152.csv is in the same folder as this HTML file
-    const DATA_FILE = 'HR2833152.csv';
+    // Relative Path: Ensures no CORS/GitHub URL errors
+    const LOCAL_CSV = 'HR2833152.csv';
     
     let masterLibrary = [];
     let playHistory = [];
-    const SONG_SEP = 240; 
-    const ARTIST_SEP = 100;
+    const SONG_SEP = 240; // 4 Hours
+    const ARTIST_SEP = 100; // 100 Mins
 
-    const hourSelect = document.getElementById('start-hour');
+    // Populate Clock
+    const hourBox = document.getElementById('start-hour');
     for(let i=0; i<24; i++) {
-        let opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = i.toString().padStart(2, '0') + ":00";
-        hourSelect.appendChild(opt);
+        let h = i.toString().padStart(2, '0') + ":00";
+        hourBox.options.add(new Option(h, i));
     }
 
-    async function connectAndStart() {
+    async function initSystem() {
         const btn = document.querySelector('.btn-start');
-        btn.innerText = "Accessing File...";
+        btn.innerText = "READING DATABASE...";
         
         try {
-            const response = await fetch(DATA_FILE);
+            // Fetching from local path
+            const resp = await fetch(LOCAL_CSV);
+            if (!resp.ok) throw new Error("File Missing");
             
-            if (!response.ok) {
-                throw new Error("CSV file not found in this directory.");
-            }
+            const text = await resp.text();
             
-            const csvData = await response.text();
-            
-            Papa.parse(csvData, {
+            Papa.parse(text, {
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    masterLibrary = results.data.filter(row => row.ID || row.Artist);
+                    masterLibrary = results.data.filter(r => r.Artist && r.Title);
+                    
+                    if(masterLibrary.length === 0) {
+                        alert("Database parsed but no data found.");
+                        return;
+                    }
+
                     document.getElementById('setup-view').style.display = 'none';
                     document.getElementById('monitor').style.display = 'block';
                     generateNext();
                 }
             });
-        } catch (err) {
-            alert(`Error: ${err.message}\nEnsure the CSV is in the same branch as index.html`);
-            btn.innerText = "Retry";
+        } catch (e) {
+            alert("Critical Error: Ensure HR2833152.csv is in the same folder as this HTML file.");
+            btn.innerText = "RETRY INITIALIZE";
         }
     }
 
     function generateNext() {
         const now = Date.now();
-        const startHour = parseInt(document.getElementById('start-hour').value);
+        const startH = parseInt(document.getElementById('start-hour').value);
 
-        // Filter: Strictly recognizable (indie-free check)
-        let pool = masterLibrary.filter(song => {
-            const lastS = playHistory.findLast(h => h.id === song.ID);
-            const lastA = playHistory.findLast(h => h.artist === song.Artist);
+        // Filter 1: Strict Separation
+        let pool = masterLibrary.filter(s => {
+            const lastS = playHistory.findLast(h => h.id === s.ID);
+            const lastA = playHistory.findLast(h => h.artist === s.Artist);
             return (!lastS || (now - lastS.time > SONG_SEP * 60000)) &&
                    (!lastA || (now - lastA.time > ARTIST_SEP * 60000));
         });
 
-        if (pool.length === 0) pool = masterLibrary;
+        // Filter 2: Recognition Check (No obscure indie)
+        if (pool.length === 0) pool = masterLibrary; 
 
-        let pick = pool[Math.floor(Math.random() * pool.length)];
+        // Dayparting Logic
+        let mode = "Daytime Mix";
+        if (startH >= 6 && startH < 11) {
+            mode = "Morning Gold";
+            const gold = pool.filter(s => s.Decade <= 1970);
+            if (gold.length > 0) pool = gold;
+        }
+
+        const pick = pool[Math.floor(Math.random() * pool.length)];
 
         if (pick) {
-            playHistory.push({id: pick.ID, artist: pick.Artist, energy: pick.Energy, time: Date.now()});
-            document.getElementById('display-artist').innerText = pick.Artist || "Artist Unknown";
-            document.getElementById('display-track').innerText = pick.Title || "Title Unknown";
-            document.getElementById('logic-tag').innerText = `LIVE | LOCAL SYNC ACTIVE`;
+            playHistory.push({id: pick.ID, artist: pick.Artist, time: Date.now()});
+            document.getElementById('display-artist').innerText = pick.Artist;
+            document.getElementById('display-track').innerText = pick.Title;
+            document.getElementById('logic-tag').innerText = `MODE: ${mode} | LOCAL SYNC`;
         }
     }
 </script>
