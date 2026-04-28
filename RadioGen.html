@@ -126,3 +126,54 @@
                                   (!lastA || (totalSec - lastA.time > 6000));
                 
                 return matchesTime && separated;
+            });
+
+            // Fallback if the daypart pool is empty
+            if (pool.length === 0) {
+                pool = masterLibrary.filter(s => {
+                    const lastA = history.findLast(h => h.artist === s.Artist);
+                    return !lastA || (totalSec - lastA.time > 6000);
+                });
+            }
+            
+            let pick = pool[Math.floor(Math.random() * pool.length)];
+            
+            currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
+            history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
+            
+            totalSec += 210; // 3.5 min average
+            
+            // Increment the virtual hour based on elapsed time
+            currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
+
+            if (currentPlaylist.length > 200) break;
+        }
+        render();
+    }
+
+    function render() {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        const box = document.getElementById('playlist-box');
+        box.innerHTML = currentPlaylist.map((t, i) => `
+            <div class="track-row">
+                <div class="track-num">${i + 1}</div>
+                <div>
+                    <div class="t-artist">${t.artist}</div>
+                    <div class="t-title">${t.title}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function downloadTxt() {
+        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\n');
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Hospital_Radio_Playlist.txt";
+        a.click();
+    }
+</script>
+</body>
+</html>
