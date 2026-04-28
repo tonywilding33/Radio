@@ -33,7 +33,9 @@
         <h1>STATION SETUP</h1>
         <div class="field">
             <label>Start Hour</label>
-            <select id="start-hour"></select>
+            <select id="start-hour">
+                <option>Loading hours...</option>
+            </select>
         </div>
         <div class="field">
             <label>Session Duration</label>
@@ -55,28 +57,29 @@
 </div>
 
 <script>
+    // 1. UPDATE THIS URL to your new CSV with the Daypart column
     const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152.csv';
+    
     let masterLibrary = [];
     let currentPlaylist = [];
-    
-    // Function to fill the dropdown with hours
-    function populateHours() {
+
+    // 2. POPULATE DROPDOWN - Forced to run after full window load
+    window.onload = function() {
         const hourBox = document.getElementById('start-hour');
         if (hourBox) {
-            hourBox.innerHTML = '';
+            hourBox.innerHTML = ''; // Clear the "Loading..." text
             for(let i=0; i<24; i++) {
-                const label = i.toString().padStart(2, '0') + ":00";
-                hourBox.options.add(new Option(label, i));
+                let h = i.toString().padStart(2, '0') + ":00";
+                let opt = document.createElement("option");
+                opt.value = i;
+                opt.text = h;
+                hourBox.add(opt);
             }
+            console.log("Hours populated successfully.");
+        } else {
+            console.error("Could not find the start-hour element.");
         }
-    }
-
-    // Run population as soon as the DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', populateHours);
-    } else {
-        populateHours();
-    }
+    };
 
     async function connectAndBuild() {
         try {
@@ -94,7 +97,7 @@
                 }
             });
         } catch (err) {
-            alert("Database Error: Check connection or CSV format.");
+            alert("Database Error: Check your CSV file and internet connection.");
         }
     }
 
@@ -106,29 +109,29 @@
         let history = [];
         let totalSec = 0;
         const targetSec = durationMins * 60;
-        
         let currentVirtualHour = startHour;
 
         while (totalSec < targetSec) {
-            // Daypart boundaries
+            // Daypart Logic
             let dayPart = "Night";
             if (currentVirtualHour >= 6 && currentVirtualHour < 12) dayPart = "Morning";
             else if (currentVirtualHour >= 12 && currentVirtualHour < 18) dayPart = "Afternoon";
             else if (currentVirtualHour >= 18 && currentVirtualHour < 22) dayPart = "Evening";
 
             let pool = masterLibrary.filter(s => {
+                // Must match daypart
                 const matchesTime = s.Daypart === dayPart;
+                
+                // Separation checks
                 const lastS = history.findLast(h => h.id === s.ID);
                 const lastA = history.findLast(h => h.artist === s.Artist);
-                
-                // Separation: 4hrs for songs, 100mins for artists
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) &&
                                   (!lastA || (totalSec - lastA.time > 6000));
                 
                 return matchesTime && separated;
             });
 
-            // Fallback if the daypart pool is empty
+            // Fallback if the pool is empty
             if (pool.length === 0) {
                 pool = masterLibrary.filter(s => {
                     const lastA = history.findLast(h => h.artist === s.Artist);
@@ -141,12 +144,10 @@
             currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
             history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
             
-            totalSec += 210; // 3.5 min average
-            
-            // Increment the virtual hour based on elapsed time
+            totalSec += 210; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
 
-            if (currentPlaylist.length > 200) break;
+            if (currentPlaylist.length > 300) break; 
         }
         render();
     }
