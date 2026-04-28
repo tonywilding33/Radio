@@ -10,7 +10,7 @@
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
         .wrapper { width: 100%; max-width: 500px; padding: 20px; }
         .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); border: 1px solid #334155; }
-        h1 { font-size: 1.4rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 1px; }
+        h1 { font-size: 1.4rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
         .field { margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
         select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
@@ -30,11 +30,11 @@
 
 <div class="wrapper">
     <div id="setup-view" class="setup-card">
-        <h1>STATION SETUP</h1>
+        <h1>SHOW TIME</h1>
         <div class="field">
             <label>Start Hour</label>
             <select id="start-hour">
-                <option>Loading hours...</option>
+                <option value="">Select Hour</option>
             </select>
         </div>
         <div class="field">
@@ -57,27 +57,22 @@
 </div>
 
 <script>
-    // 1. UPDATE THIS URL to your new CSV with the Daypart column
     const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152.csv';
-    
     let masterLibrary = [];
     let currentPlaylist = [];
 
-    // 2. POPULATE DROPDOWN - Forced to run after full window load
+    // POPULATE DROPDOWN - This runs immediately after everything loads
     window.onload = function() {
         const hourBox = document.getElementById('start-hour');
         if (hourBox) {
-            hourBox.innerHTML = ''; // Clear the "Loading..." text
+            hourBox.innerHTML = ''; 
             for(let i=0; i<24; i++) {
-                let h = i.toString().padStart(2, '0') + ":00";
+                let hLabel = i.toString().padStart(2, '0') + ":00";
                 let opt = document.createElement("option");
                 opt.value = i;
-                opt.text = h;
+                opt.text = hLabel;
                 hourBox.add(opt);
             }
-            console.log("Hours populated successfully.");
-        } else {
-            console.error("Could not find the start-hour element.");
         }
     };
 
@@ -97,7 +92,7 @@
                 }
             });
         } catch (err) {
-            alert("Database Error: Check your CSV file and internet connection.");
+            alert("Database Error: Check connection or CSV URL.");
         }
     }
 
@@ -112,26 +107,25 @@
         let currentVirtualHour = startHour;
 
         while (totalSec < targetSec) {
-            // Daypart Logic
+            // Daypart boundaries
             let dayPart = "Night";
             if (currentVirtualHour >= 6 && currentVirtualHour < 12) dayPart = "Morning";
             else if (currentVirtualHour >= 12 && currentVirtualHour < 18) dayPart = "Afternoon";
             else if (currentVirtualHour >= 18 && currentVirtualHour < 22) dayPart = "Evening";
 
             let pool = masterLibrary.filter(s => {
-                // Must match daypart
                 const matchesTime = s.Daypart === dayPart;
-                
-                // Separation checks
                 const lastS = history.findLast(h => h.id === s.ID);
                 const lastA = history.findLast(h => h.artist === s.Artist);
+                
+                // Separation: 4hrs for songs, 100mins for artists
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) &&
                                   (!lastA || (totalSec - lastA.time > 6000));
                 
                 return matchesTime && separated;
             });
 
-            // Fallback if the pool is empty
+            // Fallback
             if (pool.length === 0) {
                 pool = masterLibrary.filter(s => {
                     const lastA = history.findLast(h => h.artist === s.Artist);
@@ -147,7 +141,7 @@
             totalSec += 210; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
 
-            if (currentPlaylist.length > 300) break; 
+            if (currentPlaylist.length > 300) break;
         }
         render();
     }
