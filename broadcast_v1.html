@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Hospital Radio | Interface</title>
+    <title>Hospital Radio | Station Interface</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #0ea5e9; --text: #f8fafc; }
@@ -16,11 +16,10 @@
         select { width: 100%; background: #0f172a; color: white; border: 1px solid #334155; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         .btn-start { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
         .btn-start:hover { background: #0284c7; }
-        #monitor { display: none; text-align: center; animation: fadeIn 0.5s ease; }
+        #monitor { display: none; text-align: center; }
         .now-artist { color: var(--accent); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
         .now-title { font-size: 2.2rem; font-weight: 800; margin: 0; line-height: 1.2; }
         .status-pill { display: inline-block; margin-top: 25px; background: #0f172a; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-family: monospace; color: #64748b; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -51,15 +50,16 @@
     </div>
 </div>
 
-<div style="display:none;" aria-hidden="true">Developer: Tony Wilding</div>
-
 <script>
-    const GITHUB_DB = 'https://raw.githubusercontent.com/tonywilding33/Radio/HR2833152.csv';
+    // URL targeting the correct branch: 'Radio'
+    const GITHUB_RAW = 'https://raw.githubusercontent.com/tonywilding33/tonywilding33/Radio/HR2833152.csv';
+    
     let masterLibrary = [];
     let playHistory = [];
     const SONG_SEP = 240; 
     const ARTIST_SEP = 100;
 
+    // Build Hour Dropdown
     const hourSelect = document.getElementById('start-hour');
     for(let i=0; i<24; i++) {
         let opt = document.createElement('option');
@@ -69,25 +69,42 @@
     }
 
     async function connectAndStart() {
+        const btn = document.querySelector('.btn-start');
+        btn.innerText = "Syncing...";
+        
         try {
-            const response = await fetch(GITHUB_DB);
-            if(!response.ok) throw new Error("Fetch failed");
+            // Using cache-busting to ensure we grab the fresh Radio branch file
+            const response = await fetch(`${GITHUB_RAW}?cb=${Date.now()}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP Error ${response.status}: Ensure repo is Public and branch is 'Radio'.`);
+            }
+            
             const csvData = await response.text();
             
             Papa.parse(csvData, {
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
+                // Normalizes headers to match code regardless of CSV casing
+                transformHeader: h => h.trim().toLowerCase(), 
                 complete: function(results) {
-                    // Filter out any empty rows
-                    masterLibrary = results.data.filter(row => row.ID && row.Artist);
+                    masterLibrary = results.data.filter(row => row.artist || row.title);
+                    
+                    if (masterLibrary.length === 0) {
+                        alert("File found, but no valid song rows detected.");
+                        return;
+                    }
+
                     document.getElementById('setup-view').style.display = 'none';
                     document.getElementById('monitor').style.display = 'block';
                     generateNext();
                 }
             });
         } catch (err) {
-            alert("Database Error: Check your GitHub Radio branch.");
+            console.error("Connection Debug:", err);
+            alert(`Database Error: ${err.message}`);
+            btn.innerText = "Retry Sync";
         }
     }
 
@@ -95,32 +112,32 @@
         const now = Date.now();
         const startHour = parseInt(document.getElementById('start-hour').value);
 
-        // 1. Mandatory Separation Filter (Strict 4hr Song / 100min Artist)
+        // 1. Separation Filter (Uses normalized lowercase keys)
         let pool = masterLibrary.filter(song => {
-            const lastS = playHistory.findLast(h => h.id === song.ID);
-            const lastA = playHistory.findLast(h => h.artist === song.Artist);
+            const lastS = playHistory.findLast(h => h.id === song.id);
+            const lastA = playHistory.findLast(h => h.artist === song.artist);
             return (!lastS || (now - lastS.time > SONG_SEP * 60000)) &&
                    (!lastA || (now - lastA.time > ARTIST_SEP * 60000));
         });
 
-        // 2. Daypart Logic (Weighting)
-        let mode = "Standard";
+        // 2. Daypart Logic
+        let modeLabel = "Standard";
         let subPool = [...pool];
 
         if (startHour >= 6 && startHour < 11) {
-            mode = "Morning Gold";
-            const gold = pool.filter(s => s.Decade <= 1970);
+            modeLabel = "Morning Gold";
+            const gold = pool.filter(s => s.decade <= 1970);
             if (gold.length > 0) subPool = gold;
         } else if (startHour >= 20 || startHour < 6) {
-            mode = "Night Shift";
-            const night = pool.filter(s => s.Length === 'L');
+            modeLabel = "Night Shift";
+            const night = pool.filter(s => s.length === 'L' || s.length === 'l');
             if (night.length > 0) subPool = night;
         }
 
-        // 3. Failsafe: If Dayparting or Separation left us with nothing
+        // 3. Failsafe
         if (subPool.length === 0) {
             subPool = pool.length > 0 ? pool : masterLibrary;
-            mode = "Recovery Mode";
+            modeLabel = "Rotation Sync";
         }
 
         // 4. Energy Kick Check
@@ -129,18 +146,18 @@
 
         let pick;
         if (avgE < 3) {
-            const power = subPool.filter(s => s.Energy === 5);
-            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : subPool[Math.floor(Math.random()*subPool.length)];
-            mode += " + Kick";
+            const power = subPool.filter(s => s.energy === 5);
+            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : subPool[0];
+            modeLabel += " + Kick";
         } else {
             pick = subPool[Math.floor(Math.random()*subPool.length)];
         }
 
         if (pick) {
-            playHistory.push({id: pick.ID, artist: pick.Artist, energy: pick.Energy, time: Date.now()});
-            document.getElementById('display-artist').innerText = pick.Artist;
-            document.getElementById('display-track').innerText = pick.Title;
-            document.getElementById('logic-tag').innerText = `MODE: ${mode}`;
+            playHistory.push({id: pick.id, artist: pick.artist, energy: pick.energy, time: Date.now()});
+            document.getElementById('display-artist').innerText = pick.artist || "Unknown Artist";
+            document.getElementById('display-track').innerText = pick.title || "No Title Found";
+            document.getElementById('logic-tag').innerText = `MODE: ${modeLabel}`;
         }
     }
 </script>
