@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TuneStacker</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; background: #f0f2f5; color: #1a252f; }
+        .box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 8px solid #2c3e50; display: flex; flex-direction: column; }
+        .status { font-size: 0.9em; color: #546e7a; margin-bottom: 20px; padding: 12px; background: #eef1f2; border-radius: 6px; border: 1px solid #2c3e50; font-weight: bold; text-align: center; }
+        h2 { color: #1a252f; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; text-align: center; font-size: 1.4em; }
+        .controls { margin-top: 20px; text-align: center; order: 3; }
+        button { background: #2c3e50; color: white; border: none; padding: 15px 30px; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; margin: 10px 5px; }
+        button:hover { background: #34495e; transform: translateY(-1px); }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        #outputArea { order: 2; margin-top: 20px; }
+        pre { background: #1a252f; color: #f8f9f9; padding: 25px; border-radius: 6px; font-size: 1.1em; white-space: pre-wrap; border-left: 6px solid #3498db; line-height: 1.6; font-family: 'Courier New', Courier, monospace; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>TuneStacker</h2>
+        <div id="loadStatus" class="status">INITIALIZING...</div>
+        
+        <div id="outputArea" style="display:none;">
+            <pre id="playlistDisplay"></pre>
+        </div>
+
+        <div class="controls">
+            <button id="initialGenBtn" onclick="generateAdvancedShow()" disabled>Generate Show</button>
+            <div id="bottomControls" style="display:none;">
+                <button style="background:#2980b9;" onclick="downloadTxt()">Download Hour Playlist (.txt)</button>
+                <button id="nextHourBtn" onclick="generateAdvancedShow()">Generate Next Hour</button>
+                <button style="background:#7f8c8d;" onclick="manualReset()">Clear Session Memory</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CORRECTED PATH FOR LIVE REPOSITORY
+        const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC%20DATA.csv';
+        let libraryData = [];
+
+        function parseCSV(text) {
+            const rows = [];
+            let currRow = [];
+            let currField = "";
+            let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') {
+                    if (inQuotes && text[i+1] === '"') { currField += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (char === ',' && !inQuotes) {
+                    currRow.push(currField.trim());
+                    currField = "";
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (currField || currRow.length > 0) {
+                        currRow.push(currField.trim());
+                        rows.push(currRow);
+                    }
+                    currRow = []; currField = "";
+                    if (char === '\r' && text[i+1] === '\n') i++;
+                } else { currField += char; }
+            }
+            if (currField || currRow.length > 0) {
+                currRow.push(currField.trim());
+                rows.push(currRow);
+            }
+            return rows;
+        }
+
+        async function fetchLibrary() {
+            const status = document.getElementById('loadStatus');
+            const endpoints = [
+                GITHUB_URL,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(GITHUB_URL)}`,
+                `https://corsproxy.io/?${encodeURIComponent(GITHUB_URL)}`
+            ];
+
+            for (let url of endpoints) {
+                try {
+                    status.innerText = `CONNECTING...`;
+                    let response = await fetch(url);
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text.length > 100) {
+                            processData(text);
+                            return;
+                        }
+                    }
+                } catch (e) { console.log("Method failed"); }
+            }
+            status.innerText = "CONNECTION FAILED.";
+        }
+
+        function processData(csvText) {
+            const status = document.getElementById('loadStatus');
+            const parsed = parseCSV(csvText);
+            const headers = parsed[0].map(h => h.replace(/[^\x20-\x7E]/g, "").trim());
+            const headersLower = headers.map(h => h.toLowerCase());
+            const findIdx = (terms) => headersLower.findIndex(h => terms.some(t => h === t || h.includes(t)));
+            
+            const idx = {
+                artist: findIdx(["artist"]),
+                title: findIdx(["song title", "title"]),
+                gender: findIdx(["gender"]),
+                year: findIdx(["year"]),
+                pos: headers.indexOf("TY")
+            };
+
+            if (idx.pos === -1) idx.pos = headersLower.indexOf("ty");
+
+            libraryData = parsed.slice(1).map((cols, i) => {
+                if (cols.length < 2) return null;
+                const yr = parseInt(cols[idx.year]) || 1980;
+                let rawPos = cols[idx.pos] ? cols[idx.pos].trim() : "UR";
+                let posVal = 999; 
+
+                if (rawPos !== "" && !isNaN(rawPos)) {
+                    posVal = parseInt(rawPos);
+                    rawPos = posVal.toString();
+                } else {
+                    rawPos = "UR";
+                }
+
+                return {
+                    id: i,
+                    artist: cols[idx.artist] || "Unknown",
+                    title: cols[idx.title] || "Unknown",
+                    gender: (cols[idx.gender] || 'M').toUpperCase().substring(0,1),
+                    year: yr,
+                    decade: Math.floor(yr / 10) * 10,
+                    pos: rawPos,
+                    chartRank: posVal 
+                };
+            }).filter(r => r && r.artist && r.artist !== "0" && r.artist !== "Artist");
+
+            status.innerText = `READY: ${libraryData.length} SONGS.`;
+            status.style.background = "#d4edda";
+            document.getElementById('initialGenBtn').disabled = false;
+        }
+
+        function manualReset() {
+            sessionStorage.clear();
+            alert("Session history cleared.");
+        }
+
+        function getArtistKey(name) {
+            if (!name) return "unknown";
+            let s = name.toLowerCase().trim().replace(/^the\s+/, "");
+            s = s.split(/\s+and\s+/)[0].split(/\s*&\s*/)[0].split(/\s+feat\s+/)[0];
+            s = s.replace(/[^a-z0-9]/g, ""); 
+            if (s.length > 4 && s.endsWith('s')) s = s.slice(0, -1);
+            return s;
+        }
+
+        function getTitleKey(title) {
+            return title.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+        }
+
+        function generateAdvancedShow() {
+            let currentHourArtKeys = [];
+            let lastTrack = null;
+            let decadeCount = {};
+            
+            function pickTrack() {
+                let pool = libraryData.filter(t => {
+                    const artKey = getArtistKey(t.artist);
+                    const titleKey = getTitleKey(t.title);
+                    const lastArtist = sessionStorage.getItem(`played_artist_${artKey}`);
+                    const lastTitle = sessionStorage.getItem(`played_title_${titleKey}`);
+                    
+                    if (lastArtist && (Date.now() - parseInt(lastArtist) < 7200000)) return false;
+                    if (lastTitle && (Date.now() - parseInt(lastTitle) < 14400000)) return false;
+
+                    if (currentHourArtKeys.includes(artKey)) return false;
+                    if ((decadeCount[t.decade] || 0) >= 4) return false;
+                    
+                    if (lastTrack) {
+                        if (t.gender === lastTrack.gender) return false;
+                        if (t.year === lastTrack.year) return false;
+                    }
+                    return true;
+                });
+
+                if (pool.length === 0) {
+                    sessionStorage.clear();
+                    pool = libraryData.filter(t => !currentHourArtKeys.includes(getArtistKey(t.artist)));
+                }
+
+                let weightedPool = [];
+                pool.forEach(t => {
+                    let tickets = (t.chartRank > 0 && t.chartRank <= 100) ? 5 : 1;
+                    for (let i = 0; i < tickets; i++) {
+                        weightedPool.push(t);
+                    }
+                });
+
+                const track = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+                const aKey = getArtistKey(track.artist);
+                const tKey = getTitleKey(track.title);
+                
+                currentHourArtKeys.push(aKey);
+                sessionStorage.setItem(`played_artist_${aKey}`, Date.now());
+                sessionStorage.setItem(`played_title_${tKey}`, Date.now());
+                
+                decadeCount[track.decade] = (decadeCount[track.decade] || 0) + 1;
+                lastTrack = track;
+                return track;
+            }
+
+            let output = "";
+            for (let i = 0; i < 14; i++) {
+                let track = pickTrack();
+                output += `${String(i + 1).padStart(2, '0')} ${track.artist} - ${track.title} (Chart Position ${track.pos})\n`;
+            }
+
+            output += "\nOPTIONAL FILLERS\n\n";
+            for (let i = 0; i < 4; i++) {
+                let track = pickTrack();
+                output += `${String(i + 15).padStart(2, '0')} ${track.artist} - ${track.title} (Chart Position ${track.pos})\n`;
+            }
+
+            document.getElementById('playlistDisplay').innerText = output;
+            document.getElementById('outputArea').style.display = 'block';
+            document.getElementById('initialGenBtn').style.display = 'none';
+            document.getElementById('bottomControls').style.display = 'block';
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function downloadTxt() {
+            const text = document.getElementById('playlistDisplay').innerText;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = 'TuneStacker_Schedule.txt';
+            anchor.href = URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        fetchLibrary();
+    </script>
+</body>
+</html>
