@@ -55,14 +55,27 @@
 </div>
 
 <script>
-    // URL for the updated CSV (ensure the column "Daypart" exists)
-    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152A.csv';
+    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152.csv';
     let masterLibrary = [];
     let currentPlaylist = [];
     
-    const hourBox = document.getElementById('start-hour');
-    for(let i=0; i<24; i++) {
-        hourBox.options.add(new Option(i.toString().padStart(2, '0') + ":00", i));
+    // Function to fill the dropdown with hours
+    function populateHours() {
+        const hourBox = document.getElementById('start-hour');
+        if (hourBox) {
+            hourBox.innerHTML = '';
+            for(let i=0; i<24; i++) {
+                const label = i.toString().padStart(2, '0') + ":00";
+                hourBox.options.add(new Option(label, i));
+            }
+        }
+    }
+
+    // Run population as soon as the DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', populateHours);
+    } else {
+        populateHours();
     }
 
     async function connectAndBuild() {
@@ -81,7 +94,7 @@
                 }
             });
         } catch (err) {
-            alert("Database Error: Ensure the CSV file on GitHub contains the 'Daypart' column.");
+            alert("Database Error: Check connection or CSV format.");
         }
     }
 
@@ -94,69 +107,22 @@
         let totalSec = 0;
         const targetSec = durationMins * 60;
         
-        // Track virtual hour to handle daypart transitions
         let currentVirtualHour = startHour;
 
         while (totalSec < targetSec) {
-            // Determine current Daypart based on the virtual hour
+            // Daypart boundaries
             let dayPart = "Night";
             if (currentVirtualHour >= 6 && currentVirtualHour < 12) dayPart = "Morning";
             else if (currentVirtualHour >= 12 && currentVirtualHour < 18) dayPart = "Afternoon";
             else if (currentVirtualHour >= 18 && currentVirtualHour < 22) dayPart = "Evening";
 
             let pool = masterLibrary.filter(s => {
-                // 1. Match the assigned Daypart from the CSV
                 const matchesTime = s.Daypart === dayPart;
-                
-                // 2. Artist & Song Separation Rules
                 const lastS = history.findLast(h => h.id === s.ID);
                 const lastA = history.findLast(h => h.artist === s.Artist);
                 
-                // Rules: 4 hours (14400s) for songs, 100 mins (6000s) for artists
+                // Separation: 4hrs for songs, 100mins for artists
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) &&
                                   (!lastA || (totalSec - lastA.time > 6000));
                 
                 return matchesTime && separated;
-            });
-
-            // Fallback if the specific daypart pool is too restrictive
-            if (pool.length === 0) {
-                pool = masterLibrary.filter(s => {
-                    const lastA = history.findLast(h => h.artist === s.Artist);
-                    return !lastA || (totalSec - lastA.time > 6000);
-                });
-            }
-            
-            let pick = pool[Math.floor(Math.random() * pool.length)];
-            
-            currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
-            history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
-            
-            // Advance by average song length (3.5 mins)
-            totalSec += 210; 
-            
-            // Update the hour for the next song selection
-            currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
-
-            if (currentPlaylist.length > 300) break; 
-        }
-        render();
-    }
-
-    function render() {
-        document.getElementById('setup-view').style.display = 'none';
-        document.getElementById('monitor').style.display = 'block';
-        const box = document.getElementById('playlist-box');
-        box.innerHTML = currentPlaylist.map((t, i) => `
-            <div class="track-row">
-                <div class="track-num">${i + 1}</div>
-                <div>
-                    <div class="t-artist">${t.artist}</div>
-                    <div class="t-title">${t.title}</div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function downloadTxt() {
-        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\
