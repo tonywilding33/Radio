@@ -9,23 +9,17 @@
         :root { --bg: #0f172a; --card: #1e293b; --accent: #0ea5e9; --text: #f8fafc; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
         .wrapper { width: 100%; max-width: 500px; padding: 20px; }
-        
         .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border: 1px solid #334155; }
         h1 { font-size: 1.5rem; margin: 0 0 20px 0; text-align: center; color: var(--accent); }
-        
         .field { margin-bottom: 20px; }
         label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; }
         select { width: 100%; background: #0f172a; color: white; border: 1px solid #334155; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-        
         .btn-start { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
-        .btn-start:hover { background: #0284c7; transform: translateY(-1px); }
-
-        /* Monitor View - Hidden until Start */
+        .btn-start:hover { background: #0284c7; }
         #monitor { display: none; text-align: center; animation: fadeIn 0.5s ease; }
         .now-artist { color: var(--accent); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
         .now-title { font-size: 2.2rem; font-weight: 800; margin: 0; line-height: 1.2; }
         .status-pill { display: inline-block; margin-top: 25px; background: #0f172a; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-family: monospace; color: #64748b; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -39,12 +33,12 @@
             <select id="start-hour"></select>
         </div>
         <div class="field">
-            <label>Broadcast Duration</label>
+            <label>Session Duration</label>
             <select id="duration">
-                <option value="60">1 Hour Session</option>
-                <option value="240">4 Hour Session</option>
-                <option value="480">8 Hour Session</option>
-                <option value="1440">Full 24-Hour Cycle</option>
+                <option value="60">1 Hour</option>
+                <option value="120">2 Hours</option>
+                <option value="180">3 Hours</option>
+                <option value="240">4 Hours</option>
             </select>
         </div>
         <button class="btn-start" onclick="connectAndStart()">Initialize Broadcast</button>
@@ -63,12 +57,9 @@
     const GITHUB_DB = 'https://raw.githubusercontent.com/tonywilding33/tonywilding33/Radio/HR2833152.csv';
     let masterLibrary = [];
     let playHistory = [];
-    
-    // Config: 4hr song separation, 100min artist separation
     const SONG_SEP = 240; 
     const ARTIST_SEP = 100;
 
-    // Fill Hours
     const hourSelect = document.getElementById('start-hour');
     for(let i=0; i<24; i++) {
         let opt = document.createElement('option');
@@ -79,9 +70,7 @@
 
     async function connectAndStart() {
         const btn = document.querySelector('.btn-start');
-        btn.innerText = "Syncing Database...";
-        btn.disabled = true;
-
+        btn.innerText = "Syncing...";
         try {
             const response = await fetch(GITHUB_DB);
             const csvData = await response.text();
@@ -90,28 +79,22 @@
                 dynamicTyping: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    masterLibrary = results.data.filter(row => row.ID);
-                    transitionToLive();
+                    masterLibrary = results.data.filter(row => row.ID && row.Artist);
+                    document.getElementById('setup-view').style.display = 'none';
+                    document.getElementById('monitor').style.display = 'block';
+                    generateNext();
                 }
             });
         } catch (err) {
-            alert("Database Connection Failed. Check GitHub status.");
-            btn.innerText = "Retry Connection";
-            btn.disabled = false;
+            alert("Database Error. Check GitHub.");
         }
-    }
-
-    function transitionToLive() {
-        document.getElementById('setup-view').style.display = 'none';
-        document.getElementById('monitor').style.display = 'block';
-        generateNext();
     }
 
     function generateNext() {
         const now = Date.now();
         const startHour = parseInt(document.getElementById('start-hour').value);
 
-        // 1. Core Separation Logic
+        // 1. Filter: Standard Separation (Strict)
         let available = masterLibrary.filter(song => {
             const lastSong = playHistory.findLast(h => h.id === song.ID);
             const lastArtist = playHistory.findLast(h => h.artist === song.Artist);
@@ -119,10 +102,32 @@
                    (!lastArtist || (now - lastArtist.time > ARTIST_SEP * 60000));
         });
 
-        // 2. Daypart Weighting (Morning 6am-11am)
-        if (startHour >= 6 && startHour <= 11) {
-            const morningHits = available.filter(s => s.Decade === 1960 || s.Decade === 1970);
-            if (morningHits.length > 0) available = morningHits;
+        // Fallback: If strict rules leave 0 songs, relax Artist separation to 30 mins
+        if (available.length === 0) {
+            available = masterLibrary.filter(song => {
+                const lastSong = playHistory.findLast(h => h.id === song.ID);
+                const lastArtist = playHistory.findLast(h => h.artist === song.Artist);
+                return (!lastSong || (now - lastSong.time > SONG_SEP * 60000)) &&
+                       (!lastArtist || (now - lastArtist.time > 30 * 60000));
+            });
+        }
+
+        // 2. Daypart Logic
+        let daypartLabel = "Standard";
+        let finalPool = [...available];
+
+        if (startHour >= 6 && startHour < 11) {
+            daypartLabel = "Morning Gold";
+            const morning = available.filter(s => s.Decade <= 1970);
+            if (morning.length > 0) finalPool = morning;
+        } else if (startHour >= 16 && startHour < 20) {
+            daypartLabel = "Drivetime";
+            const drive = available.filter(s => s.Energy >= 4);
+            if (drive.length > 0) finalPool = drive;
+        } else if (startHour >= 20 || startHour < 6) {
+            daypartLabel = "Night Shift";
+            const night = available.filter(s => s.Length === 'L');
+            if (night.length > 0) finalPool = night;
         }
 
         // 3. Horizontal Shift (Energy Kick)
@@ -131,21 +136,18 @@
 
         let pick;
         if (avgE < 3) {
-            const power = available.filter(s => s.Energy === 5);
-            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : available[0];
-            document.getElementById('logic-tag').innerText = "MODE: ENERGY KICK";
+            const power = finalPool.filter(s => s.Energy === 5);
+            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : finalPool[0];
+            daypartLabel += " + Energy Kick";
         } else {
-            pick = available[Math.floor(Math.random()*available.length)];
-            document.getElementById('logic-tag').innerText = "MODE: BALANCED";
+            pick = finalPool[Math.floor(Math.random()*finalPool.length)];
         }
 
         if (pick) {
             playHistory.push({id: pick.ID, artist: pick.Artist, energy: pick.Energy, time: Date.now()});
             document.getElementById('display-artist').innerText = pick.Artist;
             document.getElementById('display-track').innerText = pick.Title;
-            
-            // In a live scenario, you'd trigger next song after the audio duration.
-            // For testing, this will stay on the current track until refreshed or manually advanced.
+            document.getElementById('logic-tag').innerText = `MODE: ${daypartLabel}`;
         }
     }
 </script>
