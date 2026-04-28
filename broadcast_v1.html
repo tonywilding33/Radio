@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Hospital Radio | Interface</title>
+    <title>Hospital Radio | Station Interface</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #0ea5e9; --text: #f8fafc; }
@@ -51,8 +51,8 @@
 </div>
 
 <script>
-    // CLEAN URL: user/repo/branch/file
-    const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/tonywilding33/Radio/HR2833152.csv';
+    // Relative path: Use this if HR2833152.csv is in the same folder as this HTML file
+    const DATA_FILE = 'HR2833152.csv';
     
     let masterLibrary = [];
     let playHistory = [];
@@ -69,13 +69,13 @@
 
     async function connectAndStart() {
         const btn = document.querySelector('.btn-start');
-        btn.innerText = "Connecting...";
+        btn.innerText = "Accessing File...";
         
         try {
-            const response = await fetch(GITHUB_URL);
+            const response = await fetch(DATA_FILE);
             
             if (!response.ok) {
-                throw new Error("Cannot find database file. Check branch name.");
+                throw new Error("CSV file not found in this directory.");
             }
             
             const csvData = await response.text();
@@ -84,18 +84,15 @@
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
-                transformHeader: h => h.trim(), 
                 complete: function(results) {
-                    // Logic check for ID/Artist columns
                     masterLibrary = results.data.filter(row => row.ID || row.Artist);
-                    
                     document.getElementById('setup-view').style.display = 'none';
                     document.getElementById('monitor').style.display = 'block';
                     generateNext();
                 }
             });
         } catch (err) {
-            alert("Database Error: Ensure the 'Radio' branch exists and the repo is Public.");
+            alert(`Error: ${err.message}\nEnsure the CSV is in the same branch as index.html`);
             btn.innerText = "Retry";
         }
     }
@@ -104,7 +101,7 @@
         const now = Date.now();
         const startHour = parseInt(document.getElementById('start-hour').value);
 
-        // Filter: Keep music recognizable for patients (No obscure indie)
+        // Filter: Strictly recognizable (indie-free check)
         let pool = masterLibrary.filter(song => {
             const lastS = playHistory.findLast(h => h.id === song.ID);
             const lastA = playHistory.findLast(h => h.artist === song.Artist);
@@ -120,7 +117,7 @@
             playHistory.push({id: pick.ID, artist: pick.Artist, energy: pick.Energy, time: Date.now()});
             document.getElementById('display-artist').innerText = pick.Artist || "Artist Unknown";
             document.getElementById('display-track').innerText = pick.Title || "Title Unknown";
-            document.getElementById('logic-tag').innerText = `LIVE | SYNCED TO RADIO BRANCH`;
+            document.getElementById('logic-tag').innerText = `LIVE | LOCAL SYNC ACTIVE`;
         }
     }
 </script>
