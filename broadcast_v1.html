@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Hospital Radio | Station Interface</title>
+    <title>Hospital Radio | Full Session Mode</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .wrapper { width: 100%; max-width: 480px; padding: 20px; }
+        .wrapper { width: 100%; max-width: 500px; padding: 20px; }
         .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); border: 1px solid #334155; }
         h1 { font-size: 1.4rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 1px; }
         .field { margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
         select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-        .btn-start:hover { background: #7dd3fc; }
-        #monitor { display: none; text-align: center; }
-        .now-artist { color: var(--accent); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; }
-        .now-title { font-size: 2.4rem; font-weight: 900; margin: 0; line-height: 1.1; color: #fff; }
-        .status-pill { display: inline-block; margin-top: 30px; background: #0f172a; padding: 6px 15px; border-radius: 20px; font-size: 0.65rem; font-family: monospace; color: #64748b; border: 1px solid #1e293b; }
+        #monitor { display: none; text-align: left; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
+        .playlist-container { max-height: 400px; overflow-y: auto; margin-top: 15px; padding-right: 10px; }
+        .track-row { padding: 10px 0; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .track-row:last-child { border-bottom: none; }
+        .t-info { flex-grow: 1; }
+        .t-artist { color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+        .t-title { font-size: 1rem; font-weight: 600; margin: 2px 0; }
+        .t-time { font-family: monospace; font-size: 0.8rem; color: #64748b; }
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -34,45 +38,38 @@
         <div class="field">
             <label>Session Duration</label>
             <select id="duration">
-                <option value="60">1 Hour</option>
-                <option value="120">2 Hours</option>
-                <option value="180">3 Hours</option>
-                <option value="240">4 Hours</option>
+                <option value="60">1 Hour Session</option>
+                <option value="120">2 Hour Session</option>
+                <option value="180">3 Hour Session</option>
+                <option value="240">4 Hour Session</option>
             </select>
         </div>
-        <button class="btn-start" onclick="connectAndStart()">INITIALIZE BROADCAST</button>
+        <button class="btn-start" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
     </div>
 
     <div id="monitor">
-        <p id="display-artist" class="now-artist">SYNCING FEED...</p>
-        <h2 id="display-track" class="now-title">---</h2>
-        <div id="logic-tag" class="status-pill">CONNECTED | MAIN BRANCH</div>
+        <div class="status-header">
+            <span style="font-weight: 800; color: var(--accent);">LIVE PLAYLIST</span>
+            <span id="session-info" style="font-size: 0.7rem; color: #64748b;"></span>
+        </div>
+        <div id="playlist-box" class="playlist-container"></div>
     </div>
 </div>
 
 <script>
-    // Path structure: User (tonywilding33) / Repo (Radio) / Branch (main) / File
     const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152.csv';
-    
     let masterLibrary = [];
-    let playHistory = [];
-    const SONG_SEP = 240; // 4 Hour separation
-    const ARTIST_SEP = 100; // 100 Minute separation
-
+    
+    // Fill Hour Dropdown
     const hourBox = document.getElementById('start-hour');
     for(let i=0; i<24; i++) {
-        let opt = new Option(i.toString().padStart(2, '0') + ":00", i);
-        hourBox.options.add(opt);
+        hourBox.options.add(new Option(i.toString().padStart(2, '0') + ":00", i));
     }
 
-    async function connectAndStart() {
-        const btn = document.querySelector('.btn-start');
-        btn.innerText = "ACCESSING DATABASE...";
-        
+    async function connectAndBuild() {
         try {
             const response = await fetch(CSV_URL);
-            if (!response.ok) throw new Error(`HTTP ${response.status}: File not found on main branch`);
-            
+            if (!response.ok) throw new Error("Database Sync Failed");
             const csvData = await response.text();
             
             Papa.parse(csvData, {
@@ -80,55 +77,79 @@
                 dynamicTyping: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    // Filter out any blank rows to keep the feed clean
                     masterLibrary = results.data.filter(r => r.Artist && r.Title);
-                    
-                    if(masterLibrary.length === 0) {
-                        alert("Connected, but no song data found. Check your CSV headers (Artist, Title).");
-                        return;
-                    }
-
-                    document.getElementById('setup-view').style.display = 'none';
-                    document.getElementById('monitor').style.display = 'block';
-                    generateNext();
+                    runPlaylistLogic();
                 }
             });
         } catch (err) {
-            alert(`CONNECTION ERROR\n${err.message}\n\nEnsure HR2833152.csv is in the 'main' branch and the repo is Public.`);
-            btn.innerText = "RETRY INITIALIZE";
+            alert("Connection Error. Check your manual path correction.");
         }
     }
 
-    function generateNext() {
-        const now = Date.now();
-        const startH = parseInt(document.getElementById('start-hour').value);
+    function runPlaylistLogic() {
+        const durationMins = parseInt(document.getElementById('duration').value);
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        let playlist = [];
+        let localHistory = [];
+        let totalTimeSec = 0;
+        const targetSec = durationMins * 60;
+        
+        let currentTime = new Date();
+        currentTime.setHours(startHour, 0, 0, 0);
 
-        // Separation Rules: 4hr Song / 100min Artist
-        let pool = masterLibrary.filter(s => {
-            const lastS = playHistory.findLast(h => h.id === s.ID);
-            const lastA = playHistory.findLast(h => h.artist === s.Artist);
-            return (!lastS || (now - lastS.time > SONG_SEP * 60000)) &&
-                   (!lastA || (now - lastA.time > ARTIST_SEP * 60000));
-        });
+        // Loop until we fill the requested hours
+        while (totalTimeSec < targetSec) {
+            const nowTimestamp = currentTime.getTime();
 
-        // Failsafe: Ensure we always have music (recognizable focus)
-        if (pool.length === 0) pool = masterLibrary;
+            // Filter for 4hr Song / 100min Artist rules
+            let pool = masterLibrary.filter(s => {
+                const lastS = localHistory.findLast(h => h.id === s.ID);
+                const lastA = localHistory.findLast(h => h.artist === s.Artist);
+                return (!lastS || (nowTimestamp - lastS.time > 240 * 60000)) &&
+                       (!lastA || (nowTimestamp - lastA.time > 100 * 60000));
+            });
 
-        let mode = "Standard";
-        if (startH >= 6 && startH < 11) {
-            mode = "Morning Gold";
-            const gold = pool.filter(s => s.Decade <= 1970);
-            if (gold.length > 0) pool = gold;
+            // No recognizable indie fallback
+            if (pool.length === 0) pool = masterLibrary;
+
+            // Pick a random song from the safe pool
+            let pick = pool[Math.floor(Math.random() * pool.length)];
+            
+            // Assume average song length of 3.5 minutes (210 seconds) if not in CSV
+            let songDuration = 210; 
+            
+            playlist.push({
+                artist: pick.Artist,
+                title: pick.Title,
+                startTime: currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            localHistory.push({id: pick.ID, artist: pick.Artist, time: nowTimestamp});
+            totalTimeSec += songDuration;
+            currentTime.setSeconds(currentTime.getSeconds() + songDuration);
+            
+            // Safety break to prevent infinite loops if library is too small
+            if (playlist.length > 100) break;
         }
 
-        const pick = pool[Math.floor(Math.random() * pool.length)];
+        displayPlaylist(playlist, durationMins);
+    }
 
-        if (pick) {
-            playHistory.push({id: pick.ID, artist: pick.Artist, time: Date.now()});
-            document.getElementById('display-artist').innerText = pick.Artist;
-            document.getElementById('display-track').innerText = pick.Title;
-            document.getElementById('logic-tag').innerText = `MODE: ${mode} | SESSION ACTIVE`;
-        }
+    function displayPlaylist(list, mins) {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        document.getElementById('session-info').innerText = `${mins/60} HOUR SESSION`;
+
+        const box = document.getElementById('playlist-box');
+        box.innerHTML = list.map(track => `
+            <div class="track-row">
+                <div class="t-info">
+                    <div class="t-artist">${track.artist}</div>
+                    <div class="t-title">${track.title}</div>
+                </div>
+                <div class="t-time">${track.startTime}</div>
+            </div>
+        `).join('');
     }
 </script>
 </body>
