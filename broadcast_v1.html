@@ -69,32 +69,24 @@
     }
 
     async function connectAndStart() {
-        const btn = document.querySelector('.btn-start');
-        btn.innerText = "Syncing...";
         try {
             const response = await fetch(GITHUB_DB);
-            if (!response.ok) throw new Error('Network error');
             const csvData = await response.text();
             
             Papa.parse(csvData, {
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
+                transformHeader: h => h.trim().toLowerCase(), // FIX: Normalizes headers to lowercase
                 complete: function(results) {
-                    masterLibrary = results.data.filter(row => row.ID && row.Artist);
-                    console.log("Database Loaded. Count:", masterLibrary.length);
-                    
+                    masterLibrary = results.data.filter(row => row.id && row.artist);
                     document.getElementById('setup-view').style.display = 'none';
                     document.getElementById('monitor').style.display = 'block';
-                    
-                    // Small delay to ensure UI transition before first pick
-                    setTimeout(generateNext, 500);
+                    generateNext();
                 }
             });
         } catch (err) {
-            console.error(err);
-            alert("Database Error: Check your 'Radio' branch for HR2833152.csv");
-            btn.innerText = "Retry Initialize";
+            alert("Connection Error. Check GitHub.");
         }
     }
 
@@ -102,37 +94,28 @@
         const now = Date.now();
         const startHour = parseInt(document.getElementById('start-hour').value);
 
-        // 1. Separation Logic
-        let available = masterLibrary.filter(song => {
-            const lastSong = playHistory.findLast(h => h.id === song.ID);
-            const lastArtist = playHistory.findLast(h => h.artist === song.Artist);
+        // 1. Core Filters (Artist/Song Separation)
+        let pool = masterLibrary.filter(song => {
+            const lastSong = playHistory.findLast(h => h.id === song.id);
+            const lastArtist = playHistory.findLast(h => h.artist === song.artist);
             return (!lastSong || (now - lastSong.time > SONG_SEP * 60000)) &&
                    (!lastArtist || (now - lastArtist.time > ARTIST_SEP * 60000));
         });
 
         // 2. Daypart Weights
-        let daypartLabel = "Standard";
-        let finalPool = [...available];
-
+        let label = "Standard";
         if (startHour >= 6 && startHour < 11) {
-            daypartLabel = "Morning Gold";
-            const morning = available.filter(s => s.Decade <= 1970);
-            if (morning.length > 0) finalPool = morning;
-        } else if (startHour >= 16 && startHour < 20) {
-            daypartLabel = "Drivetime";
-            const drive = available.filter(s => s.Energy >= 4);
-            if (drive.length > 0) finalPool = drive;
+            label = "Morning Gold";
+            const morning = pool.filter(s => s.decade <= 1970);
+            if (morning.length > 0) pool = morning;
         } else if (startHour >= 20 || startHour < 6) {
-            daypartLabel = "Night Shift";
-            const night = available.filter(s => s.Length === 'L');
-            if (night.length > 0) finalPool = night;
+            label = "Night Shift";
+            const night = pool.filter(s => s.length === 'L' || s.length === 'l');
+            if (night.length > 0) pool = night;
         }
 
-        // 3. Fallback if logic is too tight
-        if (finalPool.length === 0) {
-            console.warn("Rotation too tight, using full available pool");
-            finalPool = available.length > 0 ? available : masterLibrary;
-        }
+        // 3. Fallback: If logic is too strict, just pick any valid track
+        if (pool.length === 0) pool = masterLibrary;
 
         // 4. Energy Kick
         const lastThree = playHistory.slice(-3);
@@ -140,18 +123,18 @@
 
         let pick;
         if (avgE < 3) {
-            const power = finalPool.filter(s => s.Energy === 5);
-            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : finalPool[0];
-            daypartLabel += " + Kick";
+            const power = pool.filter(s => s.energy === 5);
+            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : pool[0];
+            label += " + Kick";
         } else {
-            pick = finalPool[Math.floor(Math.random()*finalPool.length)];
+            pick = pool[Math.floor(Math.random()*pool.length)];
         }
 
         if (pick) {
-            playHistory.push({id: pick.ID, artist: pick.Artist, energy: pick.Energy, time: Date.now()});
-            document.getElementById('display-artist').innerText = pick.Artist;
-            document.getElementById('display-track').innerText = pick.Title;
-            document.getElementById('logic-tag').innerText = `MODE: ${daypartLabel}`;
+            playHistory.push({id: pick.id, artist: pick.artist, energy: pick.energy, time: Date.now()});
+            document.getElementById('display-artist').innerText = pick.artist;
+            document.getElementById('display-track').innerText = pick.title;
+            document.getElementById('logic-tag').innerText = `MODE: ${label}`;
         }
     }
 </script>
