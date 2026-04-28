@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Hospital Radio | Station Interface</title>
+    <title>Hospital Radio | Interface</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #0ea5e9; --text: #f8fafc; }
@@ -54,9 +54,7 @@
 <div style="display:none;" aria-hidden="true">Developer: Tony Wilding</div>
 
 <script>
-    // Updated to the most direct raw format
     const GITHUB_DB = 'https://raw.githubusercontent.com/tonywilding33/tonywilding33/Radio/HR2833152.csv';
-    
     let masterLibrary = [];
     let playHistory = [];
     const SONG_SEP = 240; 
@@ -71,44 +69,29 @@
     }
 
     async function connectAndStart() {
-        const btn = document.querySelector('.btn-start');
-        btn.innerText = "Connecting...";
-        
         try {
-            // Added cache-busting to ensure we don't get a stale 404
-            const response = await fetch(`${GITHUB_DB}?t=${Date.now()}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status}`);
-            }
-            
+            const response = await fetch(GITHUB_DB);
+            if(!response.ok) throw new Error("Fetch failed");
             const csvData = await response.text();
             
             Papa.parse(csvData, {
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
-                transformHeader: h => h.trim().toLowerCase(),
+                transformHeader: h => h.trim().toLowerCase(), // Case-insensitive headers
                 complete: function(results) {
-                    // Log data to console so you can see if it parsed
-                    console.log("Parsed Data:", results.data);
-                    
                     masterLibrary = results.data.filter(row => row.artist || row.title);
+                    console.log("Database Sync Successful. Songs:", masterLibrary.length);
                     
-                    if (masterLibrary.length === 0) {
-                        alert("Database is empty or headers don't match.");
-                        return;
-                    }
-
                     document.getElementById('setup-view').style.display = 'none';
                     document.getElementById('monitor').style.display = 'block';
+                    
+                    // Force the first pick
                     generateNext();
                 }
             });
         } catch (err) {
-            console.error("Tony, the error is:", err);
-            alert(`Database Error: ${err.message}. Check that HR2833152.csv is exactly in the 'Radio' branch.`);
-            btn.innerText = "Retry Initialize";
+            alert("Database Error: Check connection or branch name.");
         }
     }
 
@@ -116,39 +99,52 @@
         const now = Date.now();
         const startHour = parseInt(document.getElementById('start-hour').value);
 
+        // 1. Separation Filter
         let pool = masterLibrary.filter(song => {
-            const lastSong = playHistory.findLast(h => h.id === song.id);
-            const lastArtist = playHistory.findLast(h => h.artist === song.artist);
-            return (!lastSong || (now - lastSong.time > SONG_SEP * 60000)) &&
-                   (!lastArtist || (now - lastArtist.time > ARTIST_SEP * 60000));
+            const lastS = playHistory.findLast(h => h.id === song.id);
+            const lastA = playHistory.findLast(h => h.artist === song.artist);
+            return (!lastS || (now - lastS.time > SONG_SEP * 60000)) &&
+                   (!lastA || (now - lastA.time > ARTIST_SEP * 60000));
         });
 
-        if (pool.length === 0) pool = masterLibrary;
+        // 2. Daypart Logic
+        let mode = "Standard";
+        let subPool = [...pool];
 
-        let label = "Standard";
         if (startHour >= 6 && startHour < 11) {
-            label = "Morning Gold";
-            const morning = pool.filter(s => s.decade <= 1970);
-            if (morning.length > 0) pool = morning;
+            mode = "Morning Gold";
+            const gold = pool.filter(s => s.decade <= 1970);
+            if (gold.length > 0) subPool = gold;
+        } else if (startHour >= 20 || startHour < 6) {
+            mode = "Night Shift";
+            const night = pool.filter(s => s.length === 'L' || s.length === 'l');
+            if (night.length > 0) subPool = night;
         }
 
-        const lastThree = playHistory.slice(-3);
-        const avgE = lastThree.length === 3 ? lastThree.reduce((a,b)=>a+b.energy,0)/3 : 3;
+        // 3. SAFETY FALLBACK: If filters are too tight, use anything from master
+        if (subPool.length === 0) {
+            subPool = pool.length > 0 ? pool : masterLibrary;
+            mode = "Rotation Recovery";
+        }
+
+        // 4. Energy Kick
+        const last3 = playHistory.slice(-3);
+        const avgE = last3.length === 3 ? last3.reduce((a,b)=>a+b.energy,0)/3 : 3;
 
         let pick;
         if (avgE < 3) {
-            const power = pool.filter(s => s.energy === 5);
-            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : pool[0];
-            label += " + Kick";
+            const power = subPool.filter(s => s.energy === 5);
+            pick = power.length > 0 ? power[Math.floor(Math.random()*power.length)] : subPool[0];
+            mode += " + Kick";
         } else {
-            pick = pool[Math.floor(Math.random()*pool.length)];
+            pick = subPool[Math.floor(Math.random()*subPool.length)];
         }
 
         if (pick) {
             playHistory.push({id: pick.id, artist: pick.artist, energy: pick.energy, time: Date.now()});
-            document.getElementById('display-artist').innerText = pick.artist || "Unknown Artist";
-            document.getElementById('display-track').innerText = pick.title || "Unknown Title";
-            document.getElementById('logic-tag').innerText = `MODE: ${label}`;
+            document.getElementById('display-artist').innerText = pick.artist;
+            document.getElementById('display-track').innerText = pick.title;
+            document.getElementById('logic-tag').innerText = `MODE: ${mode}`;
         }
     }
 </script>
