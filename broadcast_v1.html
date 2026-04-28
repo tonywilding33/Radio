@@ -16,13 +16,14 @@
         select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
         #monitor { display: none; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
-        .playlist-container { max-height: 450px; overflow-y: auto; margin-top: 15px; padding-right: 10px; border-top: 1px solid #334155; }
+        .playlist-container { max-height: 400px; overflow-y: auto; margin-top: 15px; padding-right: 10px; border-top: 1px solid #334155; border-bottom: 1px solid #334155; margin-bottom: 20px; }
         .track-row { padding: 12px 0; border-bottom: 1px solid #334155; display: flex; align-items: flex-start; }
         .track-num { color: var(--accent); font-weight: 800; margin-right: 15px; min-width: 25px; font-size: 0.9rem; }
         .t-artist { color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
         .t-title { font-size: 1.1rem; font-weight: 600; color: #fff; line-height: 1.2; }
-        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .btn-download { background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
+        .status-header { font-weight: 800; color: var(--accent); font-size: 1.1rem; margin-bottom: 10px; }
+        .btn-download { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .btn-download:hover { background: #059669; }
     </style>
 </head>
 <body>
@@ -47,11 +48,9 @@
     </div>
 
     <div id="monitor">
-        <div class="status-header">
-            <div style="font-weight: 800; color: var(--accent); font-size: 1.1rem;">STATION LOG</div>
-            <button class="btn-download" onclick="downloadTxt()">DOWNLOAD TXT</button>
-        </div>
+        <div class="status-header">STATION LOG</div>
         <div id="playlist-box" class="playlist-container"></div>
+        <button class="btn-download" onclick="downloadTxt()">Download Playlist (txt)</button>
     </div>
 </div>
 
@@ -107,7 +106,7 @@
             currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
             history.push({ id: pick.ID, artist: pick.Artist, time: virtualTime });
             
-            totalSec += 210; // Approx 3.5 mins
+            totalSec += 210; 
             virtualTime += 210000;
             if (currentPlaylist.length > 200) break;
         }
@@ -130,7 +129,7 @@
     }
 
     function downloadTxt() {
-        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\\n');
+        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\n');
         const blob = new Blob([content], { type: 'text/plain' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
