@@ -44,7 +44,7 @@
                 <option value="240">4 Hour Session</option>
             </select>
         </div>
-        <button class="btn-start" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
+        <button class="btn-start" onclick="connectAndBuild()">START SCHEDULER</button>
     </div>
 
     <div id="monitor">
@@ -80,7 +80,7 @@
                 }
             });
         } catch (err) {
-            alert("Database Error: Verify your manual path correction for HR3328152.csv");
+            alert("Database Error: Check your CSV file name on the main branch.");
         }
     }
 
