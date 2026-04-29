@@ -14,17 +14,17 @@
         .sub-h { font-size: 0.7rem; text-align: center; color: #94a3b8; margin-bottom: 25px; font-weight: 800; letter-spacing: 2px; }
         .field { margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
-        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
         #monitor { display: none; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
         .status-header { font-weight: 800; color: var(--accent); font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .playlist-container { max-height: 500px; overflow-y: auto; margin-top: 15px; border-top: 1px solid #334155; border-bottom: 1px solid #334155; margin-bottom: 20px; padding: 5px; }
-        .track-row { padding: 10px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 15px; }
-        .time-col { color: #94a3b8; font-family: monospace; font-size: 0.85rem; min-width: 50px; }
+        .track-row { padding: 10px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
+        .num-col { color: var(--accent); font-weight: 800; font-size: 0.85rem; min-width: 30px; opacity: 0.7; }
         .track-info { flex-grow: 1; }
         .t-artist { color: var(--accent); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .t-title { font-size: 1rem; font-weight: 600; color: #fff; }
-        .talk-tag { font-size: 0.65rem; color: #f87171; font-weight: 800; border: 1px solid #f87171; padding: 2px 5px; border-radius: 4px; white-space: nowrap; }
+        .time-col { color: #94a3b8; font-family: monospace; font-size: 0.9rem; min-width: 55px; text-align: right; font-weight: 600; }
         .btn-download { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     </style>
 </head>
@@ -72,7 +72,7 @@
             let opt = document.createElement("option");
             opt.value = i;
             opt.text = hLabel;
-            if(i === new Date().getHours()) opt.selected = true;
+            if(i === 0) opt.selected = true;
             hourBox.add(opt);
         }
     };
@@ -97,7 +97,9 @@
         let date = new Date();
         date.setHours(startHour, 0, 0, 0);
         date.setSeconds(totalSeconds);
-        return date.toTimeString().slice(0, 5);
+        let h = date.getHours().toString().padStart(2, '0');
+        let m = date.getMinutes().toString().padStart(2, '0');
+        return `${h}:${m}`;
     }
 
     function runLogic() {
@@ -135,9 +137,7 @@
             }
             if (pool.length === 0) break; 
             
-            let pick = pool[Math.floor(Math.random() * pool.length)];
-            
-            // Addition: Store start time string
+            let pick = {...pool[Math.floor(Math.random() * pool.length)]};
             pick.startTime = formatTime(totalSec, startHour);
             
             currentPlaylist.push(pick);
@@ -145,7 +145,7 @@
             genreHistory.push(String(pick.Genre).trim().toUpperCase());
             if (genreHistory.length > 2) genreHistory.shift();
             
-            totalSec += 210; // Avg song length
+            totalSec += 210; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
         }
         render();
@@ -158,19 +158,19 @@
         const box = document.getElementById('playlist-box');
         box.innerHTML = currentPlaylist.map((t, i) => `
             <div class="track-row">
-                <div class="time-col">${t.startTime}</div>
+                <div class="num-col">${(i + 1).toString().padStart(2, '0')}</div>
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
                 </div>
-                <div class="talk-tag">TALK: 10s</div>
+                <div class="time-col">${t.startTime}</div>
             </div>
         `).join('');
     }
 
     function downloadTxt() {
         let content = "HOSPITAL RADIO LOG\n" + "=".repeat(25) + "\n";
-        content += currentPlaylist.map(t => `${t.startTime} | ${t.Artist} - ${t.Title}`).join('\n');
+        content += currentPlaylist.map((t, i) => `${(i + 1).toString().padStart(2, '0')} | ${t.startTime} | ${t.Artist} - ${t.Title}`).join('\n');
         const blob = new Blob([content], { type: 'text/plain' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
