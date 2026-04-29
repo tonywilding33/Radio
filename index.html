@@ -57,6 +57,7 @@
 </div>
 
 <script>
+    // Updated to point to your new database file
     const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152B.csv';
     let masterLibrary = [];
     let currentPlaylist = [];
@@ -88,8 +89,14 @@
                 dynamicTyping: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    // FILTER: Only allow tracks where Artist/Title exist AND Enabled is 'Y'
-                    masterLibrary = results.data.filter(r => r.Artist && r.Title && r.Enabled === 'Y');
+                    // ROBUST FILTER: 
+                    // 1. Checks for Artist and Title
+                    // 2. Checks Enabled column case-insensitively (supports 'Y' or 'y')
+                    // 3. Automatically skips anything with 'n', 'N', or blanks.
+                    masterLibrary = results.data.filter(r => {
+                        const isEnabled = r.Enabled && String(r.Enabled).trim().toUpperCase() === 'Y';
+                        return r.Artist && r.Title && isEnabled;
+                    });
                     runLogic();
                 }
             });
@@ -119,31 +126,33 @@
                 const lastS = history.findLast(h => h.id === s.ID);
                 const lastA = history.findLast(h => h.artist === s.Artist);
                 
-                // Separation rules
+                // Separation rules: 4 hours for same song, ~1.5 hours for same artist
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) &&
-                                  (!lastA || (totalSec - lastA.time > 6000));
+                                  (!lastA || (totalSec - lastA.time > 5400));
                 
                 return matchesTime && separated;
             });
 
+            // Fallback: If no songs match the Daypart AND separation, relax the Daypart rule
             if (pool.length === 0) {
                 pool = masterLibrary.filter(s => {
                     const lastA = history.findLast(h => h.artist === s.Artist);
-                    return !lastA || (totalSec - lastA.time > 6000);
+                    return !lastA || (totalSec - lastA.time > 5400);
                 });
             }
             
-            if (pool.length === 0) break; // Safety break if library is empty
+            if (pool.length === 0) break; 
             
             let pick = pool[Math.floor(Math.random() * pool.length)];
             
             currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
             history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
             
+            // Assume average song length of 3.5 minutes (210s)
             totalSec += 210; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
 
-            if (currentPlaylist.length > 300) break;
+            if (currentPlaylist.length > 500) break;
         }
         render();
     }
@@ -164,11 +173,12 @@
     }
 
     function downloadTxt() {
-        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\n');
+        let content = "HOSPITAL RADIO PLAYLIST\n" + "=".repeat(25) + "\n";
+        content += currentPlaylist.map((t, i) => `${(i + 1).toString().padStart(2, '0')}. ${t.artist} - ${t.title}`).join('\n');
         const blob = new Blob([content], { type: 'text/plain' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "Hospital_Radio_Playlist.txt";
+        a.download = `Playlist_Export_${new Date().toISOString().slice(0,10)}.txt`;
         a.click();
     }
 </script>
