@@ -29,7 +29,10 @@
         .t-artist { color: var(--accent); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .t-title { font-size: 1rem; font-weight: 600; color: #fff; }
         .time-col { color: #94a3b8; font-family: monospace; font-size: 0.9rem; min-width: 55px; text-align: right; font-weight: 600; }
-        .btn-download { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        
+        .btn-download { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 10px; }
+        .btn-back { width: 100%; background: transparent; color: #94a3b8; border: 1px solid #475569; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
+        .btn-back:hover { color: white; border-color: white; }
     </style>
 </head>
 <body>
@@ -73,11 +76,12 @@
         </div>
         <div id="playlist-box" class="playlist-container"></div>
         <button class="btn-download" onclick="downloadTxt()">Download Playlist (txt)</button>
+        <button class="btn-back" onclick="resetView()">← SCHEDULE MORE</button>
     </div>
 </div>
 
 <script>
-    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152C.csv';
+    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152B.csv';
     let masterLibrary = [];
     let currentPlaylist = [];
 
@@ -92,6 +96,11 @@
             hourBox.add(opt);
         }
     };
+
+    function resetView() {
+        document.getElementById('monitor').style.display = 'none';
+        document.getElementById('setup-view').style.display = 'block';
+    }
 
     async function connectAndBuild() {
         try {
@@ -138,7 +147,6 @@
                           (currentVirtualHour >= 18 && currentVirtualHour < 22) ? "Evening" : "Night";
 
             const isOpener = currentPlaylist.length === 0;
-            // A "Closer" is defined as a song where adding it puts us over or very near the target time
             const isCloser = (totalSec + 235) >= targetSec;
 
             let pool = masterLibrary.filter(s => {
@@ -151,7 +159,6 @@
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) && (!lastA || (totalSec - lastA.time > 5400));
                 const genreOk = !genreHistory.includes(genreClean);
                 
-                // Opener: Energy 4 or 5 | Closer: Energy 5 only | Mid-session: Every 3rd song upbeat
                 let energyOk = true;
                 if (isOpener) energyOk = (s.Energy >= 4);
                 else if (isCloser) energyOk = (s.Energy === 5);
