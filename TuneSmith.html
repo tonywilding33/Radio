@@ -138,6 +138,8 @@
                           (currentVirtualHour >= 18 && currentVirtualHour < 22) ? "Evening" : "Night";
 
             const isOpener = currentPlaylist.length === 0;
+            // A "Closer" is defined as a song where adding it puts us over or very near the target time
+            const isCloser = (totalSec + 235) >= targetSec;
 
             let pool = masterLibrary.filter(s => {
                 const genreClean = String(s.Genre).trim().toUpperCase();
@@ -148,11 +150,15 @@
                 const lastA = history.findLast(h => h.artist === s.Artist);
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) && (!lastA || (totalSec - lastA.time > 5400));
                 const genreOk = !genreHistory.includes(genreClean);
-                const needsEnergy = (currentPlaylist.length + 1) % 3 === 0;
-                const energyOk = needsEnergy ? (s.Energy >= 4) : true;
+                
+                // Opener: Energy 4 or 5 | Closer: Energy 5 only | Mid-session: Every 3rd song upbeat
+                let energyOk = true;
+                if (isOpener) energyOk = (s.Energy >= 4);
+                else if (isCloser) energyOk = (s.Energy === 5);
+                else if ((currentPlaylist.length + 1) % 3 === 0) energyOk = (s.Energy >= 4);
 
-                if (themedDecade !== "OFF") return separated && genreOk;
-                return isOpener ? (s.Daypart === dayPart && s.Energy >= 4) : (s.Daypart === dayPart && separated && genreOk && energyOk);
+                if (themedDecade !== "OFF") return separated && genreOk && energyOk;
+                return (s.Daypart === dayPart) && separated && genreOk && energyOk;
             });
 
             if (pool.length === 0) {
@@ -171,7 +177,6 @@
             genreHistory.push(String(pick.Genre).trim().toUpperCase());
             if (genreHistory.length > 2) genreHistory.shift();
             
-            // ADJUSTED: 235 seconds per track to leave room for presenter talk.
             totalSec += 235; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
         }
