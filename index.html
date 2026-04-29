@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>Hospital Radio | Playlist Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .wrapper { width: 100%; max-width: 500px; padding: 20px; }
+        .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); border: 1px solid #334155; }
+        h1 { font-size: 1.4rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+        .field { margin-bottom: 20px; }
+        label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
+        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+        .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        #monitor { display: none; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
+        .playlist-container { max-height: 400px; overflow-y: auto; margin-top: 15px; padding-right: 10px; border-top: 1px solid #334155; border-bottom: 1px solid #334155; margin-bottom: 20px; }
+        .track-row { padding: 12px 0; border-bottom: 1px solid #334155; display: flex; align-items: flex-start; }
+        .track-num { color: var(--accent); font-weight: 800; margin-right: 15px; min-width: 25px; font-size: 0.9rem; }
+        .t-artist { color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+        .t-title { font-size: 1.1rem; font-weight: 600; color: #fff; line-height: 1.2; }
+        .status-header { font-weight: 800; color: var(--accent); font-size: 1.1rem; margin-bottom: 10px; }
+        .btn-download { width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        .btn-download:hover { background: #059669; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div id="setup-view" class="setup-card">
+        <h1>SHOW TIME</h1>
+        <div class="field">
+            <label>Start Hour</label>
+            <select id="start-hour">
+                <option value="">Select Hour</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Session Duration</label>
+            <select id="duration">
+                <option value="60">1 Hour Session</option>
+                <option value="120">2 Hour Session</option>
+                <option value="180">3 Hour Session</option>
+                <option value="240">4 Hour Session</option>
+            </select>
+        </div>
+        <button class="btn-start" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
+    </div>
+
+    <div id="monitor">
+        <div class="status-header">STATION LOG</div>
+        <div id="playlist-box" class="playlist-container"></div>
+        <button class="btn-download" onclick="downloadTxt()">Download Playlist (txt)</button>
+    </div>
+</div>
+
+<script>
+    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152A.csv';
+    let masterLibrary = [];
+    let currentPlaylist = [];
+
+    window.onload = function() {
+        const hourBox = document.getElementById('start-hour');
+        if (hourBox) {
+            hourBox.innerHTML = ''; 
+            for(let i=0; i<24; i++) {
+                let hLabel = i.toString().padStart(2, '0') + ":00";
+                let opt = document.createElement("option");
+                let now = new Date();
+                opt.value = i;
+                opt.text = hLabel;
+                if(i === now.getHours()) opt.selected = true;
+                hourBox.add(opt);
+            }
+        }
+    };
+
+    async function connectAndBuild() {
+        try {
+            const resp = await fetch(CSV_URL);
+            if (!resp.ok) throw new Error("Sync Error");
+            const csv = await resp.text();
+            
+            Papa.parse(csv, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    // FILTER: Only allow tracks where Artist/Title exist AND Enabled is 'Y'
+                    masterLibrary = results.data.filter(r => r.Artist && r.Title && r.Enabled === 'Y');
+                    runLogic();
+                }
+            });
+        } catch (err) {
+            alert("Database Error: Check connection or CSV URL.");
+        }
+    }
+
+    function runLogic() {
+        const durationMins = parseInt(document.getElementById('duration').value);
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        
+        currentPlaylist = [];
+        let history = [];
+        let totalSec = 0;
+        const targetSec = durationMins * 60;
+        let currentVirtualHour = startHour;
+
+        while (totalSec < targetSec) {
+            let dayPart = "Night";
+            if (currentVirtualHour >= 6 && currentVirtualHour < 12) dayPart = "Morning";
+            else if (currentVirtualHour >= 12 && currentVirtualHour < 18) dayPart = "Afternoon";
+            else if (currentVirtualHour >= 18 && currentVirtualHour < 22) dayPart = "Evening";
+
+            let pool = masterLibrary.filter(s => {
+                const matchesTime = s.Daypart === dayPart;
+                const lastS = history.findLast(h => h.id === s.ID);
+                const lastA = history.findLast(h => h.artist === s.Artist);
+                
+                // Separation rules
+                const separated = (!lastS || (totalSec - lastS.time > 14400)) &&
+                                  (!lastA || (totalSec - lastA.time > 6000));
+                
+                return matchesTime && separated;
+            });
+
+            if (pool.length === 0) {
+                pool = masterLibrary.filter(s => {
+                    const lastA = history.findLast(h => h.artist === s.Artist);
+                    return !lastA || (totalSec - lastA.time > 6000);
+                });
+            }
+            
+            if (pool.length === 0) break; // Safety break if library is empty
+            
+            let pick = pool[Math.floor(Math.random() * pool.length)];
+            
+            currentPlaylist.push({ artist: pick.Artist, title: pick.Title, id: pick.ID });
+            history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
+            
+            totalSec += 210; 
+            currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
+
+            if (currentPlaylist.length > 300) break;
+        }
+        render();
+    }
+
+    function render() {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        const box = document.getElementById('playlist-box');
+        box.innerHTML = currentPlaylist.map((t, i) => `
+            <div class="track-row">
+                <div class="track-num">${i + 1}</div>
+                <div>
+                    <div class="t-artist">${t.artist}</div>
+                    <div class="t-title">${t.title}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function downloadTxt() {
+        let content = currentPlaylist.map((t, i) => `${i + 1}. ${t.artist} - ${t.title}`).join('\n');
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Hospital_Radio_Playlist.txt";
+        a.click();
+    }
+</script>
+</body>
+</html>
