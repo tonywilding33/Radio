@@ -106,7 +106,7 @@
                     runLogic();
                 }
             });
-        } catch (err) { alert("Sync Error. Check GitHub."); }
+        } catch (err) { alert("Sync Error."); }
     }
 
     function formatTime(totalSeconds, startHour) {
@@ -122,10 +122,8 @@
         const durationMins = parseInt(document.getElementById('duration').value);
         const startHour = parseInt(document.getElementById('start-hour').value);
         const themedDecade = document.getElementById('golden-hour-select').value;
-        
-        // Seasonal Logic
         const now = new Date();
-        const isDecember = now.getMonth() === 11; // 11 is December in JS
+        const isDecember = now.getMonth() === 11;
 
         currentPlaylist = [];
         let history = [];
@@ -142,24 +140,19 @@
             const isOpener = currentPlaylist.length === 0;
 
             let pool = masterLibrary.filter(s => {
-                // Seasonal Filter: Block Christmas songs if not December
                 const genreClean = String(s.Genre).trim().toUpperCase();
                 if (!isDecember && (genreClean.includes("CHRISTMAS") || genreClean.includes("XMAS"))) return false;
-
-                // Themed Filter
                 if (themedDecade !== "OFF" && parseInt(s.Decade) !== parseInt(themedDecade)) return false;
 
-                const matchesTime = s.Daypart === dayPart;
                 const lastS = history.findLast(h => h.id === s.ID);
                 const lastA = history.findLast(h => h.artist === s.Artist);
-                
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) && (!lastA || (totalSec - lastA.time > 5400));
                 const genreOk = !genreHistory.includes(genreClean);
                 const needsEnergy = (currentPlaylist.length + 1) % 3 === 0;
                 const energyOk = needsEnergy ? (s.Energy >= 4) : true;
 
                 if (themedDecade !== "OFF") return separated && genreOk;
-                return isOpener ? (matchesTime && s.Energy >= 4) : (matchesTime && separated && genreOk && energyOk);
+                return isOpener ? (s.Daypart === dayPart && s.Energy >= 4) : (s.Daypart === dayPart && separated && genreOk && energyOk);
             });
 
             if (pool.length === 0) {
@@ -169,18 +162,17 @@
                     return !lastA || (totalSec - lastA.time > 3600);
                 });
             }
-            
             if (pool.length === 0) break; 
             
             let pick = {...pool[Math.floor(Math.random() * pool.length)]};
             pick.startTime = formatTime(totalSec, startHour);
-            
             currentPlaylist.push(pick);
             history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
             genreHistory.push(String(pick.Genre).trim().toUpperCase());
             if (genreHistory.length > 2) genreHistory.shift();
             
-            totalSec += 210; 
+            // ADJUSTED: 235 seconds per track to leave room for presenter talk.
+            totalSec += 235; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
         }
         render();
