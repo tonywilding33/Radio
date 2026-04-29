@@ -13,7 +13,7 @@
         h1 { font-size: 1.6rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
         .field { margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
-        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         
         .gold-box { background: rgba(251, 191, 36, 0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.2); margin-bottom: 20px; }
         .gold-label { color: var(--gold); font-weight: 800; font-size: 0.7rem; text-transform: uppercase; display: block; margin-bottom: 8px; }
@@ -81,7 +81,6 @@
     let masterLibrary = [];
     let currentPlaylist = [];
 
-    // Correctly populates the Start Hour and defaults to 00:00
     window.onload = function() {
         const hourBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) {
@@ -124,6 +123,10 @@
         const startHour = parseInt(document.getElementById('start-hour').value);
         const themedDecade = document.getElementById('golden-hour-select').value;
         
+        // Seasonal Logic
+        const now = new Date();
+        const isDecember = now.getMonth() === 11; // 11 is December in JS
+
         currentPlaylist = [];
         let history = [];
         let genreHistory = [];
@@ -139,6 +142,11 @@
             const isOpener = currentPlaylist.length === 0;
 
             let pool = masterLibrary.filter(s => {
+                // Seasonal Filter: Block Christmas songs if not December
+                const genreClean = String(s.Genre).trim().toUpperCase();
+                if (!isDecember && (genreClean.includes("CHRISTMAS") || genreClean.includes("XMAS"))) return false;
+
+                // Themed Filter
                 if (themedDecade !== "OFF" && parseInt(s.Decade) !== parseInt(themedDecade)) return false;
 
                 const matchesTime = s.Daypart === dayPart;
@@ -146,7 +154,6 @@
                 const lastA = history.findLast(h => h.artist === s.Artist);
                 
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) && (!lastA || (totalSec - lastA.time > 5400));
-                const genreClean = String(s.Genre).trim().toUpperCase();
                 const genreOk = !genreHistory.includes(genreClean);
                 const needsEnergy = (currentPlaylist.length + 1) % 3 === 0;
                 const energyOk = needsEnergy ? (s.Energy >= 4) : true;
