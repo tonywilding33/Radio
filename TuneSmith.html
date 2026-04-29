@@ -140,4 +140,90 @@
         while (totalSec < targetSec) {
             let dayPart = (currentVirtualHour >= 6 && currentVirtualHour < 12) ? "Morning" : 
                           (currentVirtualHour >= 12 && currentVirtualHour < 18) ? "Afternoon" : 
-                          (currentVirtualHour >= 18 && currentVirtualHour < 22)
+                          (currentVirtualHour >= 18 && currentVirtualHour < 22) ? "Evening" : "Night";
+
+            const isOpener = currentPlaylist.length === 0;
+            const isCloser = (totalSec + 235) >= targetSec;
+
+            let pool = masterLibrary.filter(s => {
+                const genreClean = String(s.Genre).trim().toUpperCase();
+                if (!isDecember && genreClean.includes("CHRISTMAS")) return false;
+                if (themedDecade !== "OFF" && parseInt(s.Decade) !== parseInt(themedDecade)) return false;
+
+                const lastS = history.findLast(h => h.id === s.ID);
+                const lastA = history.findLast(h => h.artist === s.Artist);
+                const separated = (!lastS || (totalSec - lastS.time > 14400)) && (!lastA || (totalSec - lastA.time > 5400));
+                const genreOk = !genreHistory.includes(genreClean);
+                
+                let energyOk = true;
+                if (isOpener) energyOk = (s.Energy >= 4);
+                else if (isCloser) energyOk = (s.Energy === 5);
+                else if ((currentPlaylist.length + 1) % 3 === 0) energyOk = (s.Energy >= 4);
+
+                if (themedDecade !== "OFF") return separated && genreOk && energyOk;
+                return (s.Daypart === dayPart) && separated && genreOk && energyOk;
+            });
+
+            if (pool.length === 0) {
+                pool = masterLibrary.filter(s => {
+                    if (themedDecade !== "OFF" && parseInt(s.Decade) !== parseInt(themedDecade)) return false;
+                    const lastA = history.findLast(h => h.artist === s.Artist);
+                    return !lastA || (totalSec - lastA.time > 3600);
+                });
+            }
+            if (pool.length === 0) break; 
+            
+            let pick = {...pool[Math.floor(Math.random() * pool.length)]};
+            pick.startTime = formatTime(totalSec, startHour);
+            currentPlaylist.push(pick);
+            history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
+            genreHistory.push(String(pick.Genre).trim().toUpperCase());
+            if (genreHistory.length > 2) genreHistory.shift();
+            
+            totalSec += 235; 
+            currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
+        }
+        render();
+    }
+
+    function render() {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        document.getElementById('track-count').innerText = `${currentPlaylist.length} TRACKS`;
+        const box = document.getElementById('playlist-box');
+        box.innerHTML = currentPlaylist.map((t, i) => `
+            <div class="track-row">
+                <div class="num-col">${(i + 1).toString().padStart(2, '0')}</div>
+                <div class="track-info">
+                    <div class="t-artist">${t.Artist}</div>
+                    <div class="t-title">${t.Title}</div>
+                </div>
+                <div class="time-col">${t.startTime}</div>
+            </div>
+        `).join('');
+    }
+
+    function downloadTxt() {
+        const theme = document.getElementById('golden-hour-select').value;
+        const now = new Date();
+        const dateStr = now.toLocaleDateString();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        let header = "SHOW LOG";
+        if (theme !== "OFF") header = `${theme}s SPECIAL SHOW LOG`;
+        
+        let content = `${header} | ${dateStr} ${timeStr}\n`;
+        content += "=".repeat(40) + "\n";
+        content += currentPlaylist.map((t, i) => `${(i + 1).toString().padStart(2, '0')} | ${t.startTime} | ${t.Artist} - ${t.Title}`).join('\n');
+        content += "\n" + "=".repeat(40) + "\n";
+        content += "Developed by Tony Wilding";
+        
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `HR_Log_${now.toISOString().slice(0,10)}_${now.getHours()}${now.getMinutes()}.txt`;
+        a.click();
+    }
+</script>
+</body>
+</html>
