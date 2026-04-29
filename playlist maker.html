@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>Hospital Radio | Pro Playlist Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .wrapper { width: 100%; max-width: 500px; padding: 20px; }
+        .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); border: 1px solid #334155; }
+        h1 { font-size: 1.4rem; margin: 0 0 5px 0; text-align: center; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+        .sub-h { font-size: 0.7rem; text-align: center; color: #94a3b8; margin-bottom: 25px; font-weight: 800; letter-spacing: 2px; }
+        .field { margin-bottom: 20px; }
+        label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
+        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+        select:focus { border-color: var(--accent); outline: none; }
+        .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-start:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        #monitor { display: none; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
+        .status-header { font-weight: 800; color: var(--accent); font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .playlist-container { max-height: 450px; overflow-y: auto; margin-top: 15px; border-top: 1px solid #334155; border-bottom: 1px solid #334155; margin-bottom: 20px; padding: 10px 5px; }
+        .track-row { padding: 12px 10px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; border-radius: 8px; transition: 0.2s; }
+        .track-row:hover { background: rgba(255,255,255,0.05); }
+        .track-num { color: var(--accent); font-weight: 800; margin-right: 15px; min-width: 30px; font-size: 0.8rem; opacity: 0.6; }
+        .t-artist { color: var(--accent); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+        .t-title { font-size: 1.05rem; font-weight: 600; color: #fff; line-height: 1.2; }
+        .energy-tag { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: #334155; margin-left: auto; color: #94a3b8; }
+        .btn-download { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div id="setup-view" class="setup-card">
+        <h1>SHOW TIME</h1>
+        <div class="sub-h">PRO BROADCAST SCHEDULER</div>
+        <div class="field">
+            <label>Start Hour</label>
+            <select id="start-hour"></select>
+        </div>
+        <div class="field">
+            <label>Session Duration</label>
+            <select id="duration">
+                <option value="60">1 Hour Session</option>
+                <option value="120">2 Hour Session</option>
+                <option value="180">3 Hour Session</option>
+                <option value="240">4 Hour Session</option>
+            </select>
+        </div>
+        <button class="btn-start" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
+    </div>
+
+    <div id="monitor">
+        <div class="status-header">
+            <span>STATION LOG</span>
+            <span id="track-count" style="font-size: 0.7rem; color: #94a3b8;"></span>
+        </div>
+        <div id="playlist-box" class="playlist-container"></div>
+        <button class="btn-download" onclick="downloadTxt()">Download Playlist (txt)</button>
+    </div>
+</div>
+
+<script>
+    const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152B.csv';
+    let masterLibrary = [];
+    let currentPlaylist = [];
+
+    window.onload = function() {
+        const hourBox = document.getElementById('start-hour');
+        for(let i=0; i<24; i++) {
+            let hLabel = i.toString().padStart(2, '0') + ":00";
+            let opt = document.createElement("option");
+            opt.value = i;
+            opt.text = hLabel;
+            if(i === new Date().getHours()) opt.selected = true;
+            hourBox.add(opt);
+        }
+    };
+
+    async function connectAndBuild() {
+        try {
+            const resp = await fetch(CSV_URL);
+            const csv = await resp.text();
+            Papa.parse(csv, {
+                header: true, dynamicTyping: true, skipEmptyLines: true,
+                complete: function(results) {
+                    // FILTER: Strict 'Y' only, must have Artist/Title
+                    masterLibrary = results.data.filter(r => 
+                        r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y'
+                    );
+                    runLogic();
+                }
+            });
+        } catch (err) { alert("Database Error. Check GitHub URL."); }
+    }
+
+    function runLogic() {
+        const durationMins = parseInt(document.getElementById('duration').value);
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        
+        currentPlaylist = [];
+        let history = [];
+        let genreHistory = []; // Track last 2 genres
+        let totalSec = 0;
+        const targetSec = durationMins * 60;
+        let currentVirtualHour = startHour;
+
+        while (totalSec < targetSec) {
+            let dayPart = "Night";
+            if (currentVirtualHour >= 6 && currentVirtualHour < 12) dayPart = "Morning";
+            else if (currentVirtualHour >= 12 && currentVirtualHour < 18) dayPart = "Afternoon";
+            else if (currentVirtualHour >= 18 && currentVirtualHour < 22) dayPart = "Evening";
+
+            // PRO RULE 1: Opener Logic
+            const isOpener = currentPlaylist.length === 0;
+
+            let pool = masterLibrary.filter(s => {
+                const matchesTime = s.Daypart === dayPart;
+                const lastS = history.findLast(h => h.id === s.ID);
+                const lastA = history.findLast(h => h.artist === s.Artist);
+                
+                // PRO RULE 2: Vertical Separation (90m Artist / 4h Track)
+                const separated = (!lastS || (totalSec - lastS.time > 14400)) &&
+                                  (!lastA || (totalSec - lastA.time > 5400));
+                
+                // PRO RULE 3: Genre Rotation (No same genre in last 2 tracks)
+                const genreClean = String(s.Genre).trim().toUpperCase();
+                const genreOk = !genreHistory.includes(genreClean);
+
+                // PRO RULE 4: Energy Curve (Every 3rd song must be Energy 4 or 5)
+                const needsEnergy = (currentPlaylist.length + 1) % 3 === 0;
+                const energyOk = needsEnergy ? (s.Energy >= 4) : true;
+
+                if (isOpener) return matchesTime && s.Energy >= 4;
+                return matchesTime && separated && genreOk && energyOk;
+            });
+
+            // Fallback: Relax Genre and Energy rules if pool is empty
+            if (pool.length === 0) {
+                pool = masterLibrary.filter(s => {
+                    const lastA = history.findLast(h => h.artist === s.Artist);
+                    return !lastA || (totalSec - lastA.time > 3600);
+                });
+            }
+            
+            if (pool.length === 0) break; 
+            
+            let pick = pool[Math.floor(Math.random() * pool.length)];
+            
+            currentPlaylist.push(pick);
+            history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
+            
+            // Manage Genre History (Keep last 2)
+            genreHistory.push(String(pick.Genre).trim().toUpperCase());
+            if (genreHistory.length > 2) genreHistory.shift();
+            
+            totalSec += 210; 
+            currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
+            if (currentPlaylist.length > 500) break;
+        }
+        render();
+    }
+
+    function render() {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        document.getElementById('track-count').innerText = `${currentPlaylist.length} TRACKS GENERATED`;
+        const box = document.getElementById('playlist-box');
+        box.innerHTML = currentPlaylist.map((t, i) => `
+            <div class="track-row">
+                <div class="track-num">${(i + 1).toString().padStart(2, '0')}</div>
+                <div>
+                    <div class="t-artist">${t.Artist}</div>
+                    <div class="t-title">${t.Title}</div>
+                </div>
+                <div class="energy-tag">E${t.Energy}</div>
+            </div>
+        `).join('');
+    }
+
+    function downloadTxt() {
+        let content = "HOSPITAL RADIO | STATION LOG\n" + "=".repeat(30) + "\n\n";
+        content += currentPlaylist.map((t, i) => 
+            `${(i + 1).toString().padStart(2, '0')}. [${t.Genre}] ${t.Artist} - ${t.Title}`
+        ).join('\n');
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `Hospital_Radio_Log_${new Date().toISOString().slice(0,10)}.txt`;
+        a.click();
+    }
+</script>
+</body>
+</html>
