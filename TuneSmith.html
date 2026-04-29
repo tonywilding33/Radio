@@ -42,7 +42,6 @@
 <div class="wrapper">
     <div id="setup-view" class="setup-card">
         <h1>SHOW TIME</h1>
-        
         <div class="gold-box">
             <span class="gold-label">Special Themed Hour</span>
             <select id="golden-hour-select" class="gold-select">
@@ -52,12 +51,10 @@
                 <option value="1980">Golden Hour: 1980s</option>
             </select>
         </div>
-
         <div class="field">
             <label>Start Hour</label>
             <select id="start-hour"></select>
         </div>
-
         <div class="field">
             <label>Session Duration</label>
             <select id="duration">
@@ -67,7 +64,6 @@
                 <option value="240">4 Hour Session</option>
             </select>
         </div>
-
         <button class="btn-start" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
         <div class="credit-footer">Developed by Tony Wilding</div>
     </div>
@@ -89,7 +85,6 @@
     let masterLibrary = [];
     let currentPlaylist = [];
 
-    // FIXED: Corrected Start Hour dropdown generation
     window.onload = function() {
         const hourBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) {
@@ -139,16 +134,18 @@
         let history = [];
         let genreHistory = [];
         let totalSec = 0;
+        const trackAverageSec = 240; // Estimated 4 mins per song including sweepers/gaps
         const targetSec = durationMins * 60;
         let currentVirtualHour = startHour;
 
-        while (totalSec < targetSec) {
+        // NEW: Ensure we don't start a song if it will likely end significantly past the hour
+        while (totalSec + trackAverageSec <= targetSec) {
             let dayPart = (currentVirtualHour >= 6 && currentVirtualHour < 12) ? "Morning" : 
                           (currentVirtualHour >= 12 && currentVirtualHour < 18) ? "Afternoon" : 
                           (currentVirtualHour >= 18 && currentVirtualHour < 22) ? "Evening" : "Night";
 
             const isOpener = currentPlaylist.length === 0;
-            const isCloser = (totalSec + 235) >= targetSec;
+            const isCloser = (totalSec + (trackAverageSec * 2)) >= targetSec;
 
             let pool = masterLibrary.filter(s => {
                 const genreClean = String(s.Genre).trim().toUpperCase();
@@ -185,7 +182,7 @@
             genreHistory.push(String(pick.Genre).trim().toUpperCase());
             if (genreHistory.length > 2) genreHistory.shift();
             
-            totalSec += 235; 
+            totalSec += trackAverageSec; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
         }
         render();
