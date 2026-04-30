@@ -9,22 +9,43 @@
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; --gold: #fbbf24; --vip: #a855f7; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
         .wrapper { width: 100%; max-width: 550px; padding: 20px; }
-        .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); border: 1px solid #334155; position: relative; overflow: hidden; }
         
-        /* Subscriber Badge */
-        .setup-card::before { content: "SUBSCRIBER ONLY"; position: absolute; top: 12px; right: -35px; background: var(--vip); color: white; font-size: 0.6rem; font-weight: 900; padding: 5px 40px; transform: rotate(45deg); letter-spacing: 1px; }
+        .setup-card { 
+            background: var(--card); 
+            padding: 40px 30px 30px 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); 
+            border: 1px solid #334155; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        
+        .subscriber-ribbon {
+            position: absolute;
+            top: 15px;
+            right: -40px;
+            background: var(--vip);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 900;
+            padding: 5px 45px;
+            transform: rotate(45deg);
+            letter-spacing: 1px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
 
-        h1 { font-size: 1.6rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+        h1 { font-size: 1.6rem; margin: 10px 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
         .field { margin-bottom: 20px; }
         label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
         select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
         
-        .specialist-box { background: rgba(168, 85, 247, 0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.2); margin-bottom: 20px; }
+        .specialist-box { background: rgba(168, 85, 247, 0.08); padding: 15px; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3); margin-bottom: 20px; }
         .spec-label { color: var(--vip); font-weight: 800; font-size: 0.7rem; text-transform: uppercase; display: block; margin-bottom: 8px; }
         .spec-select { border-color: rgba(168, 85, 247, 0.4); color: white; }
 
         .btn-start { width: 100%; background: var(--vip); color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-        .btn-start:hover { filter: brightness(1.1); }
+        .btn-start:hover { background: #b56ff9; }
         
         #monitor { display: none; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
         .status-header { font-weight: 800; color: var(--vip); font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -46,16 +67,26 @@
 
 <div class="wrapper">
     <div id="setup-view" class="setup-card">
+        <div class="subscriber-ribbon">SUBSCRIBER</div>
         <h1>SPECIALIST SHOW</h1>
         
         <div class="specialist-box">
-            <span class="spec-label">Select Theme / Genre</span>
-            <select id="genre-select" class="spec-select">
-                <option value="ALL">All Library (Shuffle)</option>
-                <option value="COUNTRY">Country Music Special</option>
-                <option value="ROCK">Rock Anthems</option>
-                <option value="SOUL">Soul & Motown</option>
-                <option value="JAZZ">Jazz & Easy Listening</option>
+            <span class="spec-label">Specialist Theme / Era / Genre</span>
+            <select id="theme-select" class="spec-select">
+                <optgroup label="Era-Based (Decades)">
+                    <option value="D1960">Sounds of the 60's</option>
+                    <option value="D1970">Sounds of the 70's</option>
+                    <option value="D1980">Sounds of the 80's</option>
+                    <option value="D1990">Sounds of the 90's</option>
+                    <option value="D2000">Sounds of the 2000's</option>
+                    <option value="D2010">Sounds of the 2010's</option>
+                </optgroup>
+                <optgroup label="Genre-Based">
+                    <option value="GCOUNTRY">Country Music Special</option>
+                    <option value="GROCK">Rock Anthems</option>
+                    <option value="GSOUL">Soul & Motown</option>
+                    <option value="GJAZZ">Jazz & Easy Listening</option>
+                </optgroup>
             </select>
         </div>
 
@@ -65,11 +96,12 @@
         </div>
 
         <div class="field">
-            <label>Specialist Duration</label>
+            <label>Show Duration (Max 4 hrs)</label>
             <select id="duration">
                 <option value="60">1 Hour Session</option>
                 <option value="120">2 Hour Session</option>
                 <option value="180">3 Hour Session</option>
+                <option value="240">4 Hour Session</option>
             </select>
         </div>
 
@@ -135,7 +167,7 @@
     function runLogic() {
         const durationMins = parseInt(document.getElementById('duration').value);
         const startHour = parseInt(document.getElementById('start-hour').value);
-        const selectedGenre = document.getElementById('genre-select').value.toUpperCase();
+        const themeValue = document.getElementById('theme-select').value;
 
         currentPlaylist = [];
         let history = [];
@@ -146,22 +178,30 @@
         while (totalSec + trackAverageSec <= targetSec) {
             let pool = masterLibrary.filter(s => {
                 const genreClean = String(s.Genre || "").trim().toUpperCase();
-                
-                // Subscriber Filter: Must match selected genre if not "ALL"
-                if (selectedGenre !== "ALL" && !genreClean.includes(selectedGenre)) return false;
+                const decadeClean = parseInt(s.Decade);
+
+                // Filter logic for Decades vs Genres
+                if (themeValue.startsWith("D")) {
+                    const targetDecade = parseInt(themeValue.substring(1));
+                    if (decadeClean !== targetDecade) return false;
+                } else if (themeValue.startsWith("G")) {
+                    const targetGenre = themeValue.substring(1).toUpperCase();
+                    if (!genreClean.includes(targetGenre)) return false;
+                }
 
                 const lastA = history.findLast(h => h.artist === s.Artist);
-                const separated = (!lastA || (totalSec - lastA.time > 5400));
-                
-                return separated;
+                return (!lastA || (totalSec - lastA.time > 5400));
             });
 
-            // Fallback: If pool is empty, relax artist separation slightly to fill the hour
             if (pool.length === 0) {
+                // Relaxed artist separation fallback
                 pool = masterLibrary.filter(s => {
-                   const genreClean = String(s.Genre || "").trim().toUpperCase();
-                   if (selectedGenre !== "ALL" && !genreClean.includes(selectedGenre)) return false;
-                   return true;
+                    if (themeValue.startsWith("D")) {
+                        return parseInt(s.Decade) === parseInt(themeValue.substring(1));
+                    } else if (themeValue.startsWith("G")) {
+                        return String(s.Genre || "").trim().toUpperCase().includes(themeValue.substring(1).toUpperCase());
+                    }
+                    return true;
                 });
             }
 
@@ -171,7 +211,6 @@
             pick.startTime = formatTime(totalSec, startHour);
             currentPlaylist.push(pick);
             history.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
-            
             totalSec += trackAverageSec; 
         }
         render();
@@ -195,16 +234,14 @@
     }
 
     function downloadTxt() {
-        const selector = document.getElementById('genre-select');
+        const selector = document.getElementById('theme-select');
         const themeLabel = selector.options[selector.selectedIndex].text;
         const now = new Date();
-        
         let content = `${themeLabel.toUpperCase()} - SUBSCRIBER SPECIALIST LOG\n`;
         content += "=".repeat(45) + "\n";
         content += currentPlaylist.map((t, i) => `${(i + 1).toString().padStart(2, '0')} | ${t.startTime} | ${t.Artist} - ${t.Title}`).join('\n');
         content += "\n" + "=".repeat(45) + "\n";
         content += "Developed by Tony Wilding";
-        
         const blob = new Blob([content], { type: 'text/plain' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
