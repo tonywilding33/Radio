@@ -41,7 +41,7 @@
         </div>
 
         <div class="field">
-            <label>Session Duration</label>
+            <label>Broadcast Duration</label>
             <select id="duration"></select>
         </div>
 
@@ -67,7 +67,7 @@
     let currentPlaylist = [];
 
     window.onload = function() {
-        // Generate Start Hours (00:00 to 23:00)
+        // Start Hours
         const hourBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) {
             let opt = document.createElement("option");
@@ -76,13 +76,16 @@
             hourBox.add(opt);
         }
 
-        // Generate Durations (1 to 24 Hours)
+        // Durations (1-24 Hours using 'Playlist' instead of 'Session')
         const durationBox = document.getElementById('duration');
         for(let i=1; i<=24; i++) {
             let opt = document.createElement("option");
-            opt.value = i * 60; // Store value in minutes
-            opt.text = i + (i === 1 ? " Hour Session" : " Hour Session");
-            if(i === 24) opt.text = "24 Hour Marathon";
+            opt.value = i * 60;
+            if (i === 24) {
+                opt.text = "24 Hour Marathon Playlist";
+            } else {
+                opt.text = `${i} Hour ${i === 1 ? 'Playlist' : 'Playlist'}`;
+            }
             durationBox.add(opt);
         }
     };
@@ -209,7 +212,7 @@
         const dateStr = now.toLocaleDateString();
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         
-        let content = `STATION SHOW LOG | ${dateStr} ${timeStr}\n`;
+        let content = `STATION LOG | ${dateStr} ${timeStr}\n`;
         content += "=".repeat(45) + "\n";
         content += currentPlaylist.map((t, i) => `${(i + 1).toString().padStart(2, '0')} | ${t.startTime} | ${t.Artist} - ${t.Title}`).join('\n');
         content += "\n" + "=".repeat(45) + "\n";
