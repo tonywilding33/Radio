@@ -42,13 +42,7 @@
 
         <div class="field">
             <label>Session Duration</label>
-            <select id="duration">
-                <option value="60">1 Hour Session</option>
-                <option value="120">2 Hour Session</option>
-                <option value="180">3 Hour Session</option>
-                <option value="240">4 Hour Session</option>
-                <option value="1440">24 Hour Marathon</option>
-            </select>
+            <select id="duration"></select>
         </div>
 
         <button class="btn-start" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
@@ -73,12 +67,23 @@
     let currentPlaylist = [];
 
     window.onload = function() {
+        // Generate Start Hours (00:00 to 23:00)
         const hourBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) {
             let opt = document.createElement("option");
             opt.value = i;
             opt.text = i.toString().padStart(2, '0') + ":00";
             hourBox.add(opt);
+        }
+
+        // Generate Durations (1 to 24 Hours)
+        const durationBox = document.getElementById('duration');
+        for(let i=1; i<=24; i++) {
+            let opt = document.createElement("option");
+            opt.value = i * 60; // Store value in minutes
+            opt.text = i + (i === 1 ? " Hour Session" : " Hour Session");
+            if(i === 24) opt.text = "24 Hour Marathon";
+            durationBox.add(opt);
         }
     };
 
@@ -103,15 +108,11 @@
         } catch (err) { alert("Sync Error."); }
     }
 
-    /**
-     * Specification 4: Clean Artist Name
-     * Strips "The " from beginning or ", The" from the end for accurate separation.
-     */
     function cleanArtist(name) {
         if (!name) return "";
         return name.toLowerCase()
-            .replace(/^the\s+/i, '')     // Remove "The " at start
-            .replace(/,\s+the$/i, '')    // Remove ", The" at end
+            .replace(/^the\s+/i, '')
+            .replace(/,\s+the$/i, '')
             .trim();
     }
 
@@ -148,17 +149,14 @@
                 const genreClean = String(s.Genre || "").trim().toUpperCase();
                 const songDaypart = String(s.Daypart || "").trim().toUpperCase();
 
-                // Seasonal Firewall
                 if (!isDecember && genreClean.includes("CHRISTMAS")) return false;
 
                 const lastS = history.findLast(h => h.id === s.ID);
                 const lastA = history.findLast(h => cleanArtist(h.artist) === cleanArtist(s.Artist));
                 
-                // Separation Rules (4hr song / 90min artist)
                 const separated = (!lastS || (totalSec - lastS.time > 14400)) && (!lastA || (totalSec - lastA.time > 5400));
                 const genreOk = !genreHistory.includes(genreClean);
                 
-                // Energy Pulsing
                 let energyOk = true;
                 if (isOpener) energyOk = (s.Energy >= 4);
                 else if (isCloser) energyOk = (s.Energy === 5);
@@ -167,7 +165,6 @@
                 return (songDaypart === dayPart) && separated && genreOk && energyOk;
             });
 
-            // Emergency Fallback
             if (pool.length === 0) {
                 pool = masterLibrary.filter(s => {
                     const lastA = history.findLast(h => cleanArtist(h.artist) === cleanArtist(s.Artist));
@@ -184,7 +181,7 @@
             genreHistory.push(String(pick.Genre || "").trim().toUpperCase());
             if (genreHistory.length > 2) genreHistory.shift();
             
-            totalSec += 235; // 235-Second Buffer
+            totalSec += 235;
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
         }
         render();
