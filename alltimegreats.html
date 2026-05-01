@@ -38,8 +38,6 @@
         const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/ATG3328152A.csv';
         let libraryData = [];
         const TWO_HOURS = 7200000;
-        
-        // Blocklist for specific artists
         const BANNED_ARTISTS = ["pinkfong", "psy", "omi"];
 
         function getCleanKey(str) {
@@ -51,6 +49,7 @@
 
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
+            // Cache buster ensures the browser sees this as a new request
             const CACHE_BUSTER = `${BASE_URL}?t=${Date.now()}`;
             try {
                 let response = await fetch(CACHE_BUSTER);
@@ -70,7 +69,6 @@
                 const artistName = cols[0].trim();
                 const artistKey = getCleanKey(artistName);
                 
-                // Hard Filter: Skip banned artists immediately
                 if (BANNED_ARTISTS.includes(artistKey)) return null;
 
                 return {
@@ -99,7 +97,7 @@
                     if (now - time < TWO_HOURS) count++;
                 }
             }
-            document.getElementById('debugInfo').innerText = `MEMORY: ${count} ITEMS LOCKED`;
+            document.getElementById('debugInfo').innerText = `MEMORY: ${count} ITEMS LOCKED (2HR)`;
         }
 
         function generatePlaylist() {
@@ -115,12 +113,15 @@
 
             for (let i = 0; i < 16; i++) {
                 let pool = sorted.filter(r => {
-                    const isHolidayTrack = r.title.toLowerCase().includes("christmas") || r.title.toLowerCase().includes("xmas");
-                    if (!isDecember && isHolidayTrack) return false;
+                    // Seasonal Lock
+                    const isHoliday = r.title.toLowerCase().includes("christmas") || r.title.toLowerCase().includes("xmas");
+                    if (!isDecember && isHoliday) return false;
 
+                    // Current Hour Lock
                     if (hourArtKeys.includes(r.artistKey)) return false;
                     if (hourTitKeys.includes(r.titleKey)) return false;
 
+                    // 2-Hour Session Lock
                     const lastArt = sessionStorage.getItem(`atg_art_${r.artistKey}`);
                     const lastTit = sessionStorage.getItem(`atg_tit_${r.titleKey}`);
                     if (lastArt && (now - parseInt(lastArt) < TWO_HOURS)) return false;
@@ -131,18 +132,18 @@
                     return !genderClump && !eraClump;
                 });
 
+                // Auto-Reset if playlist cannot be completed
                 if (pool.length === 0) {
                     sessionStorage.clear(); 
                     pool = sorted.filter(r => {
-                        const isHolidayTrack = r.title.toLowerCase().includes("christmas") || r.title.toLowerCase().includes("xmas");
-                        if (!isDecember && isHolidayTrack) return false;
+                        const isHoliday = r.title.toLowerCase().includes("christmas") || r.title.toLowerCase().includes("xmas");
+                        if (!isDecember && isHoliday) return false;
                         return !hourArtKeys.includes(r.artistKey) && !hourTitKeys.includes(r.titleKey);
                     });
                 }
                 
-                // Deep shuffle to prevent repetitive slot results
-                let shuffleDepth = Math.min(pool.length, 50);
-                let pickIndex = Math.floor(Math.random() * shuffleDepth);
+                // Shuffle depth to ensure slot variety
+                let pickIndex = Math.floor(Math.random() * Math.min(pool.length, 50));
                 let pick = pool[pickIndex];
 
                 if (pick) {
@@ -174,7 +175,7 @@
             const content = document.getElementById('playlistDisplay').innerText;
             const blob = new Blob([content], {type: 'text/plain'});
             const a = document.createElement("a");
-            a.download = "Playlist.txt";
+            a.download = "ATG_Playlist.txt";
             a.href = URL.createObjectURL(blob);
             a.click();
         }
