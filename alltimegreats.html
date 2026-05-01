@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>ALL TIME GREATS! | Playlist Generator</title>
+    <title>ALL TIME GREATS | Playlist Generator</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         body { 
@@ -37,7 +37,7 @@
     <script>
         const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/ATG3328152A.csv';
         let libraryData = [];
-        const TWO_HOURS = 7200000; // 120 Minutes
+        const TWO_HOURS = 7200000;
 
         function getCleanKey(str) {
             if (!str) return "unknown";
@@ -88,7 +88,7 @@
                     if (now - time < TWO_HOURS) count++;
                 }
             }
-            document.getElementById('debugInfo').innerText = `MEMORY: ${count} ARTISTS/SONGS BLOCKED (2HR LOCK)`;
+            document.getElementById('debugInfo').innerText = `MEMORY: ${count} ITEMS LOCKED`;
         }
 
         function generatePlaylist() {
@@ -103,11 +103,9 @@
 
             for (let i = 0; i < 16; i++) {
                 let pool = sorted.filter(r => {
-                    // 1. Current Hour Block
                     if (hourArtKeys.includes(r.artistKey)) return false;
                     if (hourTitKeys.includes(r.titleKey)) return false;
 
-                    // 2. 2-Hour Persistence Block
                     const lastArt = sessionStorage.getItem(`atg_art_${r.artistKey}`);
                     const lastTit = sessionStorage.getItem(`atg_tit_${r.titleKey}`);
                     
@@ -119,16 +117,12 @@
                     return !genderClump && !eraClump;
                 });
 
-                // Fail-safe: prioritizes keeping the 2-Hour Lock
+                // AUTO-RESET TRIGGER: If pool is empty, clear old memory and try again
                 if (pool.length === 0) {
-                    pool = sorted.filter(r => {
-                        const lastArt = sessionStorage.getItem(`atg_art_${r.artistKey}`);
-                        const lastTit = sessionStorage.getItem(`atg_tit_${r.titleKey}`);
-                        return !hourArtKeys.includes(r.artistKey) && 
-                               !hourTitKeys.includes(r.titleKey) &&
-                               (!lastArt || (now - parseInt(lastArt) >= TWO_HOURS)) &&
-                               (!lastTit || (now - parseInt(lastTit) >= TWO_HOURS));
-                    });
+                    console.log("Pool exhausted. Auto-resetting memory.");
+                    sessionStorage.clear(); 
+                    // Retry once without constraints if still stuck
+                    pool = sorted.filter(r => !hourArtKeys.includes(r.artistKey));
                 }
                 
                 let pick = pool[Math.floor(Math.random() * Math.min(pool.length, 25))];
@@ -137,11 +131,8 @@
                     playlist.push(pick);
                     hourArtKeys.push(pick.artistKey);
                     hourTitKeys.push(pick.titleKey);
-                    
-                    // Save to persistent session memory
                     sessionStorage.setItem(`atg_art_${pick.artistKey}`, now.toString());
                     sessionStorage.setItem(`atg_tit_${pick.titleKey}`, now.toString());
-                    
                     genderHistory.push(pick.gender);
                     if (genderHistory.length > 2) genderHistory.shift();
                     lastYear = pick.year;
@@ -165,7 +156,7 @@
             const content = document.getElementById('playlistDisplay').innerText;
             const blob = new Blob([content], {type: 'text/plain'});
             const a = document.createElement("a");
-            a.download = "ATG_Playlist.txt";
+            a.download = "Playlist.txt";
             a.href = URL.createObjectURL(blob);
             a.click();
         }
