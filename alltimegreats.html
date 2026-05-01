@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>ALL TIME GREATS | Playlist Generator</title>
+    <title>ALL TIME GREATS * | Playlist Generator</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         body { 
@@ -21,7 +21,7 @@
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
-        <h2>ALL TIME GREATS</h2>
+        <h2>ALL TIME GREATS *</h2>
         <div id="loadStatus" class="status">INITIALIZING...</div>
         <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
         <div class="controls" id="bottomControls" style="display:none; margin-top: 20px;">
@@ -33,34 +33,22 @@
     <div class="credit-footer">Developed by Tony Wilding</div>
 
     <script>
-        /* Database config for Radio Repo[cite: 1, 3] */
         const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/ATG3328152A.csv';
-        const GITHUB_URL = `${BASE_URL}?v=${Math.random()}`;
         let libraryData = [];
 
-        document.onkeydown = (e) => {
-            if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
-        };
-
-        function parseCSV(text) {
-            const rows = []; let currRow = []; let currField = ""; let inQuotes = false;
-            for (let i = 0; i < text.length; i++) {
-                const char = text[i];
-                if (char === '"') { inQuotes = !inQuotes; }
-                else if (char === ',' && !inQuotes) { currRow.push(currField.trim()); currField = ""; }
-                else if ((char === '\n' || char === '\r') && !inQuotes) {
-                    if (currField || currRow.length > 0) { currRow.push(currField.trim()); rows.push(currRow); }
-                    currRow = []; currField = ""; if (char === '\r' && text[i+1] === '\n') i++;
-                } else { currField += char; }
-            }
-            if (currField || currRow.length > 0) { currRow.push(currField.trim()); rows.push(currRow); }
-            return rows;
+        function getCleanKey(str) {
+            if (!str) return "unknown";
+            return str.toLowerCase().trim()
+                .replace(/^the\s+/, "").replace(/\s+the$/, "")
+                .replace(/[^a-z0-9]/g, "");
         }
 
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
+            // Cache Buster: Appends a unique timestamp so the browser MUST reload[cite: 1]
+            const CACHE_BUSTER = `${BASE_URL}?t=${Date.now()}`;
             try {
-                let response = await fetch(GITHUB_URL);
+                let response = await fetch(CACHE_BUSTER);
                 if (response.ok) {
                     const text = await response.text();
                     processData(text);
@@ -69,60 +57,70 @@
         }
 
         function processData(csvText) {
-            const status = document.getElementById('loadStatus');
-            const parsed = parseCSV(csvText);
-            libraryData = parsed.slice(1).map((cols) => {
+            const lines = csvText.split(/\r?\n/);
+            libraryData = lines.slice(1).map(line => {
+                const cols = line.split(',');
                 if (cols.length < 2) return null;
                 return {
                     artist: cols[0], title: cols[1],    
                     score: parseFloat(cols[26]) || 0, 
                     gender: cols[27] || 'M',  
                     year: parseInt(cols[28]) || 1980,
-                    cleanArtist: cols[0].toLowerCase().trim().replace(/^the\s+/, "").replace(/[^a-z0-9]/g, "")
+                    artistKey: getCleanKey(cols[0]),
+                    titleKey: getCleanKey(cols[1])
                 };
-            }).filter(r => r && r.artist && r.artist !== "0");
+            }).filter(r => r && r.artistKey !== "unknown");
 
-            status.innerText = `CONNECTED`;
-            status.style.background = "#10b981"; status.style.color = "white";
+            document.getElementById('loadStatus').innerText = `CONNECTED`;
+            document.getElementById('loadStatus').style.background = "#10b981";
             generatePlaylist();
         }
 
         function generatePlaylist() {
             let playlist = [];
-            let sessionArtists = []; 
+            let hourArtKeys = []; 
+            let hourTitKeys = [];
             let genderHistory = [];
             let lastYear = 0;
-            const TWO_HOURS = 7200000; // 2 hours in ms[cite: 3]
+            const TWO_HOURS = 7200000; 
 
             const sorted = [...libraryData].sort((a, b) => b.score - a.score);
 
             for (let i = 0; i < 16; i++) {
                 let pool = sorted.filter(r => {
-                    // 1. Check current show memory
-                    if (sessionArtists.includes(r.cleanArtist)) return false;
+                    // Block if played in current 16 tracks
+                    if (hourArtKeys.includes(r.artistKey)) return false;
+                    if (hourTitKeys.includes(r.titleKey)) return false;
 
-                    // 2. Check 2-hour browser memory[cite: 1, 3]
-                    const lastPlayed = sessionStorage.getItem(`atg_artist_${r.cleanArtist}`);
-                    if (lastPlayed && (Date.now() - parseInt(lastPlayed) < TWO_HOURS)) return false;
+                    // Block if played in last 2 hours[cite: 1]
+                    const lastArt = sessionStorage.getItem(`atg_art_${r.artistKey}`);
+                    const lastTit = sessionStorage.getItem(`atg_tit_${r.titleKey}`);
+                    if (lastArt && (Date.now() - parseInt(lastArt) < TWO_HOURS)) return false;
+                    if (lastTit && (Date.now() - parseInt(lastTit) < TWO_HOURS)) return false;
                     
-                    const genderClump = genderHistory.length >= 2 && 
-                                        genderHistory[genderHistory.length-1] === r.gender && 
-                                        genderHistory[genderHistory.length-2] === r.gender;
+                    const genderClump = genderHistory.length >= 2 && genderHistory.every(g => g === r.gender);
                     const eraClump = lastYear !== 0 && Math.abs(r.year - lastYear) < 5;
                     return !genderClump && !eraClump;
                 });
 
-                // Fail-safe: if pool is empty, clear this specific artist from memory to avoid crash
-                if (pool.length === 0) pool = sorted;
+                // Fail-safe: Always prioritize Artist/Title separation
+                if (pool.length === 0) {
+                    pool = sorted.filter(r => !hourArtKeys.includes(r.artistKey) && !hourTitKeys.includes(r.titleKey));
+                }
                 
-                let pick = pool[Math.floor(Math.random() * Math.min(pool.length, 30))];
+                let pick = pool[Math.floor(Math.random() * Math.min(pool.length, 25))];
 
                 if (pick) {
                     playlist.push(pick);
-                    sessionArtists.push(pick.cleanArtist);
-                    // Update global lock[cite: 1, 3]
-                    sessionStorage.setItem(`atg_artist_${pick.cleanArtist}`, Date.now());
+                    hourArtKeys.push(pick.artistKey);
+                    hourTitKeys.push(pick.titleKey);
+                    
+                    // Set Global Locks for 2 hours[cite: 1]
+                    sessionStorage.setItem(`atg_art_${pick.artistKey}`, Date.now());
+                    sessionStorage.setItem(`atg_tit_${pick.titleKey}`, Date.now());
+                    
                     genderHistory.push(pick.gender);
+                    if (genderHistory.length > 2) genderHistory.shift();
                     lastYear = pick.year;
                 }
             }
@@ -143,7 +141,7 @@
             const content = document.getElementById('playlistDisplay').innerText;
             const blob = new Blob([content], {type: 'text/plain'});
             const a = document.createElement("a");
-            a.download = "AllTimeGreats_Log.txt";
+            a.download = "ATG_Playlist.txt";
             a.href = URL.createObjectURL(blob);
             a.click();
         }
