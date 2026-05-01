@@ -10,7 +10,7 @@
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
             display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
-            -webkit-user-select: none; user-select: none; /* Prevents text highlights */
+            -webkit-user-select: none; user-select: none;
         }
         .wrapper { width: 100%; max-width: 550px; padding: 20px; }
         .setup-card { background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
@@ -47,16 +47,10 @@
 </div>
 
 <script>
-/** 
- * PROTECTED LOGIC 
- * Pointing to updated DB: HR3328152E.csv
- */
 const ui = (function() {
-    // Encoded URL for HR3328152E.csv
     const _c = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3Rvbnl3aWxkaW5nMzMvUmFkaW8vbWFpbi9IUjMzMjgxNTJFLmNzdg==';
     let lib = [], pl = [];
 
-    // Keyboard Lock
     document.onkeydown = (e) => {
         if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
     };
@@ -82,7 +76,7 @@ const ui = (function() {
             
             while(sec < (dur * 60)) {
                 let dp = (h>=6 && h<12)?"MORNING":(h>=12 && h<18)?"AFTERNOON":(h>=18 && h<22)?"EVENING":"NIGHT";
-                let pool = lib.filter(s => String(s.Daypart).toUpperCase() === dp);
+                let pool = lib.filter(s => String(s.Daypart || s.morning).toUpperCase() === dp);
                 if(!pool.length) pool = lib;
                 let pick = pool[Math.floor(Math.random()*pool.length)];
                 
@@ -90,7 +84,9 @@ const ui = (function() {
                 let ts = d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0');
                 
                 pl.push({...pick, time: ts});
-                sec += 235; h = (start + Math.floor(sec/3600)) % 24;
+                // Adjusted from 235 to 220 to prevent hour overruns
+                sec += 220; 
+                h = (start + Math.floor(sec/3600)) % 24;
             }
             this.render();
         },
@@ -114,7 +110,6 @@ const ui = (function() {
     };
 })();
 
-// Initialize Duration Dropdown
 (function() {
     const h = document.getElementById('start-hour'), d = document.getElementById('duration');
     for(let i=0; i<24; i++) h.add(new Option(i.toString().padStart(2,'0')+":00", i));
