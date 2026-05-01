@@ -6,9 +6,10 @@
     <title>Toneranger | Playlist Generator</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
-            display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
             -webkit-user-select: none; user-select: none;
         }
         .box { 
@@ -32,20 +33,25 @@
         }
         button:hover { opacity: 0.9; }
         button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
+        
         #outputArea { order: 2; margin-top: 20px; }
         pre { 
             background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; 
             font-size: 0.9rem; white-space: pre-wrap; border-left: 4px solid var(--accent); 
             line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0;
         }
-        .credit-footer { text-align: center; color: #f8fafc; font-size: 0.65rem; margin-top: 25px; text-transform: uppercase; opacity: 0.9; }
+        .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.9; }
     </style>
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
         <h2>Toneranger</h2>
         <div id="loadStatus" class="status">INITIALIZING...</div>
-        <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
+        
+        <div id="outputArea" style="display:none;">
+            <pre id="playlistDisplay"></pre>
+        </div>
+
         <div class="controls">
             <button id="initialGenBtn" onclick="generateAdvancedShow()" disabled>Generate Show</button>
             <div id="bottomControls" style="display:none;">
@@ -54,19 +60,21 @@
                 <button style="background:#475569; color:white;" onclick="manualReset()">Clear Session Memory</button>
             </div>
         </div>
-        <div class="credit-footer">Developed by Tony Wilding</div>
     </div>
 
+    <div class="credit-footer">Developed by Tony Wilding</div>
+
     <script>
-        /* Corrected path with %20 for the space in 'NHRRC Data.csv'[cite: 2] */
+        /* Database target: Radio branch as per example 1[cite: 1] */
         const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC%20Data.csv';
         let libraryData = [];
 
-        /* Prying eyes protection[cite: 1] */
+        /* Security from example 1[cite: 1] */
         document.onkeydown = (e) => {
             if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
         };
 
+        /* Parsing and logic from example 2[cite: 2] */
         function parseCSV(text) {
             const rows = []; let currRow = []; let currField = ""; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
@@ -88,7 +96,6 @@
 
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
-            /* Multi-method connection from File 2[cite: 2] */
             const endpoints = [
                 GITHUB_URL,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(GITHUB_URL)}`,
@@ -101,9 +108,12 @@
                     let response = await fetch(url);
                     if (response.ok) {
                         const text = await response.text();
-                        if (text.length > 50) { processData(text); return; }
+                        if (text.length > 50) {
+                            processData(text);
+                            return;
+                        }
                     }
-                } catch (e) { console.error("Connection attempt failed."); }
+                } catch (e) { console.log("Attempt failed"); }
             }
             status.innerText = "CONNECTION FAILED.";
         }
