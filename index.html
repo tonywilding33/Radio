@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Radio Scheduler | Coming Soon</title>
+    <title>Station | Maintenance</title>
     <style>
         :root { 
             --bg: #0f172a; 
-            --accent: #38bdf8; 
-            --gold: #fbbf24; 
-            --text: #f8fafc; 
+            --accent: #f97316; /* Deep Orange */
+            --text: #94a3b8; 
         }
 
         body, html {
@@ -19,97 +18,66 @@
             height: 100%;
             background: var(--bg);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             font-family: 'Segoe UI', system-ui, sans-serif;
             overflow: hidden;
         }
 
-        /* The Snazzy Ball */
-        .sphere {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            background: radial-gradient(circle at 30% 30%, var(--accent), #1e293b);
+        /* Discrete Orange Sphere */
+        .discrete-ball {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 35% 35%, #fb923c, var(--accent));
             border-radius: 50%;
             box-shadow: 
-                0 0 50px rgba(56, 189, 248, 0.3),
-                inset -20px -20px 50px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            animation: pulse 4s infinite ease-in-out;
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset -10px -10px 20px rgba(0, 0, 0, 0.4);
             cursor: pointer;
-            transition: transform 0.3s ease;
-            z-index: 2;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse-slow 6s infinite ease-in-out;
+            border: 1px solid rgba(249, 115, 22, 0.2);
         }
 
-        .sphere:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 80px rgba(56, 189, 248, 0.5);
+        .discrete-ball:hover {
+            transform: scale(1.1);
+            filter: brightness(1.1);
+            box-shadow: 0 0 40px rgba(249, 115, 22, 0.2);
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: translateY(0); box-shadow: 0 0 50px rgba(56, 189, 248, 0.3); }
-            50% { transform: translateY(-15px); box-shadow: 0 0 70px rgba(56, 189, 248, 0.4); }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.03); opacity: 1; }
         }
 
-        h1 {
-            color: var(--bg); /* Dark text on the bright ball */
-            font-size: 1.2rem;
-            font-weight: 900;
-            letter-spacing: 3px;
-            margin: 0;
-            text-transform: uppercase;
-        }
-
-        .status {
-            color: var(--bg);
-            font-size: 0.65rem;
+        .msg {
+            margin-top: 40px;
+            color: var(--text);
+            font-size: 0.6rem;
             font-weight: 800;
-            margin-top: 5px;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.8;
-        }
-
-        /* Ambient Glow in background */
-        .glow {
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
-            z-index: 1;
+            text-align: center;
         }
 
         .footer {
             position: absolute;
             bottom: 30px;
-            color: #475569;
-            font-size: 0.65rem;
+            color: #334155;
+            font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 700;
-        }
-        
-        .gold-line {
-            width: 40px;
-            height: 2px;
-            background: var(--gold);
-            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
-    <div class="glow"></div>
+    <!-- Small Discrete Ball as the only active element -->
+    <div class="discrete-ball" onclick="location.href='tunesmith6.html'"></div>
 
-    <div class="sphere" onclick="location.href='tunesmith6.html'">
-        <h1>STATION</h1>
-        <div class="status">Coming Soon</div>
-        <div class="gold-line"></div>
-    </div>
+    <div class="msg">Database Maintenance in Progress</div>
 
     <div class="footer">Developed by Tony Wilding</div>
 
