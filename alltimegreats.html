@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>ALL TIME GREATS  | Playlist Generator</title>
+    <title>ALL TIME GREATS * | Playlist Generator</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         body { 
@@ -22,7 +22,7 @@
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
-        <h2>ALL TIME GREATS </h2>
+        <h2>ALL TIME GREATS *</h2>
         <div id="loadStatus" class="status">INITIALIZING...</div>
         <div id="debugInfo" class="debug-info">MEMORY: 0 ITEMS LOCKED</div>
         <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
@@ -98,19 +98,15 @@
             let genderHistory = [];
             let lastYear = 0;
             const now = Date.now();
-            
-            // Check if current month is December (Month 11 in JS)
             const isDecember = new Date().getMonth() === 11;
 
             const sorted = [...libraryData].sort((a, b) => b.score - a.score);
 
             for (let i = 0; i < 16; i++) {
                 let pool = sorted.filter(r => {
-                    // 1. Seasonal Lock: Block Christmas songs if not December
                     const isHolidayTrack = r.title.toLowerCase().includes("christmas") || r.title.toLowerCase().includes("xmas");
                     if (!isDecember && isHolidayTrack) return false;
 
-                    // 2. Standard Logic
                     if (hourArtKeys.includes(r.artistKey)) return false;
                     if (hourTitKeys.includes(r.titleKey)) return false;
 
@@ -133,7 +129,10 @@
                     });
                 }
                 
-                let pick = pool[Math.floor(Math.random() * Math.min(pool.length, 25))];
+                // Shuffle the top portion of the pool to prevent "Song 2" sticking
+                let shuffleDepth = Math.min(pool.length, 40);
+                let pickIndex = Math.floor(Math.random() * shuffleDepth);
+                let pick = pool[pickIndex];
 
                 if (pick) {
                     playlist.push(pick);
