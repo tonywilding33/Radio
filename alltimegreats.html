@@ -38,6 +38,9 @@
         const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/ATG3328152A.csv';
         let libraryData = [];
         const TWO_HOURS = 7200000;
+        
+        // Blocklist for specific artists
+        const BANNED_ARTISTS = ["pinkfong", "psy", "omi"];
 
         function getCleanKey(str) {
             if (!str) return "unknown";
@@ -63,12 +66,20 @@
             libraryData = lines.slice(1).map(line => {
                 const cols = line.split(',');
                 if (cols.length < 2) return null;
+                
+                const artistName = cols[0].trim();
+                const artistKey = getCleanKey(artistName);
+                
+                // Hard Filter: Skip banned artists immediately
+                if (BANNED_ARTISTS.includes(artistKey)) return null;
+
                 return {
-                    artist: cols[0], title: cols[1],    
+                    artist: artistName, 
+                    title: cols[1],    
                     score: parseFloat(cols[26]) || 0, 
                     gender: cols[27] || 'M',  
                     year: parseInt(cols[28]) || 1980,
-                    artistKey: getCleanKey(cols[0]),
+                    artistKey: artistKey,
                     titleKey: getCleanKey(cols[1])
                 };
             }).filter(r => r && r.artistKey !== "unknown");
@@ -129,8 +140,8 @@
                     });
                 }
                 
-                // Shuffle the top portion of the pool to prevent "Song 2" sticking
-                let shuffleDepth = Math.min(pool.length, 40);
+                // Deep shuffle to prevent repetitive slot results
+                let shuffleDepth = Math.min(pool.length, 50);
                 let pickIndex = Math.floor(Math.random() * shuffleDepth);
                 let pick = pool[pickIndex];
 
@@ -163,7 +174,7 @@
             const content = document.getElementById('playlistDisplay').innerText;
             const blob = new Blob([content], {type: 'text/plain'});
             const a = document.createElement("a");
-            a.download = "ATG_Playlist.txt";
+            a.download = "Playlist.txt";
             a.href = URL.createObjectURL(blob);
             a.click();
         }
