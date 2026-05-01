@@ -5,9 +5,7 @@
     <meta name="author" content="Tony Wilding">
     <title>Toneranger | Playlist Generator</title>
     <style>
-        /* Styles adapted from 1.html aesthetic */
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
-        
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
             display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
@@ -34,7 +32,6 @@
         }
         button:hover { opacity: 0.9; }
         button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
-        
         #outputArea { order: 2; margin-top: 20px; }
         pre { 
             background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; 
@@ -48,11 +45,7 @@
     <div class="box">
         <h2>Toneranger</h2>
         <div id="loadStatus" class="status">INITIALIZING...</div>
-        
-        <div id="outputArea" style="display:none;">
-            <pre id="playlistDisplay"></pre>
-        </div>
-
+        <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
         <div class="controls">
             <button id="initialGenBtn" onclick="generateAdvancedShow()" disabled>Generate Show</button>
             <div id="bottomControls" style="display:none;">
@@ -65,48 +58,37 @@
     </div>
 
     <script>
-        /* DB path updated to the 'Radio' repo as in example 1[cite: 1, 2] */
+        /* Corrected path with %20 for the space in 'NHRRC Data.csv'[cite: 2] */
         const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC%20Data.csv';
         let libraryData = [];
 
-        /* Security: Block inspection keys from example 1[cite: 1] */
+        /* Prying eyes protection[cite: 1] */
         document.onkeydown = (e) => {
             if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
         };
 
-        /* CSV parsing logic from example 2[cite: 2] */
         function parseCSV(text) {
-            const rows = [];
-            let currRow = [];
-            let currField = "";
-            let inQuotes = false;
+            const rows = []; let currRow = []; let currField = ""; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
                 const char = text[i];
                 if (char === '"') {
                     if (inQuotes && text[i+1] === '"') { currField += '"'; i++; }
                     else { inQuotes = !inQuotes; }
                 } else if (char === ',' && !inQuotes) {
-                    currRow.push(currField.trim());
-                    currField = "";
+                    currRow.push(currField.trim()); currField = "";
                 } else if ((char === '\n' || char === '\r') && !inQuotes) {
-                    if (currField || currRow.length > 0) {
-                        currRow.push(currField.trim());
-                        rows.push(currRow);
-                    }
+                    if (currField || currRow.length > 0) { currRow.push(currField.trim()); rows.push(currRow); }
                     currRow = []; currField = "";
                     if (char === '\r' && text[i+1] === '\n') i++;
                 } else { currField += char; }
             }
-            if (currField || currRow.length > 0) {
-                currRow.push(currField.trim());
-                rows.push(currRow);
-            }
+            if (currField || currRow.length > 0) { currRow.push(currField.trim()); rows.push(currRow); }
             return rows;
         }
 
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
-            /* Endpoint logic from example 2[cite: 2] */
+            /* Multi-method connection from File 2[cite: 2] */
             const endpoints = [
                 GITHUB_URL,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(GITHUB_URL)}`,
@@ -119,12 +101,9 @@
                     let response = await fetch(url);
                     if (response.ok) {
                         const text = await response.text();
-                        if (text.length > 100) {
-                            processData(text);
-                            return;
-                        }
+                        if (text.length > 50) { processData(text); return; }
                     }
-                } catch (e) { console.log("Method failed"); }
+                } catch (e) { console.error("Connection attempt failed."); }
             }
             status.innerText = "CONNECTION FAILED.";
         }
@@ -143,31 +122,17 @@
                 year: findIdx(["year"]),
                 pos: headers.indexOf("TY")
             };
-
             if (idx.pos === -1) idx.pos = headersLower.indexOf("ty");
 
             libraryData = parsed.slice(1).map((cols, i) => {
                 if (cols.length < 2) return null;
                 const yr = parseInt(cols[idx.year]) || 1980;
                 let rawPos = cols[idx.pos] ? cols[idx.pos].trim() : "UR";
-                let posVal = 999; 
-
-                if (rawPos !== "" && !isNaN(rawPos)) {
-                    posVal = parseInt(rawPos);
-                    rawPos = posVal.toString();
-                } else {
-                    rawPos = "UR";
-                }
-
+                let posVal = (rawPos !== "" && !isNaN(rawPos)) ? parseInt(rawPos) : 999;
                 return {
-                    id: i,
-                    artist: cols[idx.artist] || "Unknown",
-                    title: cols[idx.title] || "Unknown",
+                    id: i, artist: cols[idx.artist] || "Unknown", title: cols[idx.title] || "Unknown",
                     gender: (cols[idx.gender] || 'M').toUpperCase().substring(0,1),
-                    year: yr,
-                    decade: Math.floor(yr / 10) * 10,
-                    pos: rawPos,
-                    chartRank: posVal 
+                    year: yr, decade: Math.floor(yr / 10) * 10, pos: rawPos, chartRank: posVal 
                 };
             }).filter(r => r && r.artist && r.artist !== "0" && r.artist !== "Artist");
 
@@ -175,11 +140,6 @@
             status.style.background = "#10b981";
             status.style.color = "white";
             document.getElementById('initialGenBtn').disabled = false;
-        }
-
-        function manualReset() {
-            sessionStorage.clear();
-            alert("Session history cleared.");
         }
 
         function getArtistKey(name) {
@@ -191,54 +151,35 @@
             return s;
         }
 
-        function getTitleKey(title) {
-            return title.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
-        }
+        function getTitleKey(title) { return title.toLowerCase().trim().replace(/[^a-z0-9]/g, ""); }
 
-        /* Logic for 1 hour show (14 tracks) from example 2[cite: 2] */
         function generateAdvancedShow() {
-            let currentHourArtKeys = [];
-            let lastTrack = null;
-            let decadeCount = {};
-            
+            let currentHourArtKeys = []; let lastTrack = null; let decadeCount = {};
             function pickTrack() {
                 let pool = libraryData.filter(t => {
                     const artKey = getArtistKey(t.artist);
                     const titleKey = getTitleKey(t.title);
                     const lastArtist = sessionStorage.getItem(`played_artist_${artKey}`);
                     const lastTitle = sessionStorage.getItem(`played_title_${titleKey}`);
-                    
                     if (lastArtist && (Date.now() - parseInt(lastArtist) < 7200000)) return false;
                     if (lastTitle && (Date.now() - parseInt(lastTitle) < 14400000)) return false;
                     if (currentHourArtKeys.includes(artKey)) return false;
                     if ((decadeCount[t.decade] || 0) >= 4) return false;
-                    
-                    if (lastTrack) {
-                        if (t.gender === lastTrack.gender) return false;
-                        if (t.year === lastTrack.year) return false;
-                    }
+                    if (lastTrack && (t.gender === lastTrack.gender || t.year === lastTrack.year)) return false;
                     return true;
                 });
-
-                if (pool.length === 0) {
-                    sessionStorage.clear();
-                    pool = libraryData.filter(t => !currentHourArtKeys.includes(getArtistKey(t.artist)));
-                }
-
+                if (pool.length === 0) { sessionStorage.clear(); pool = libraryData.filter(t => !currentHourArtKeys.includes(getArtistKey(t.artist))); }
                 let weightedPool = [];
                 pool.forEach(t => {
                     let tickets = (t.chartRank > 0 && t.chartRank <= 100) ? 5 : 1;
                     for (let i = 0; i < tickets; i++) { weightedPool.push(t); }
                 });
-
                 const track = weightedPool[Math.floor(Math.random() * weightedPool.length)];
                 const aKey = getArtistKey(track.artist);
                 const tKey = getTitleKey(track.title);
-                
                 currentHourArtKeys.push(aKey);
                 sessionStorage.setItem(`played_artist_${aKey}`, Date.now());
                 sessionStorage.setItem(`played_title_${tKey}`, Date.now());
-                
                 decadeCount[track.decade] = (decadeCount[track.decade] || 0) + 1;
                 lastTrack = track;
                 return track;
@@ -249,13 +190,11 @@
                 let track = pickTrack();
                 output += `${String(i + 1).padStart(2, '0')} ${track.artist} - ${track.title} (Chart: ${track.pos})\n`;
             }
-
             output += "\nOPTIONAL FILLERS\n\n";
             for (let i = 0; i < 4; i++) {
                 let track = pickTrack();
                 output += `${String(i + 15).padStart(2, '0')} ${track.artist} - ${track.title} (Chart: ${track.pos})\n`;
             }
-
             document.getElementById('playlistDisplay').innerText = output;
             document.getElementById('outputArea').style.display = 'block';
             document.getElementById('initialGenBtn').style.display = 'none';
@@ -272,6 +211,7 @@
             anchor.click();
         }
 
+        function manualReset() { sessionStorage.clear(); alert("Memory cleared."); }
         fetchLibrary();
     </script>
 </body>
