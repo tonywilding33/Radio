@@ -2,122 +2,153 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital Radio Master Database</title>
+    <title>Hospital Radio | Pro Station Manager</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #1c1e21; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { color: #0056b3; margin-top: 0; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
-        .search-box { margin: 20px 0; position: sticky; top: 0; background: white; padding: 10px 0; z-index: 100; }
-        input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
-        input:focus { border-color: #0056b3; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #0056b3; color: white; padding: 15px; text-align: left; position: sticky; top: 60px; z-index: 99; }
+        :root { --nhs-blue: #005eb8; --action-green: #007f3b; --danger-red: #d5281b; }
+        body { font-family: 'Arial', sans-serif; margin: 0; background: #f8f9fa; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Header & Nav */
+        header { background: var(--nhs-blue); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .nav-btns button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; margin-left: 10px; }
+        .gen-btn { background: var(--action-green); color: white; }
+        .back-btn { background: #6c757d; color: white; display: none; }
+
+        /* Main Content Areas */
+        main { flex: 1; overflow: hidden; padding: 20px; display: flex; flex-direction: column; }
+        .view { display: none; flex-direction: column; height: 100%; }
+        .active { display: flex; }
+
+        /* Search Bar */
+        .search-container { margin-bottom: 15px; }
+        #searchInput { width: 100%; padding: 15px; font-size: 18px; border: 2px solid #ddd; border-radius: 8px; }
+
+        /* Table Styling */
+        .table-wrap { overflow-y: auto; background: white; border-radius: 8px; border: 1px solid #dee2e6; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #eee; position: sticky; top: 0; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
         td { padding: 12px; border-bottom: 1px solid #eee; }
-        tr:hover { background: #f9f9f9; }
-        .energy-badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; color: white; display: inline-block; min-width: 20px; text-align: center; }
-        /* Energy Color Scale 1-5 */
-        .e1 { background: #3498db; } /* Low/Chilled */
-        .e2 { background: #2ecc71; }
-        .e3 { background: #f1c40f; color: #333; }
-        .e4 { background: #e67e22; }
-        .e5 { background: #e74c3c; } /* High/The Jam */
-        .bpm-text { color: #666; font-family: monospace; font-weight: bold; }
+        tr:hover { background: #f1f4f9; }
+
+        /* Energy Badges */
+        .badge { padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold; font-size: 12px; }
+        .e1 { background: #0072ce; } .e2 { background: #41b6e6; } .e3 { background: #ffb81c; color: black; } 
+        .e4 { background: #e87722; } .e5 { background: var(--danger-red); }
+
+        /* Playlist Specific */
+        .playlist-card { background: white; padding: 20px; border-left: 10px solid var(--action-green); margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Hospital Radio Library</h1>
+<header>
+    <div id="stationName"><strong>HOSPITAL RADIO</strong> | Master Database</div>
+    <div class="nav-btns">
+        <button id="backBtn" class="back-btn" onclick="showLibrary()">← BACK TO LIBRARY</button>
+        <button class="gen-btn" onclick="generateSet()">⚡ GENERATE NEW PLAYLIST</button>
+    </div>
+</header>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search artist, track title, or genre..." onkeyup="filterTable()">
+<main>
+    <!-- Library View -->
+    <div id="libraryView" class="view active">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search 5,000+ tracks by Artist, Song, or Genre..." onkeyup="filterLibrary()">
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Artist</th><th>Title</th><th>Genre</th><th>Energy</th><th>BPM</th></tr>
+                </thead>
+                <tbody id="libraryBody"></tbody>
+            </table>
+        </div>
     </div>
 
-    <table id="radioTable">
-        <thead>
-            <tr>
-                <th>Artist</th>
-                <th>Title</th>
-                <th>Year</th>
-                <th>Genre</th>
-                <th style="width: 80px;">Energy</th>
-                <th style="width: 100px;">BPM</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- Data will be injected here -->
-        </tbody>
-    </table>
-</div>
+    <!-- Generator View -->
+    <div id="generatorView" class="view">
+        <h2 style="color: var(--action-green);">Recommended Setlist</h2>
+        <div id="playlistContainer" style="overflow-y: auto;"></div>
+    </div>
+</main>
 
 <script>
-    // Updated Database Name
-    const DATABASE_FILE = 'HR3328152E.csv';
+    const DATA_FILE = 'HR3328152E.csv';
+    let tracks = [];
 
-    async function fetchDatabase() {
+    // 1. LOAD DATA
+    async function init() {
         try {
-            const response = await fetch(DATABASE_FILE);
-            if (!response.ok) throw new Error('File not found');
+            const resp = await fetch(DATA_FILE);
+            const text = await resp.text();
+            const rows = text.split('\n');
             
-            const rawData = await response.text();
-            const rows = rawData.split('\n');
-            const tableBody = document.getElementById('tableBody');
-            
-            rows.forEach(line => {
-                if (!line.trim()) return;
+            tracks = rows.map(r => {
+                const c = r.split('|');
+                if (c.length < 12) return null;
+                return {
+                    artist: c[0], title: c[1], genre: c[5],
+                    energy: parseInt(c[6]) || 3,
+                    bpm: c[12] ? c[12].trim() : '100'
+                };
+            }).filter(t => t !== null);
 
-                // Split by Pipe Delimiter
-                const parts = line.split('|');
-                
-                // Index Mapping based on provided structure:
-                // Artist[0], Title[1], Year[2], Genre[5], Energy[6], BPM[12]
-                const artist = parts[0] || 'Unknown';
-                const title = parts[1] || 'Unknown';
-                const year = parts[2] ? Math.floor(parseFloat(parts[2])) : '---';
-                const genre = parts[5] || '---';
-                const energy = parts[6] ? parseInt(parts[6]) : 3;
-                const bpm = parts[12] ? parts[12].trim() : '---';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${artist}</strong></td>
-                    <td>${title}</td>
-                    <td>${year}</td>
-                    <td>${genre}</td>
-                    <td><span class="energy-badge e${energy}">${energy}</span></td>
-                    <td class="bpm-text">${bpm} BPM</td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        } catch (error) {
-            console.error(error);
-            document.getElementById('tableBody').innerHTML = 
-                `<tr><td colspan="6" style="color:red; text-align:center; padding:20px;">
-                Error: Database file <strong>${DATABASE_FILE}</strong> not found. Make sure it is in the same folder as this HTML file.
-                </td></tr>`;
+            renderLibrary(tracks);
+        } catch (e) {
+            console.error("Database failed to load.");
         }
     }
 
-    function filterTable() {
-        const input = document.getElementById('searchInput').value.toUpperCase();
-        const rows = document.getElementById('tableBody').getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName('td');
-            let match = false;
-            for (let j = 0; j < cells.length; j++) {
-                if (cells[j].innerText.toUpperCase().indexOf(input) > -1) {
-                    match = true;
-                    break;
-                }
-            }
-            rows[i].style.display = match ? "" : "none";
-        }
+    // 2. RENDER FULL LIBRARY
+    function renderLibrary(data) {
+        const body = document.getElementById('libraryBody');
+        body.innerHTML = data.map(t => `
+            <tr>
+                <td><strong>${t.artist}</strong></td>
+                <td>${t.title}</td>
+                <td>${t.genre}</td>
+                <td><span class="badge e${t.energy}">${t.energy}</span></td>
+                <td style="font-family: monospace;">${t.bpm}</td>
+            </tr>
+        `).join('');
     }
 
-    // Load database on start
-    window.onload = fetchDatabase;
+    // 3. GENERATOR LOGIC
+    function generateSet() {
+        // Toggle Views
+        document.getElementById('libraryView').classList.remove('active');
+        document.getElementById('generatorView').classList.add('active');
+        document.getElementById('backBtn').style.display = 'block';
+
+        // Pick 10 Random Tracks
+        const shuffled = [...tracks].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 10);
+
+        const container = document.getElementById('playlistContainer');
+        container.innerHTML = selected.map((t, i) => `
+            <div class="playlist-card">
+                <div style="font-size: 1.2em;"><strong>${i+1}. ${t.title}</strong></div>
+                <div style="color: #555;">${t.artist} | <span class="badge e${t.energy}">Energy ${t.energy}</span> | <strong>${t.bpm} BPM</strong></div>
+            </div>
+        `).join('');
+    }
+
+    // 4. BACK TO LIBRARY
+    function showLibrary() {
+        document.getElementById('generatorView').classList.remove('active');
+        document.getElementById('libraryView').classList.add('active');
+        document.getElementById('backBtn').style.display = 'none';
+    }
+
+    // 5. SEARCH FILTER
+    function filterLibrary() {
+        const q = document.getElementById('searchInput').value.toUpperCase();
+        const rows = document.querySelectorAll('#libraryBody tr');
+        rows.forEach(r => {
+            r.style.display = r.innerText.toUpperCase().includes(q) ? "" : "none";
+        });
+    }
+
+    window.onload = init;
 </script>
 
 </body>
