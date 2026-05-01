@@ -5,6 +5,7 @@
     <meta name="author" content="Tony Wilding">
     <title>Toneranger | Playlist Generator</title>
     <style>
+        /* Aesthetic adapted from 1.html[cite: 1] */
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         
         body { 
@@ -40,6 +41,7 @@
             font-size: 0.9rem; white-space: pre-wrap; border-left: 4px solid var(--accent); 
             line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0;
         }
+        /* Foot of page credit[cite: 2] */
         .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.9; }
     </style>
 </head>
@@ -65,16 +67,16 @@
     <div class="credit-footer">Developed by Tony Wilding</div>
 
     <script>
-        /* Database target: Radio branch as per example 1[cite: 1] */
-        const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC%20Data.csv';
+        /* Updated database path for the Radio repository and underscore file name[cite: 1, 2] */
+        const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_Data.csv';
         let libraryData = [];
 
-        /* Security from example 1[cite: 1] */
+        /* Security: Block inspection keys from 1.html[cite: 1] */
         document.onkeydown = (e) => {
             if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
         };
 
-        /* Parsing and logic from example 2[cite: 2] */
+        /* Parsing and logic from 2.html[cite: 2] */
         function parseCSV(text) {
             const rows = []; let currRow = []; let currField = ""; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
