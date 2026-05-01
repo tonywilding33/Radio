@@ -39,7 +39,7 @@
             font-size: 0.9rem; white-space: pre-wrap; border-left: 4px solid var(--accent); 
             line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0;
         }
-        .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.6rem; padding: 25px 0; text-transform: uppercase; opacity: 0.8; line-height: 1.5; }
+        .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -59,12 +59,11 @@
     </div>
 
     <div class="credit-footer">
-        Developed by Tony Wilding<br>
-        National Request Chart Data (Top 500) Contributed by Mark W Snowdon
+        Developed by Tony Wilding
     </div>
 
     <script>
-        /* Targeted Database: Radio Repo / New Filename[cite: 1, 3] */
+        /* Database Config[cite: 1, 3] */
         const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/ATG3328152A.csv';
         const GITHUB_URL = `${BASE_URL}?v=${Math.random()}`;
         let libraryData = [];
@@ -128,10 +127,11 @@
                 };
             }).filter(r => r && r.artist && r.artist !== "0" && r.artist !== "Artist");
 
-            status.innerText = `CONNECTED: ${libraryData.length} TRACKS LOADED.`;
+            /* Hidden Track Count Logic[cite: 1] */
+            status.innerText = `CONNECTED`;
             status.style.background = "#10b981"; status.style.color = "white";
             
-            /* AUTOLOAD FIRST SHOW[cite: 3] */
+            /* Autoload show[cite: 3] */
             generatePlaylist();
         }
 
