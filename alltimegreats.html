@@ -98,17 +98,24 @@
             let genderHistory = [];
             let lastYear = 0;
             const now = Date.now();
+            
+            // Check if current month is December (Month 11 in JS)
+            const isDecember = new Date().getMonth() === 11;
 
             const sorted = [...libraryData].sort((a, b) => b.score - a.score);
 
             for (let i = 0; i < 16; i++) {
                 let pool = sorted.filter(r => {
+                    // 1. Seasonal Lock: Block Christmas songs if not December
+                    const isHolidayTrack = r.title.toLowerCase().includes("christmas") || r.title.toLowerCase().includes("xmas");
+                    if (!isDecember && isHolidayTrack) return false;
+
+                    // 2. Standard Logic
                     if (hourArtKeys.includes(r.artistKey)) return false;
                     if (hourTitKeys.includes(r.titleKey)) return false;
 
                     const lastArt = sessionStorage.getItem(`atg_art_${r.artistKey}`);
                     const lastTit = sessionStorage.getItem(`atg_tit_${r.titleKey}`);
-                    
                     if (lastArt && (now - parseInt(lastArt) < TWO_HOURS)) return false;
                     if (lastTit && (now - parseInt(lastTit) < TWO_HOURS)) return false;
                     
@@ -117,12 +124,13 @@
                     return !genderClump && !eraClump;
                 });
 
-                // AGGRESSIVE AUTO-RESET
-                // If the pool is empty or too small to finish the show, clear memory
                 if (pool.length === 0) {
                     sessionStorage.clear(); 
-                    // Re-filter with zero session constraints to ensure 16 tracks
-                    pool = sorted.filter(r => !hourArtKeys.includes(r.artistKey) && !hourTitKeys.includes(r.titleKey));
+                    pool = sorted.filter(r => {
+                        const isHolidayTrack = r.title.toLowerCase().includes("christmas") || r.title.toLowerCase().includes("xmas");
+                        if (!isDecember && isHolidayTrack) return false;
+                        return !hourArtKeys.includes(r.artistKey) && !hourTitKeys.includes(r.titleKey);
+                    });
                 }
                 
                 let pick = pool[Math.floor(Math.random() * Math.min(pool.length, 25))];
@@ -131,10 +139,8 @@
                     playlist.push(pick);
                     hourArtKeys.push(pick.artistKey);
                     hourTitKeys.push(pick.titleKey);
-                    
                     sessionStorage.setItem(`atg_art_${pick.artistKey}`, now.toString());
                     sessionStorage.setItem(`atg_tit_${pick.titleKey}`, now.toString());
-                    
                     genderHistory.push(pick.gender);
                     if (genderHistory.length > 2) genderHistory.shift();
                     lastYear = pick.year;
