@@ -3,153 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Toneranger | Playlist Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <title>Hospital Radio | Playlist Generator</title>
     <style>
-        /* Updated Branding Palette from File 2 */
-        :root { 
-            --bg: #f0f2f5; 
-            --card: #ffffff; 
-            --accent: #2c3e50; 
-            --text: #1a252f; 
-            --secondary: #34495e; 
-            --highlight: #3498db; 
-            --success: #2980b9;
-        }
+        /* Styles adapted from 1.html example */
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
             display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
             -webkit-user-select: none; user-select: none;
         }
-        .wrapper { width: 100%; max-width: 550px; padding: 20px; }
-        .setup-card { 
-            background: var(--card); padding: 30px; border-radius: 12px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 8px solid var(--accent); 
+        .box { 
+            width: 100%; max-width: 550px; background: var(--card); padding: 30px; 
+            border-radius: 16px; border: 1px solid #334155; display: flex; flex-direction: column;
         }
-        h1 { 
-            font-size: 1.4rem; margin-bottom: 25px; text-align: center; color: var(--accent); 
-            letter-spacing: 2px; text-transform: uppercase; font-weight: bold;
+        h2 { 
+            font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); 
+            letter-spacing: 2px; text-transform: uppercase; margin-top: 0;
         }
-        .field { margin-bottom: 20px; }
-        label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #546e7a; margin-bottom: 6px; }
-        select { 
-            width: 100%; background: #fff; color: var(--text); border: 1px solid #bdc3c7; 
-            padding: 12px; border-radius: 6px; font-size: 1rem;
+        .status { 
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; 
+            margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; 
+            border: 1px solid #475569; text-align: center; 
         }
-        .btn-start { 
-            width: 100%; background: var(--accent); color: white; border: none; padding: 16px; 
-            border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s;
+        .controls { margin-top: 20px; text-align: center; order: 3; }
+        button { 
+            width: 100%; background: var(--accent); color: #0f172a; border: none; 
+            padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; 
+            text-transform: uppercase; margin-bottom: 10px;
         }
-        .btn-start:hover { background: var(--secondary); transform: translateY(-1px); }
+        button:hover { opacity: 0.9; }
+        button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
         
-        #monitor { display: none; background: var(--card); padding: 25px; border-radius: 12px; border-top: 8px solid var(--accent); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .playlist-container { 
-            max-height: 500px; overflow-y: auto; margin: 15px 0; border-radius: 6px;
-            background: #1a252f; border: 1px solid #2c3e50;
+        #outputArea { order: 2; margin-top: 20px; }
+        pre { 
+            background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; 
+            font-size: 0.9rem; white-space: pre-wrap; border-left: 4px solid var(--accent); 
+            line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0;
         }
-        .track-row { 
-            padding: 12px; border-bottom: 1px solid #2c3e50; display: flex; align-items: center; gap: 10px; 
-            font-family: 'Courier New', Courier, monospace;
-        }
-        .t-artist { color: var(--highlight); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; }
-        .t-title { font-size: 1rem; font-weight: 600; color: #f8f9f9; }
-        .btn-download { 
-            width: 100%; background: var(--success); color: white; border: none; padding: 14px; 
-            border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 10px; text-transform: uppercase;
-        }
-        .credit-footer { text-align: center; color: #7f8c8d; font-size: 0.65rem; margin-top: 25px; text-transform: uppercase; }
+        .credit-footer { text-align: center; color: #f8fafc; font-size: 0.65rem; margin-top: 25px; text-transform: uppercase; opacity: 0.9; }
     </style>
 </head>
 <body oncontextmenu="return false;">
+    <div class="box">
+        <h2>Hospital Radio</h2>
+        <div id="loadStatus" class="status">INITIALIZING...</div>
+        
+        <div id="outputArea" style="display:none;">
+            <pre id="playlistDisplay"></pre>
+        </div>
 
-<div class="wrapper">
-    <div id="setup-view" class="setup-card">
-        <h1>Toneranger</h1>
-        <div class="field"><label>Start Hour</label><select id="start-hour"></select></div>
-        <div class="field"><label>Broadcast Duration</label><select id="duration"></select></div>
-        <button class="btn-start" onclick="ui.start()">Generate Show</button>
+        <div class="controls">
+            <button id="initialGenBtn" onclick="generateAdvancedShow()" disabled>Generate Show</button>
+            <div id="bottomControls" style="display:none;">
+                <button style="background:var(--success); color:white;" onclick="downloadTxt()">Download Playlist (.txt)</button>
+                <button id="nextHourBtn" onclick="generateAdvancedShow()">Generate Next Hour</button>
+                <button style="background:#475569; color:white;" onclick="manualReset()">Clear Session Memory</button>
+            </div>
+        </div>
         <div class="credit-footer">Developed by Tony Wilding</div>
     </div>
 
-    <div id="monitor">
-        <h1>Live Schedule</h1>
-        <div id="playlist-box" class="playlist-container"></div>
-        <button class="btn-download" onclick="ui.save()">Download Schedule (txt)</button>
-        <button class="btn-start" style="background:#7f8c8d;" onclick="ui.reset()">← Back</button>
-    </div>
-</div>
+    <script>
+        // DB Hosted in same location as file[cite: 2]
+        const DB_FILE = 'NHRRC.csv';
+        let libraryData = [];
 
-<script>
-const ui = (function() {
-    /* Logic remains identical to 1.html */
-    /* Database obscured to local NHRRC.csv */
-    const _c = 'TkhSUkMuY3N2'; 
-    let lib = [], pl = [];
+        // Protection for prying eyes[cite: 1]
+        document.onkeydown = (e) => {
+            if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
+        };
 
-    /* Prying eyes protection */
-    document.onkeydown = (e) => {
-        if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
-    };
-
-    return {
-        start: async function() {
-            try {
-                const r = await fetch(atob(_c));
-                const t = await r.text();
-                Papa.parse(t, {
-                    header: true, skipEmptyLines: true,
-                    complete: (res) => {
-                        lib = res.data.filter(s => s.Artist && s.Title);
-                        this.build();
+        // Logic remains identical to 2.html[cite: 2]
+        function parseCSV(text) {
+            const rows = [];
+            let currRow = [];
+            let currField = "";
+            let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') {
+                    if (inQuotes && text[i+1] === '"') { currField += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (char === ',' && !inQuotes) {
+                    currRow.push(currField.trim());
+                    currField = "";
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (currField || currRow.length > 0) {
+                        currRow.push(currField.trim());
+                        rows.push(currRow);
                     }
-                });
-            } catch(e) { alert("Database Connection Failed."); }
-        },
-        build: function() {
-            const dur = parseInt(document.getElementById('duration').value);
-            const start = parseInt(document.getElementById('start-hour').value);
-            pl = []; let sec = 0, h = start;
-            
-            while(sec < (dur * 60)) {
-                let dp = (h>=6 && h<12)?"MORNING":(h>=12 && h<18)?"AFTERNOON":(h>=18 && h<22)?"EVENING":"NIGHT";
-                let pool = lib.filter(s => String(s.Daypart || s.morning || "").toUpperCase() === dp);
-                if(!pool.length) pool = lib;
-                let pick = pool[Math.floor(Math.random()*pool.length)];
-                
-                let d = new Date(); d.setHours(start, 0, sec, 0);
-                let ts = d.getHours().toString().padStart(2,'0')+":"+d.getMinutes().toString().padStart(2,'0');
-                
-                pl.push({...pick, time: ts});
-                sec += 220; 
-                h = (start + Math.floor(sec/3600)) % 24;
+                    currRow = []; currField = "";
+                    if (char === '\r' && text[i+1] === '\n') i++;
+                } else { currField += char; }
             }
-            this.render();
-        },
-        render: function() {
-            document.getElementById('setup-view').style.display = 'none';
-            document.getElementById('monitor').style.display = 'block';
-            document.getElementById('playlist-box').innerHTML = pl.map(t => `
-                <div class="track-row">
-                    <div style="flex:1"><div class="t-artist">${t.Artist}</div><div class="t-title">${t.Title}</div></div>
-                    <div style="font-family:monospace; color:#94a3b8;">${t.time}</div>
-                </div>`).join('');
-        },
-        save: function() {
-            let out = "TONERANGER SCHEDULE\n" + pl.map(t => `${t.time} | ${t.Artist} - ${t.Title}`).join('\n');
-            const b = new Blob([out], {type:'text/plain'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(b);
-            a.download = 'Toneranger_Schedule.txt'; a.click();
-        },
-        reset: () => location.reload()
-    };
-})();
+            if (currField || currRow.length > 0) {
+                currRow.push(currField.trim());
+                rows.push(currRow);
+            }
+            return rows;
+        }
 
-(function() {
-    const h = document.getElementById('start-hour'), d = document.getElementById('duration');
-    for(let i=0; i<24; i++) h.add(new Option(i.toString().padStart(2,'0')+":00", i));
-    for(let i=1; i<=24; i++) d.add(new Option(i + " Hour Show", i * 60));
-})();
-</script>
+        async function fetchLibrary() {
+            const status = document.getElementById('loadStatus');
+            // Using exact same connection logic from 2.html[cite: 2]
+            const endpoints = [
+                DB_FILE,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(window.location.href.replace(/[^/]*$/, '') + DB_FILE)}`
+            ];
+
+            for (let url of endpoints) {
+                try {
+                    status.innerText = `CONNECTING...`;
+                    let response = await fetch(url);
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text.length > 10) {
+                            processData(text);
+                            return;
+                        }
+                    }
+                } catch (e) { console.log("Method failed"); }
+            }
+            status.innerText = "CONNECTION FAILED.";
+        }
+
+        function processData(csvText) {
+            const status = document.getElementById('loadStatus');
+            const parsed = parseCSV(csvText);
+            const headers = parsed[0].map(h => h.replace(/[^\x20-\x7E]/g, "").trim());
+            const headersLower = headers.map(h => h.toLowerCase());
+            const findIdx = (terms) => headersLower.findIndex(h => terms.some(t => h === t || h.includes(t)));
+            
+            const idx = {
+                artist: findIdx(["artist"]),
+                title: findIdx(["song title", "title"]),
+                gender: findIdx(["gender"]),
+                year: findIdx(["year"]),
+                pos: headers.indexOf("TY")
+            };
+
+            if (idx.pos === -1) idx.pos = headersLower.indexOf("ty");
+
+            libraryData = parsed.slice(1).map((cols, i) => {
+                if (cols.length < 2) return null;
+                const yr = parseInt(cols[idx.year]) || 1980;
+                let rawPos = cols[idx.pos] ? cols[idx.pos].trim() : "UR";
+                let posVal = 999; 
+
+                if (rawPos !== "" && !isNaN(rawPos)) {
+                    posVal = parseInt(rawPos);
+                    rawPos = posVal.toString();
+                } else {
+                    rawPos = "UR";
+                }
+
+                return {
+                    id: i,
+                    artist: cols[idx.artist] || "Unknown",
+                    title: cols[idx.title] || "Unknown",
+                    gender: (cols[idx.gender] || 'M').toUpperCase().substring(0,1),
+                    year: yr,
+                    decade: Math.floor(yr / 10) * 10,
+                    pos: rawPos,
+                    chartRank: posVal 
+                };
+            }).filter(r => r && r.artist && r.artist !== "0" && r.artist !== "Artist");
+
+            status.innerText = `READY: ${libraryData.length} SONGS.`;
+            status.style.background = "#10b981";
+            status.style.color = "white";
+            document.getElementById('initialGenBtn').disabled = false;
+        }
+
+        function manualReset() {
+            sessionStorage.clear();
+            alert("Session history cleared.");
+        }
+
+        function getArtistKey(name) {
+            if (!name) return "unknown";
+            let s = name.toLowerCase().trim().replace(/^the\s+/, "");
+            s = s.split(/\s+and\s+/)[0].split(/\s*&\s*/)[0].split(/\s+feat\s+/)[0];
+            s = s.replace(/[^a-z0-9]/g, ""); 
+            if (s.length > 4 && s.endsWith('s')) s = s.slice(0, -1);
+            return s;
+        }
+
+        function getTitleKey(title) {
+            return title.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
+        }
+
+        function generateAdvancedShow() {
+            let currentHourArtKeys = [];
+            let lastTrack = null;
+            let decadeCount = {};
+            
+            function pickTrack() {
+                let pool = libraryData.filter(t => {
+                    const artKey = getArtistKey(t.artist);
+                    const titleKey = getTitleKey(t.title);
+                    const lastArtist = sessionStorage.getItem(`played_artist_${artKey}`);
+                    const lastTitle = sessionStorage.getItem(`played_title_${titleKey}`);
+                    
+                    if (lastArtist && (Date.now() - parseInt(lastArtist) < 7200000)) return false;
+                    if (lastTitle && (Date.now() - parseInt(lastTitle) < 14400000)) return false;
+                    if (currentHourArtKeys.includes(artKey)) return false;
+                    if ((decadeCount[t.decade] || 0) >= 4) return false;
+                    
+                    if (lastTrack) {
+                        if (t.gender === lastTrack.gender) return false;
+                        if (t.year === lastTrack.year) return false;
+                    }
+                    return true;
+                });
+
+                if (pool.length === 0) {
+                    sessionStorage.clear();
+                    pool = libraryData.filter(t => !currentHourArtKeys.includes(getArtistKey(t.artist)));
+                }
+
+                let weightedPool = [];
+                pool.forEach(t => {
+                    let tickets = (t.chartRank > 0 && t.chartRank <= 100) ? 5 : 1;
+                    for (let i = 0; i < tickets; i++) { weightedPool.push(t); }
+                });
+
+                const track = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+                const aKey = getArtistKey(track.artist);
+                const tKey = getTitleKey(track.title);
+                
+                currentHourArtKeys.push(aKey);
+                sessionStorage.setItem(`played_artist_${aKey}`, Date.now());
+                sessionStorage.setItem(`played_title_${tKey}`, Date.now());
+                
+                decadeCount[track.decade] = (decadeCount[track.decade] || 0) + 1;
+                lastTrack = track;
+                return track;
+            }
+
+            let output = "";
+            for (let i = 0; i < 14; i++) {
+                let track = pickTrack();
+                output += `${String(i + 1).padStart(2, '0')} ${track.artist} - ${track.title} (Chart: ${track.pos})\n`;
+            }
+
+            output += "\nOPTIONAL FILLERS\n\n";
+            for (let i = 0; i < 4; i++) {
+                let track = pickTrack();
+                output += `${String(i + 15).padStart(2, '0')} ${track.artist} - ${track.title} (Chart: ${track.pos})\n`;
+            }
+
+            document.getElementById('playlistDisplay').innerText = output;
+            document.getElementById('outputArea').style.display = 'block';
+            document.getElementById('initialGenBtn').style.display = 'none';
+            document.getElementById('bottomControls').style.display = 'block';
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function downloadTxt() {
+            const text = document.getElementById('playlistDisplay').innerText;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = 'Hospital_Radio_Playlist.txt';
+            anchor.href = URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        fetchLibrary();
+    </script>
 </body>
 </html>
