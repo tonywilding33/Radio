@@ -1,0 +1,963 @@
+Artist,Title,Year,Decade,Gender,Genre,Energy,ID,Length,Daypart,Enabled,BPM
+Peggy Lee,Fever,1958,1950,F,JAZZ,2,1267,S,afternoon,Y,85
+Frank Sinatra,Three Coins in the Fountain,1954,1950,M,VOCAL,1,2638,S,night,Y,70
+Doris Day,"Ready, Willing and Able",1955,1950,F,VOCAL,2,2678,S,morning,Y,85
+Frank Sinatra,I've Got You Under My Skin,1956,1950,M,POP,2,553,S,afternoon,Y,85
+Jackie Wilson,Reet Petite,1957,1950,M,SOUL,2,676,S,morning,Y,85
+Rosemary Clooney,Mambo Italiano,1954,1950,F,POP,2,1440,S,morning,Y,85
+Petula Clark,Suddenly There's a Valley,1955,1950,F,VOCAL,1,2557,S,evening,Y,70
+Playmates,Beep Beep,1958,1950,G,NOVELTY,5,2757,S,morning,Y,128
+Bill Haley & His Comets,"See You Later, Alligator",1956,1950,G,ROCK,2,2665,S,morning,Y,85
+Frank Sinatra,Learn' Rock and Roll,1956,1950,M,VOCAL,2,2686,S,morning,Y,85
+Emile Ford & The Checkmates,Don't Tell Me Your Troubles,1959,1950,G,ROCK,5,2790,S,morning,Y,128
+Ruby Murray,Softly Softly,1955,1950,F,POP,1,1449,S,night,Y,70
+Pat Boone,April Love,1957,1950,M,VOCAL,1,2705,S,evening,Y,70
+Bert Weedon,Guitar Boogie Shuffle,1959,1950,M,INSTRUMENTAL,5,2813,S,morning,Y,128
+King Brothers,A White Sport Coat,1957,1950,G,VOCAL,2,2575,S,morning,Y,85
+Little Richard,Long Tall Sally,1956,1950,M,ROCK,2,2604,S,morning,Y,85
+Elvis Presley,Don't Be Cruel,1956,1950,M,ROCK,2,2597,S,morning,Y,85
+Lita Roza,(How Much Is) That Doggie in the Window,1953,1950,F,VOCAL,1,2651,S,afternoon,Y,70
+Buddy Holly,Peggy Sue,1957,1950,M,ROCK,2,260,S,afternoon,Y,85
+Bill Haley,Rock Around the Clock,1955,1950,G,ROCK,2,2615,S,morning,Y,85
+Little Richard,Good Golly Miss Molly,1958,1950,M,ROCK,2,947,S,afternoon,Y,85
+Ella Fitzgerald,Manhattan,1957,1950,F,JAZZ,1,2826,S,afternoon,Y,70
+Perry Como,Kewpie Doll,1958,1950,M,VOCAL,2,2707,S,morning,Y,85
+Marvin Rainwater,Whole Lotta Woman,1958,1950,M,ROCK,1,2654,S,morning,Y,70
+Lonnie Donegan,The Lonnie Donegan Skiffle Party,1957,1950,M,SKIFFLE,2,2700,S,morning,Y,85
+Mario Lanza,The Loveliest Night of the Year,1952,1950,M,VOCAL,2,2728,S,night,Y,85
+Chordettes,Mr. Sandman,1954,1950,G,POP,2,1874,S,morning,Y,85
+Lonnie Donegan,The Battle of New Orleans,1959,1950,M,SKIFFLE,2,2629,S,morning,Y,85
+Buddy Holly,It Doesn't Matter Anymore,1959,1950,M,ROCK,2,2592,S,morning,Y,85
+Dean Martin,That's Amore,1953,1950,M,POP,2,354,S,morning,Y,85
+Marty Wilde,Teenager in Love,1959,1950,M,ROCK,2,2552,S,morning,Y,85
+Alma Cogan,Twenty Tiny Fingers,1955,1950,F,VOCAL,2,2513,S,morning,Y,85
+Al Martino,Here in My Heart,1952,1950,M,POP,1,43,S,evening,Y,70
+Lonnie Donegan,Does Your Chewing Gum Lose Its Flavour,1958,1950,M,SKIFFLE,2,2544,S,morning,Y,85
+David Whitfield,When You Lose the One You Love,1955,1950,M,VOCAL,1,2673,S,evening,Y,70
+Elvis Presley,One Night,1959,1950,M,ROCK,1,2685,S,night,Y,70
+Mel Tormé,Blue Moon,1952,1950,M,JAZZ,1,1059,S,night,Y,70
+Kalin Twins,Forget Me Not,1958,1950,G,ROCK,2,2736,S,morning,Y,85
+Bill Haley & His Comets,Rock Around the Clock,1954,1950,G,ROCK,2,1830,S,morning,Y,85
+Johnnie Ray,Walkin' My Baby Back Home,1952,1950,M,VOCAL,5,2749,S,morning,Y,128
+Guy Mitchell,Feet Up (Pat Him on the Po-Po),1952,1950,M,VOCAL,1,2720,S,morning,Y,70
+Browns,The Three Bells,1959,1950,G,VOCAL,3,2788,S,night,Y,100
+Ray Martin,Blue Tango,1952,1950,M,INSTRUMENTAL,2,2560,S,afternoon,Y,85
+Eddie Calvert,"Oh, Mein Papa",1953,1950,M,INSTRUMENTAL,1,2533,S,night,Y,70
+Billy Fury,Maybe Tomorrow,1959,1950,M,ROCK,1,2520,S,night,Y,70
+Patti Page,The Doggie in the Window,1953,1950,F,VOCAL,2,2733,S,afternoon,Y,85
+Elvis Presley,Heartbreak Hotel,1956,1950,M,ROCK,2,475,S,morning,Y,85
+Domenico Modugno,Volare (Nel Blu Dipinto Di Blu),1958,1950,M,VOCAL,5,2793,S,afternoon,Y,128
+Connie Francis,Lipstick on Your Collar,1959,1950,F,VOCAL,2,2593,S,morning,Y,85
+Lonnie Donegan,Rock Island Line,1955,1950,M,SKIFFLE,2,2546,S,morning,Y,85
+Russ Hamilton,We Will Make Love,1957,1950,M,VOCAL,1,2565,S,night,Y,70
+Ella Fitzgerald,Dream a Little Dream of Me,1952,1950,F,JAZZ,1,453,S,night,Y,70
+Frankie Vaughan,Green Door,1956,1950,M,VOCAL,2,2535,S,morning,Y,85
+Jimmy Young,Unchained Melody,1955,1950,M,POP,1,736,S,night,Y,70
+Ray Charles,What'd I Say,1959,1950,M,SOUL,5,2819,S,morning,Y,128
+Andy Williams,I Like Your Kind of Love,1957,1950,M,POP,5,2800,S,morning,Y,128
+Platters,Only You (And You Alone),1955,1950,G,POP,1,1316,S,evening,Y,70
+Perry Como,Catch a Falling Star,1957,1950,M,POP,2,1270,S,morning,Y,85
+Harry Belafonte,Mary's Boy Child,1956,1950,M,POP,1,636,S,evening,Y,70
+Frankie Laine,The Kid's Last Fight,1954,1950,M,VOCAL,1,2688,S,evening,Y,70
+Michael Holliday,The Story of My Life,1958,1950,M,POP,2,1073,S,afternoon,Y,85
+Winifred Atwell,Let's Have Another Party,1954,1950,F,INSTRUMENTAL,2,2588,S,morning,Y,85
+Fats Domino,Ain't That a Shame,1955,1950,M,ROCK,2,527,S,morning,Y,85
+Terry Dene,Stairway of Love,1958,1950,M,ROCK,2,2573,S,morning,Y,85
+Monotones,Book of Love,1958,1950,G,ROCK,2,2758,S,morning,Y,85
+Platters,Only You (And You Alone),1955,1950,G,VOCAL,1,2612,S,night,Y,70
+Louis Prima,Buona Sera,1958,1950,M,VOCAL,5,2827,S,afternoon,Y,128
+Craig Douglas,Only Sixteen,1959,1950,M,VOCAL,2,2523,S,morning,Y,85
+Fats Domino,Blueberry Hill,1956,1950,M,ROCK,2,528,S,morning,Y,85
+Kay Starr,Side by Side,1953,1950,F,VOCAL,2,2697,S,morning,Y,85
+Jo Stafford,You Belong to Me,1953,1950,F,VOCAL,1,2645,S,night,Y,70
+Lonnie Donegan,Puttin' on the Style,1957,1950,M,SKIFFLE,1,2761,S,morning,Y,70
+Ritchie Valens,La Bamba,1958,1950,M,ROCK,2,1403,S,morning,Y,85
+Frankie Laine,I Believe,1953,1950,M,VOCAL,1,2600,S,night,Y,70
+Ronnie Hilton,A Blossom Fell,1955,1950,M,VOCAL,1,2561,S,evening,Y,70
+Bobby Darin,Mack the Knife,1959,1950,M,POP,2,215,S,afternoon,Y,85
+Jim Reeves,He'll Have to Go,1959,1950,M,COUNTRY,1,728,S,night,Y,70
+McGuire Sisters,Sugartime,1957,1950,G,POP,2,2025,S,morning,Y,85
+Tarriers,The Banana Boat Song,1957,1950,G,FOLK,5,2802,S,morning,Y,128
+Fats Domino,Blue Monday,1957,1950,M,ROCK,5,2764,S,afternoon,Y,128
+Debbie Reynolds,Tammy,1957,1950,F,VOCAL,1,2799,S,night,Y,70
+Perry Como,Delaware,1959,1950,M,VOCAL,2,2780,S,morning,Y,85
+Terry Dene,Start Movin',1957,1950,M,ROCK,5,2754,S,morning,Y,128
+Grace Kelly,True Love,1956,1950,F,POP,1,196,S,evening,Y,70
+Doris Day,Que Sera Sera (Whatever Will Be Will Be),1956,1950,F,POP,1,399,S,evening,Y,70
+Marty Wilde,Sea of Love,1959,1950,M,ROCK,1,2551,S,night,Y,70
+Frankie Vaughan,The Tower of Strength,1958,1950,M,VOCAL,2,2537,S,morning,Y,85
+Brook Benton,It's Just a Matter of Time,1959,1950,M,VOCAL,5,2820,S,night,Y,128
+Nat King Cole,Mona Lisa,1950,1950,M,JAZZ,1,1129,S,night,Y,70
+Nat King Cole,A Blossom Fell,1955,1950,M,VOCAL,1,2703,S,evening,Y,70
+Michael Holliday,Keep It Gay,1955,1950,M,VOCAL,2,2631,S,morning,Y,85
+Al Martino,Now,1953,1950,M,VOCAL,2,2807,S,night,Y,85
+Alma Cogan,The Naughty Lady of Shady Lane,1954,1950,F,VOCAL,2,2512,S,morning,Y,85
+Russ Conway,Side Saddle,1959,1950,M,INSTRUMENTAL,1,2658,S,afternoon,Y,70
+Dickie Valentine,Finger of Suspicion,1954,1950,M,VOCAL,1,2527,S,evening,Y,70
+Sandy Nelson,Teen Beat,1959,1950,M,INSTRUMENTAL,4,2822,S,morning,Y,115
+Jane Morgan,The Day the Rains Came,1958,1950,F,VOCAL,1,2643,S,night,Y,70
+Johnnie Ray,Just Walking in the Rain,1956,1950,M,VOCAL,1,2601,S,evening,Y,70
+Conway Twitty,It's Only Make Believe,1958,1950,M,ROCK,1,2670,S,night,Y,70
+Johnny Duncan & His Blue Grass Boys,Last Train to San Fernando,1957,1950,M,SKIFFLE,1,2803,S,morning,Y,70
+Eddie Fisher,Lady of Spain,1952,1950,M,VOCAL,2,2681,S,morning,Y,85
+Frankie Laine,A Woman in Love,1956,1950,M,VOCAL,1,2639,S,night,Y,70
+Platters,Smoke Gets in Your Eyes,1958,1950,G,POP,1,1318,S,night,Y,70
+Don Lang,6-5 Special,1957,1950,M,ROCK,2,2529,S,morning,Y,85
+Eddie Calvert,Cherry Pink and Apple Blossom White,1955,1950,M,INSTRUMENTAL,2,2532,S,afternoon,Y,85
+Dean Martin,Memories Are Made of This,1955,1950,M,POP,1,355,S,evening,Y,70
+Pat Boone,Love Letters in the Sand,1957,1950,M,POP,1,1226,S,night,Y,70
+Guy Mitchell,Pretty Little Black-Eyed Susie,1953,1950,M,VOCAL,2,2692,S,morning,Y,85
+Bobby Darin,Beyond the Sea,1959,1950,M,POP,2,217,S,afternoon,Y,85
+Doris Day,Secret Love,1953,1950,F,POP,1,400,S,night,Y,70
+Elvis Presley,All Shook Up,1957,1950,M,ROCK,2,2596,S,morning,Y,85
+Four Aces,Love is a Many-Splendored Thing,1955,1950,G,VOCAL,1,2784,S,night,Y,70
+Nat King Cole,"Darling, Je Vous Aime Beaucoup",1955,1950,M,VOCAL,5,2778,S,night,Y,128
+Frankie Laine,Blowing Wild,1954,1950,M,VOCAL,1,2722,S,afternoon,Y,70
+Nat King Cole,Looking Back,1958,1950,M,VOCAL,5,2779,S,afternoon,Y,128
+Eddie Calvert,Oh Mein Papa,1954,1950,M,INSTRUMENTAL,1,2719,S,afternoon,Y,70
+Drifters,There Goes My Baby,1959,1950,G,SOUL,5,2817,S,evening,Y,128
+Vince Eager,It's Only Make Believe,1958,1950,M,ROCK,5,2755,S,night,Y,128
+Nat King Cole,Unforgettable,1952,1950,M,JAZZ,1,1125,S,evening,Y,70
+Sam Cooke,You Send Me,1957,1950,M,SOUL,1,1458,S,night,Y,70
+Obernkirchen Children's Choir,The Happy Wanderer,1954,1950,G,VOCAL,1,2711,S,afternoon,Y,70
+Johnston Brothers,Hernando's Hideaway,1955,1950,G,VOCAL,1,2647,S,night,Y,70
+Mel Blanc,I Taut I Taw a Puddy Tat,1951,1950,M,NOVELTY,2,2726,S,morning,Y,85
+Vipers Skiffle Group,Don't You Rock Me Daddy-O,1957,1950,G,SKIFFLE,2,2578,S,morning,Y,85
+Dickie Valentine,The Old Pi-Anna Rag,1955,1950,M,VOCAL,2,2528,S,morning,Y,85
+Aretha Franklin,Chain of Fools,1967,1960,F,SOUL,5,4055,S,afternoon,Y,128
+"Carlos, Wendy",Theme from A Clockwork Orange,1968,1960,F,INSTRUMENTAL,1,4173,S,evening,Y,70
+"Allison, John",Surrender,1961,1960,M,VOCAL,1,4029,S,afternoon,Y,70
+Plastic Ono Band,Cold Turkey,1969,1960,G,ROCK,5,3703,S,morning,Y,128
+Barbra Streisand,People,1964,1960,F,VOCAL,2,4084,S,night,Y,85
+Gary Lewis & Playboys,Green Grass,1966,1960,G,POP,4,4497,S,morning,Y,115
+Gene Pitney,Looking Through the Eyes of Love,1965,1960,M,VOCAL,2,3047,S,afternoon,Y,85
+Kinks,See My Friends,1965,1960,G,PSYCHEDELIC,5,3570,S,afternoon,Y,128
+Ivy League,Willow Tree,1966,1960,G,POP,5,4599,S,afternoon,Y,128
+Des O'Connor,Careless Hands,1967,1960,M,VOCAL,3,4317,S,afternoon,Y,100
+Drifters,Please Stay,1961,1960,G,SOUL,5,4364,S,night,Y,128
+George Fame,Sunny,1966,1960,M,POP,5,4525,S,afternoon,Y,128
+Lulu,To Sir with Love,1967,1960,F,POP,1,958,S,evening,Y,70
+Small Faces,Here Comes the Nice,1967,1960,G,PSYCHEDELIC,5,3837,S,morning,Y,128
+Bonzo Dog Doo-Dah Band,I'm the Urban Spaceman,1968,1960,G,NOVELTY,2,4135,S,morning,Y,85
+Petula Clark,Sailor,1961,1960,F,POP,2,1287,S,morning,Y,85
+Dionne Warwick,I Say a Little Prayer,1967,1960,F,SOUL,2,382,S,morning,Y,85
+Jefferson Airplane,Volunteers,1969,1960,G,ROCK,5,4626,S,morning,Y,128
+Everly Brothers,Temptation,1961,1960,G,POP,5,4423,S,afternoon,Y,128
+Cat Stevens,A Bad Night,1967,1960,M,POP,5,4182,S,evening,Y,128
+Four Tops,Yesterday's Dreams,1968,1960,G,SOUL,5,4469,S,night,Y,128
+Blue Mink,Melting Pot,1969,1960,G,POP,2,4118,S,afternoon,Y,85
+Englebert Humperdinck,I'm a Better Man,1969,1960,M,VOCAL,5,4411,S,afternoon,Y,128
+Simon Dupree & Big Sound,Kites,1967,1960,G,PSYCHEDELIC,4,3811,S,night,Y,115
+Tom Jones,I'll Never Fall in Love Again,1967,1960,M,VOCAL,1,3262,S,night,Y,70
+Sam Cooke,Bring It on Home to Me,1962,1960,M,SOUL,5,3763,S,night,Y,128
+Brenda Lee,Let's Jump the Broomstick,1961,1960,F,ROCK,5,3334,S,morning,Y,128
+Stevie Wonder,Uptight (Everything's Alright),1965,1960,M,SOUL,2,2104,S,morning,Y,85
+Lou Christie,I'm Gonna Make You Mine,1969,1960,M,POP,1,3594,S,morning,Y,70
+Duane Eddy,Theme from Dixie,1961,1960,M,INSTRUMENTAL,5,4368,S,morning,Y,128
+Supremes,I Hear a Symphony,1965,1960,G,SOUL,5,3247,S,evening,Y,128
+Kenny Lynch,Puff (The Magic Dragon),1963,1960,M,POP,5,3562,S,afternoon,Y,128
+Matt Monro,From Russia with Love,1963,1960,M,POP,1,1043,S,night,Y,70
+Turtles,Happy Together,1967,1960,G,POP,2,1693,S,afternoon,Y,85
+Rockin' Berries,Poor Boy,1965,1960,G,POP,2,3734,S,morning,Y,85
+"Gaye, Marvin",One More Heartache,1966,1960,M,SOUL,5,4514,S,afternoon,Y,128
+Amen Corner,Hello Susie,1969,1960,G,ROCK,2,4033,S,morning,Y,85
+"Sunray, Ronny",Viva Bobby Joe,1969,1960,M,POP,1,3879,S,morning,Y,70
+Sam the Sham & Pharaohs,Wooly Bully,1965,1960,G,ROCK,1,3767,S,morning,Y,70
+Cliff Richard,Bachelor Boy,1962,1960,M,POP,1,3351,S,morning,Y,70
+"Christie, Lou",The Gypsy Cried,1962,1960,M,POP,5,4223,S,afternoon,Y,128
+Four Seasons,Dawn (Go Away),1964,1960,G,POP,2,4454,S,morning,Y,85
+Inner Scene,In the Garden,1969,1960,G,PSYCHEDELIC,1,4593,S,afternoon,Y,70
+Searchers,Sugar and Spice,1963,1960,G,BEAT,1,3205,S,morning,Y,70
+Herb Alpert & Tijuana Brass,Spanish Flea,1965,1960,G,INSTRUMENTAL,2,3478,S,morning,Y,85
+Peter & Gordon,True Love Ways,1965,1960,G,VOCAL,1,3154,S,night,Y,70
+Stevie Wonder,A Place in the Sun,1966,1960,M,SOUL,4,3867,S,afternoon,Y,115
+Billy Fury,In Summer,1963,1960,M,POP,2,3321,S,afternoon,Y,85
+Kinks,Waterloo Sunset,1967,1960,G,POP,1,2866,S,night,Y,70
+Jerry Butler,Only the Strong Survive,1969,1960,M,SOUL,2,4628,S,afternoon,Y,85
+Cliff Richard,I'm the Lonely One,1964,1960,M,POP,4,3355,S,night,Y,115
+Johnny Mathis,My Love for You,1960,1960,M,VOCAL,4,4670,S,night,Y,115
+Amboy Dukes,Journey to the Center of the Mind,1968,1960,G,PSYCHEDELIC,5,4032,S,afternoon,Y,128
+David & Jonathan,Lovers of the World Unite,1966,1960,G,VOCAL,4,2975,S,afternoon,Y,115
+Petula Clark,Downtown,1964,1960,F,POP,2,1286,S,afternoon,Y,85
+Tom Jones,Help Yourself,1968,1960,M,VOCAL,2,3264,S,afternoon,Y,85
+Drifters,When My Little Girl Is Smiling,1962,1960,G,SOUL,5,2989,S,morning,Y,128
+Roy Orbison,Dream Baby,1962,1960,M,VOCAL,1,3190,S,morning,Y,70
+Mary Wells,My Guy,1964,1960,F,SOUL,2,1041,S,morning,Y,85
+Dusty Springfield,All I See Is You,1966,1960,F,VOCAL,4,2999,S,night,Y,115
+Bee Gees,First of May,1969,1960,G,POP,3,2937,S,afternoon,Y,100
+Van Morrison,Brown Eyed Girl,1967,1960,M,ROCK,2,1721,S,afternoon,Y,85
+Ronettes,Walking in the Rain,1964,1960,G,POP,5,3746,S,evening,Y,128
+Marvelettes,Please Mr. Postman,1961,1960,G,SOUL,2,2023,S,morning,Y,85
+Marmalade,Ob-La-Di Ob-La-Da,1968,1960,G,POP,2,1015,S,morning,Y,85
+Righteous Brothers,(You're My) Soul and Inspiration,1966,1960,G,SOUL,5,3171,S,afternoon,Y,128
+Donovan,Hurdy Gurdy Man,1968,1960,M,PSYCHEDELIC,2,4349,S,evening,Y,85
+Dave Clark Five,Catch Us If You Can,1965,1960,G,BEAT,2,2893,S,morning,Y,85
+Andy Williams,A Fool Never Learns,1964,1960,M,VOCAL,5,4040,S,night,Y,128
+Colosseum,The Kettle,1969,1960,G,ROCK,1,4252,S,morning,Y,70
+Supremes,Where Did Our Love Go,1964,1960,G,SOUL,2,3243,S,morning,Y,85
+First Class,What a Beautiful Day,1969,1960,G,POP,1,4439,S,morning,Y,70
+Roulettes,Bad Time,1964,1960,G,BEAT,1,3750,S,morning,Y,70
+"Cocker, Joe",With a Little Help from My Friends,1968,1960,M,ROCK,1,4250,S,afternoon,Y,70
+Oliver,Good Morning Starshine,1969,1960,M,POP,3,3669,S,morning,Y,100
+Hollies,He Ain't Heavy He's My Brother,1969,1960,G,POP,1,1974,S,night,Y,70
+Bachelors,I Wouldn't Trade You for the World,1964,1960,G,VOCAL,2,4070,S,afternoon,Y,85
+Thunderclap Newman,Something in the Air,1969,1960,G,ROCK,2,2117,S,afternoon,Y,85
+Johnny Cash,The Ballad of Ira Hayes,1964,1960,M,COUNTRY,2,4663,S,evening,Y,85
+Cliff Richard,It'll Be Me,1962,1960,M,ROCK,1,2956,S,morning,Y,70
+Gerry & Pacemakers,How Do You Do It?,1963,1960,G,BEAT,1,2859,S,morning,Y,70
+Johnny Mathis,Gina,1962,1960,M,VOCAL,3,4671,S,night,Y,100
+Johnny Cash,Jackson,1967,1960,M,COUNTRY,1,4664,S,morning,Y,70
+Jim Reeves,Distant Drums,1966,1960,M,COUNTRY,1,729,S,night,Y,70
+Paul Revere & Raiders,Kicks,1966,1960,G,ROCK,2,3686,S,morning,Y,85
+Amen Corner,"Bend Me, Shape Me",1968,1960,G,POP,2,2875,S,morning,Y,85
+Joan Baez,There But for Fortune,1965,1960,F,FOLK,4,3077,S,night,Y,115
+Tommy James & Shondells,Crystal Blue Persuasion,1969,1960,G,POP,1,3926,S,afternoon,Y,70
+McCoys,Hang on Sloopy,1965,1960,G,ROCK,2,3630,S,morning,Y,85
+Iron Butterfly,In-A-Gadda-Da-Vida,1968,1960,G,ROCK,5,4594,S,night,Y,128
+Gerry & Pacemakers,Ferry Cross the Mersey,1964,1960,G,BEAT,4,2858,S,night,Y,115
+Traffic,"No Face, No Name, No Number",1968,1960,G,PSYCHEDELIC,5,3949,S,evening,Y,128
+Glitterhouse,Barbarella,1968,1960,G,PSYCHEDELIC,1,3462,S,afternoon,Y,70
+Beatles,I Feel Fine,1964,1960,G,BEAT,1,2844,S,morning,Y,70
+Kingsmen,Money,1964,1960,G,ROCK,5,4713,S,morning,Y,128
+Emile Ford & The Checkmates,On a Slow Boat to China,1960,1960,G,ROCK,2,3014,S,afternoon,Y,85
+Animals,House of the Rising Sun,1964,1960,G,ROCK,1,1811,S,evening,Y,70
+Adam Faith,The Time Has Come,1961,1960,M,POP,2,4006,S,afternoon,Y,85
+Cuff Links,Tracy,1969,1960,G,POP,4,4281,S,morning,Y,115
+Alan Price Set,The House That Jack Built,1967,1960,G,POP,2,4025,S,afternoon,Y,85
+Marmalade,Lovin' Things,1968,1960,G,POP,3,3124,S,morning,Y,100
+Tony Bennett,Who Can I Turn To?,1964,1960,M,VOCAL,5,3937,S,night,Y,128
+Merseybeats,Don't Turn Around,1964,1960,G,BEAT,5,3633,S,morning,Y,128
+Kinks,You Really Got Me,1964,1960,G,ROCK,1,2867,S,morning,Y,70
+Marmalade,Reflections of My Life,1969,1960,G,POP,2,3123,S,night,Y,85
+Johnny Mathis,My Kind of Girl,1961,1960,M,VOCAL,2,3547,S,afternoon,Y,85
+Gary U.S. Bonds,"Twist, Twist Senora",1962,1960,M,ROCK,4,4503,S,morning,Y,115
+Who,Magic Bus,1968,1960,G,ROCK,5,3983,S,afternoon,Y,128
+Coasters,"Wake Me, Shake Me",1960,1960,G,SOUL,5,4248,S,morning,Y,128
+American Breed,"Bend Me, Shape Me",1967,1960,G,POP,2,4034,S,morning,Y,85
+Shangri-Las,Leader of the Pack,1964,1960,G,POP,5,3795,S,morning,Y,128
+Frank Ifield,I Remember You,1962,1960,M,VOCAL,1,2901,S,night,Y,70
+Vince Hill,Edelweiss,1967,1960,M,VOCAL,1,3276,S,night,Y,70
+Gordon Waller,Rosecrans Blvd,1968,1960,M,POP,1,4541,S,afternoon,Y,70
+Heinz,Just Like Eddie,1963,1960,M,ROCK,2,4560,S,morning,Y,85
+Johnny Mathis,What Will Mary Say,1963,1960,M,VOCAL,4,4672,S,night,Y,115
+Sandy Nelson,Let There Be Drums,1961,1960,M,INSTRUMENTAL,2,3769,S,morning,Y,85
+Heinz,Questions I Can't Answer,1964,1960,M,ROCK,5,4563,S,afternoon,Y,128
+Chuck Berry,Bye Bye Johnny,1960,1960,M,ROCK,1,4227,S,morning,Y,70
+Led Zeppelin,Dazed and Confused,1969,1960,G,ROCK,1,4722,S,night,Y,70
+Anthony Newley,The Joker,1964,1960,M,VOCAL,1,4052,S,night,Y,70
+Bobby Goldsboro,Honey,1968,1960,M,VOCAL,1,3333,S,night,Y,70
+Jane Birkin,Je t'aime... moi non plus,1969,1960,F,POP,1,702,S,night,Y,70
+Love Affair,Bringing On Back the Good Times,1969,1960,G,POP,4,3113,S,morning,Y,115
+Four Seasons,Working My Way Back to You,1966,1960,G,POP,4,4459,S,morning,Y,115
+Sweet,Little Willy,1972,1970,G,POP,1,5087,S,afternoon,Y,70
+Jefferson Starship,Miracles,1975,1970,G,ROCK,2,5000,S,morning,Y,85
+Barry White,Can't Get Enough of Your Love Babe,1974,1970,M,SOUL,2,132,S,afternoon,Y,85
+O'Jays,Love Train,1972,1970,G,SOUL,2,2040,S,morning,Y,85
+Lulu,The Man Who Sold the World,1974,1970,F,POP,2,959,S,afternoon,Y,85
+Bread,Make It with You,1970,1970,G,POP,1,1850,S,evening,Y,70
+Electric Light Orchestra,Don't Bring Me Down,1979,1970,G,ROCK,2,451,S,morning,Y,85
+Deep Purple,Smoke on the Water,1973,1970,G,ROCK,2,4815,S,morning,Y,85
+Commodores,Easy,1977,1970,G,ROCK,2,4805,S,morning,Y,85
+Bay City Rollers,Remember (Sha-La-La-La),1974,1970,G,ROCK,2,4779,S,morning,Y,85
+Frankie Valli & The Four Seasons,"December, 1963 (Oh, What a Night)",1975,1970,G,ROCK,2,4840,S,morning,Y,85
+Boomtown Rats,I Don't Like Mondays,1979,1970,G,ROCK,2,1843,S,morning,Y,85
+Stevie Wonder,I Wish,1976,1970,Male,Soul,5,5219,S,afternoon,Y,128
+Kinks,Lola,1970,1970,G,ROCK,1,5082,S,afternoon,Y,70
+Supertramp,Goodbye Stranger,1979,1970,G,ROCK,2,4883,S,morning,Y,85
+Paul McCartney,Let 'Em In,1976,1970,M,ROCK,2,1250,S,afternoon,Y,85
+Dr. Hook,A Little Bit More,1976,1970,G,POP,1,403,S,night,Y,70
+Simon & Garfunkel,Cecilia,1970,1970,G,POP,2,1518,S,morning,Y,85
+Labelle,Lady Marmalade,1974,1970,G,ROCK,2,4858,S,morning,Y,85
+Thin Lizzy,Whiskey in the Jar,1972,1970,G,ROCK,2,1666,S,morning,Y,85
+Peters and Lee,Welcome Home,1973,1970,G,ROCK,2,4867,S,morning,Y,85
+Carpenters,(They Long to Be) Close to You,1970,1970,G,POP,1,265,S,evening,Y,70
+Bee Gees,Tragedy,1979,1970,G,POP,2,142,S,morning,Y,85
+Plastic Bertrand,Ca Plane Pour Moi,1977,1970,M,POP,1,5150,S,afternoon,Y,70
+Lou Reed,Perfect Day,1972,1970,G,ROCK,2,5013,S,morning,Y,85
+Roxy Music,Dance Away,1979,1970,G,ROCK,2,4872,S,morning,Y,85
+Queen,Tie Your Mother Down,1976,1970,Male,Rock,5,5194,S,evening,Y,128
+Thin Lizzy,Don't Believe a Word,1976,1970,G,ROCK,2,4933,S,morning,Y,85
+Terry Dactyl and the Dinosaurs,Seaside Shuffle,1972,1970,G,POP,1,5173,S,afternoon,Y,70
+Bob Seger,Turn the Page (Live),1976,1970,G,ROCK,2,4957,S,morning,Y,85
+Mud,Lonely This Christmas,1974,1970,G,CHRISTMAS,1,1119,S,evening,Y,70
+Chic,Good Times,1979,1970,G,DISCO,2,1869,S,afternoon,Y,85
+Bryan Ferry,Let's Stick Together,1976,1970,G,ROCK,2,4795,S,morning,Y,85
+Suzi Quatro,If You Can't Give Me Love,1978,1970,G,ROCK,2,4886,S,morning,Y,85
+Michael Jackson,Rock with You,1979,1970,M,POP,2,1076,S,morning,Y,85
+Barry Blue,Dancin' (on a Saturday Night),1973,1970,M,POP,1,5070,S,evening,Y,70
+Drifters,Kissin' in the Back Row of the Movies,1974,1970,G,POP,2,1916,S,afternoon,Y,85
+Typically Tropical,Barbados,1975,1970,G,POP,1,5161,S,afternoon,Y,70
+Paul McCartney,Mull of Kintyre,1977,1970,M,ROCK,1,1244,S,evening,Y,70
+Cat Stevens,Wild World,1970,1970,M,ROCK,1,272,S,evening,Y,70
+Queen,We Will Rock You,1977,1970,G,ROCK,2,1350,S,afternoon,Y,85
+Clifford T. Ward,Gaye,1973,1970,M,POP,1,5072,S,night,Y,70
+Nick Lowe,I Knew the Bride,1977,1970,Male,Rock,5,5215,S,afternoon,Y,128
+Exile,Kiss You All Over,1978,1970,G,POP,2,519,S,afternoon,Y,85
+Floaters,Float On,1977,1970,G,ROCK,2,4905,S,morning,Y,85
+T. Rex,Metal Guru,1972,1970,G,ROCK,2,1627,S,afternoon,Y,85
+Charlie Rich,The Most Beautiful Girl,1973,1970,M,COUNTRY,1,1866,S,evening,Y,70
+Heatwave,Mind Blowing Decisions,1978,1970,Mixed,Soul,2,5259,S,night,Y,85
+Al Stewart,Year of the Cat,1976,1970,G,ROCK,2,4757,S,morning,Y,85
+Cheap Trick,I Want You to Want Me (Live),1979,1970,G,ROCK,2,4967,S,morning,Y,85
+Barbra Streisand,The Way We Were,1973,1970,F,POP,1,122,S,evening,Y,70
+Commodores,Three Times a Lady,1978,1970,G,ROCK,2,4806,S,morning,Y,85
+Showaddywaddy,Hey Rock and Roll,1974,1970,G,ROCK,1,5160,S,evening,Y,70
+Demis Roussos,The Roussos Phenomenon EP,1976,1970,M,POP,1,5043,S,evening,Y,70
+Carpenters,We've Only Just Begun,1970,1970,G,POP,1,269,S,night,Y,70
+Queen,Killer Queen,1974,1970,G,ROCK,2,1351,S,afternoon,Y,85
+Michael Jackson,Ben,1972,1970,M,POP,1,1088,S,night,Y,70
+Royal Scots Dragoon Guards,Amazing Grace,1972,1970,G,INSTRUMENTAL,1,5171,S,morning,Y,70
+CCS,Tap Turns on the Water,1971,1970,G,ROCK,1,5062,S,evening,Y,70
+Jacksons,Show You the Way to Go,1977,1970,G,SOUL,1,5103,S,evening,Y,70
+Boney M.,Hooray! Hooray! It's a Holi-Holiday,1979,1970,G,ROCK,2,4790,S,morning,Y,85
+Elton John,Bennie and the Jets,1973,1970,G,ROCK,2,4828,S,morning,Y,85
+Our Kid,You Just Might See Me Cry,1976,1970,G,POP,1,5042,S,night,Y,70
+Jam,All Around the World,1977,1970,G,ROCK,2,4907,S,morning,Y,85
+Joe Cocker,You Are So Beautiful,1974,1970,M,ROCK,1,742,S,evening,Y,70
+KC & The Sunshine Band,Get Down Tonight,1975,1970,G,POP,2,820,S,afternoon,Y,85
+Knack,My Sharona,1979,1970,G,ROCK,1,5113,S,afternoon,Y,70
+Deep Purple,Black Night,1970,1970,G,ROCK,2,4814,S,morning,Y,85
+Dire Straits,Sultans of Swing,1978,1970,G,ROCK,2,384,S,afternoon,Y,85
+"Emerson, Lake & Palmer",Lucky Man,1970,1970,G,ROCK,2,4982,S,morning,Y,85
+Thin Lizzy,Dancing in the Moonlight (It's Caught Me in Its Spotlight),1977,1970,G,ROCK,2,4932,S,morning,Y,85
+Status Quo,Wild Side of Life,1976,1970,G,ROCK,4,5264,S,morning,Y,115
+Pretenders,Brass in Pocket,1979,1970,G,ROCK,2,1330,S,afternoon,Y,85
+Thin Lizzy,Waiting for an Alibi,1979,1970,G,ROCK,2,4934,S,morning,Y,85
+Cheap Trick,I Want You to Want Me,1977,1970,G,ROCK,2,282,S,morning,Y,85
+Neil Diamond,Cracklin' Rosie,1970,1970,M,POP,2,1137,S,morning,Y,85
+Billy Joel,Piano Man,1973,1970,M,POP,1,184,S,night,Y,70
+Knack,My Sharona,1979,1970,G,ROCK,2,4910,S,morning,Y,85
+Genesis,Follow You Follow Me,1978,1970,G,ROCK,2,4991,S,morning,Y,85
+Blondie,Hanging on the Telephone,1978,1970,G,ROCK,2,4785,S,morning,Y,85
+Ray Stevens,The Streak,1974,1970,M,NOVELTY,1,5179,S,afternoon,Y,70
+Wings,Junior's Farm,1974,1970,Male,Rock,5,5209,S,afternoon,Y,128
+Sweet,Fox on the Run,1975,1970,G,ROCK,2,1622,S,morning,Y,85
+Steve Miller Band,Fly Like an Eagle,1976,1970,G,ROCK,2,1583,S,afternoon,Y,85
+Gilbert O'Sullivan,Get Down,1973,1970,M,POP,2,595,S,afternoon,Y,85
+Trammps,Disco Inferno,1977,1970,G,ROCK,2,4926,S,morning,Y,85
+Cozy Powell,Dance with the Devil,1973,1970,Male,Rock,5,5245,S,afternoon,Y,128
+Who,Won't Get Fooled Again,1971,1970,G,ROCK,2,1779,S,afternoon,Y,85
+Gloria Gaynor,I Will Survive,1978,1970,F,POP,2,607,S,morning,Y,85
+Kenny,Fancy Pants,1975,1970,Male,Pop,5,5223,S,afternoon,Y,128
+Carl Malcolm,Fattie Fattie,1975,1970,Male,Reggae,4,5248,S,afternoon,Y,115
+Status Quo,Down Down,1974,1970,G,ROCK,2,1566,S,morning,Y,85
+Tavares,More Than a Woman,1977,1970,G,DISCO,2,2114,S,afternoon,Y,85
+Bruce Springsteen,Born to Run,1975,1970,M,ROCK,2,246,S,afternoon,Y,85
+Doobie Brothers,What a Fool Believes,1979,1970,G,ROCK,2,4901,S,morning,Y,85
+Johnny Mathis,When a Child Is Born,1976,1970,M,POP,1,767,S,night,Y,70
+ABBA,"Knowing Me, Knowing You",1977,1970,G,ROCK,2,4751,S,morning,Y,85
+Gary Glitter,Do You Wanna Touch Me? (Oh Yeah),1973,1970,G,ROCK,2,4842,S,morning,Y,85
+Paul McCartney,Band on the Run,1973,1970,M,ROCK,2,1240,S,afternoon,Y,85
+Village People,Macho Man,1978,1970,G,ROCK,2,5027,S,morning,Y,85
+Carpenters,Rainy Days and Mondays,1971,1970,G,POP,1,268,S,night,Y,70
+Hotlegs,Neanderthal Man,1970,1970,M,ROCK,1,5049,S,evening,Y,70
+Bonnie Raitt,Angel from Montgomery,1974,1970,G,ROCK,2,4958,S,morning,Y,85
+Michael Jackson,One Day in Your Life,1975,1970,M,POP,1,1089,S,evening,Y,70
+Elton John,The Bitch Is Back,1974,1970,G,ROCK,2,4980,S,morning,Y,85
+Billie Jo Spears,Blanket on the Ground,1975,1970,F,COUNTRY,1,5183,S,morning,Y,70
+Guys 'n' Dolls,There's a Whole Lot of Loving,1975,1970,G,POP,1,5076,S,afternoon,Y,70
+"Emerson, Lake & Palmer",Fanfare for the Common Man,1977,1970,G,ROCK,2,4835,S,morning,Y,85
+Mott the Hoople,All the Young Dudes,1972,1970,G,ROCK,2,1117,S,morning,Y,85
+Undertones,Teenage Kicks,1978,1970,G,ROCK,2,1711,S,morning,Y,85
+David Essex,Hold Me Close,1975,1970,G,ROCK,2,4811,S,morning,Y,85
+Kiss,Detroit Rock City,1976,1970,G,ROCK,2,5006,S,morning,Y,85
+Chicory Tip,Son of My Father,1972,1970,M,POP,1,5037,S,afternoon,Y,70
+Elton John,Rocket Man (I Think It's Going to Be a Long Long Time),1972,1970,M,POP,2,461,S,morning,Y,85
+America,Ventura Highway,1972,1970,G,POP,2,1808,S,afternoon,Y,85
+Kraftwerk,Autobahn,1975,1970,G,ROCK,2,4857,S,morning,Y,85
+Dana,All Kinds of Everything,1970,1970,F,POP,1,5048,S,morning,Y,70
+Flying Lizards,Money,1979,1970,Mixed,New Wave,4,5261,S,afternoon,Y,115
+Cliff Richard,We Don't Talk Anymore,1979,1970,M,POP,2,307,S,afternoon,Y,85
+Clout,Substitute,1978,1970,G,POP,1,5192,S,morning,Y,70
+Rick Nelson,Garden Party,1972,1970,M,POP,2,1390,S,afternoon,Y,85
+David Soul,Don't Give Up on Us,1976,1970,M,POP,1,1904,S,night,Y,70
+Sherbet,Howzat,1976,1970,G,ROCK,2,4876,S,morning,Y,85
+ABBA,Honey Honey,1974,1970,G,POP,2,1801,S,morning,Y,85
+Dave and Ansell Collins,Double Barrel,1971,1970,Male,Reggae,5,5251,S,morning,Y,128
+Grace Jones,Slave to the Rhythm,1985,1980,F,POP,2,614,S,afternoon,Y,85
+Tiffany,I Think We're Alone Now,1987,1980,F,POP,2,1672,S,afternoon,Y,85
+ABC,Poison Arrow,1982,1980,G,POP,2,24,S,afternoon,Y,85
+Rockwell,Somebody's Watching Me,1984,1980,M,POP,2,1420,S,morning,Y,85
+Randy Crawford,One Day I'll Fly Away,1980,1980,F,SOUL,1,1371,S,night,Y,70
+Debbie Harry,French Kissin' in the USA,1986,1980,F,POP,2,357,S,morning,Y,85
+Madonna,La Isla Bonita,1986,1980,F,POP,2,982,S,morning,Y,85
+Kelly Marie,Feels Like I'm in Love,1980,1980,F,DISCO,2,2000,S,morning,Y,85
+Trio,Da Da Da,1982,1980,G,POP,2,2128,S,morning,Y,85
+Duran Duran,The Reflex,1983,1980,G,POP,2,414,S,afternoon,Y,85
+Alison Moyet,All Cried Out,1984,1980,F,POP,1,55,S,night,Y,70
+Yazz,The Only Way Is Up,1988,1980,F,DANCE,2,2151,S,morning,Y,85
+Daryl Hall & John Oates,Maneater,1982,1980,G,POP,2,335,S,afternoon,Y,85
+Phil Oakley,Together in Electric Dreams,1984,1980,M,POP,2,1298,S,morning,Y,85
+Queen,Under Pressure,1981,1980,G,ROCK,2,1354,S,morning,Y,85
+Earth Wind & Fire,Let's Groove,1981,1980,G,DISCO,2,1922,S,afternoon,Y,85
+A-ha,Hunting High and Low,1985,1980,G,POP,1,7,S,night,Y,70
+Jennifer Rush,The Power of Love,1984,1980,F,POP,1,717,S,night,Y,70
+New Order,Blue Monday,1983,1980,G,POP,2,1150,S,morning,Y,85
+Van Morrison,Have I Told You Lately,1989,1980,M,ROCK,1,1723,S,evening,Y,70
+Soul II Soul,Back to Life (However Do You Want Me),1989,1980,G,SOUL,2,2096,S,morning,Y,85
+Human League,Mirror Man,1982,1980,G,POP,2,1983,S,afternoon,Y,85
+Eddy Grant,Electric Avenue,1982,1980,M,REGGAE,2,442,S,afternoon,Y,85
+Heart,These Dreams,1985,1980,G,ROCK,1,645,S,night,Y,70
+Rod Stewart,Baby Jane,1983,1980,M,ROCK,2,1426,S,morning,Y,85
+Spandau Ballet,Chant No. 1 (I Don't Need This Pressure On),1981,1980,G,POP,2,2097,S,afternoon,Y,85
+Kenny Loggins,Danger Zone,1986,1980,M,ROCK,2,826,S,morning,Y,85
+Diana Ross,Endless Love,1981,1980,F,POP,1,375,S,night,Y,70
+Laura Branigan,Self Control,1984,1980,F,POP,2,887,S,afternoon,Y,85
+Marc Almond,Something's Gotten Hold of My Heart,1988,1980,M,POP,1,995,S,night,Y,70
+Culture Club,Do You Really Want to Hurt Me,1982,1980,G,POP,1,325,S,night,Y,70
+Bruce Springsteen,Born in the U.S.A.,1984,1980,M,ROCK,2,244,S,morning,Y,85
+Ottawan,Hands Up (Give Me Your Heart),1981,1980,G,POP,2,2045,S,morning,Y,85
+Steve Winwood,Valerie,1982,1980,M,POP,2,1585,S,morning,Y,85
+Bertie Higgins,Key Largo,1981,1980,M,POP,1,152,S,night,Y,70
+Cyndi Lauper,Girls Just Want to Have Fun,1983,1980,F,POP,2,328,S,morning,Y,85
+Curiosity Killed the Cat,Down to Earth,1986,1980,G,POP,2,1897,S,morning,Y,85
+Cindy Lauper,True Colors,1986,1980,F,POP,1,303,S,evening,Y,70
+Alison Moyet,Love Resurrection,1984,1980,F,POP,2,54,S,morning,Y,85
+Madonna,Into the Groove,1985,1980,F,POP,2,979,S,morning,Y,85
+Kim Carnes,Bette Davis Eyes,1981,1980,F,ROCK,2,839,S,morning,Y,85
+Bucks Fizz,Making Your Mind Up,1981,1980,G,POP,2,1856,S,morning,Y,85
+Kate Bush,Don't Give Up,1986,1980,F,POP,1,1284,S,evening,Y,70
+Lionel Richie,All Night Long (All Night),1983,1980,M,SOUL,2,932,S,morning,Y,85
+Stevie Wonder,Lately,1980,1980,M,SOUL,1,1594,S,evening,Y,70
+Police,De Do Do Do De Da Da Da,1980,1980,G,ROCK,2,2058,S,morning,Y,85
+Michael Jackson,Billie Jean,1982,1980,M,POP,2,1077,S,afternoon,Y,85
+Phyllis Nelson,Move Closer,1984,1980,F,SOUL,1,1300,S,evening,Y,70
+George Harrison,Got My Mind Set on You,1987,1980,M,ROCK,2,582,S,morning,Y,85
+Daryl Hall & John Oates,I Can't Go for That (No Can Do),1981,1980,G,POP,2,337,S,morning,Y,85
+Wet Wet Wet,Angel Eyes (Home and Away),1987,1980,G,POP,2,2140,S,morning,Y,85
+Johnny Hates Jazz,Shattered Dreams,1987,1980,G,POP,2,763,S,afternoon,Y,85
+Jermaine Stewart,We Don't Have to Take Our Clothes Off,1986,1980,M,POP,2,1994,S,afternoon,Y,85
+Diana Ross,Chain Reaction,1985,1980,F,POP,2,374,S,afternoon,Y,85
+Spandau Ballet,Through the Barricades,1986,1980,G,POP,1,1552,S,evening,Y,70
+Pat Benatar,Hit Me with Your Best Shot,1980,1980,F,ROCK,2,1229,S,morning,Y,85
+Bananarama,I Heard a Rumour,1987,1980,G,POP,2,1817,S,morning,Y,85
+Kim Wilde,Kids in America,1981,1980,F,POP,2,840,S,morning,Y,85
+Eurythmics,It's Alright (Baby's Coming Back),1985,1980,G,POP,2,1934,S,afternoon,Y,85
+Sister Sledge,Frankie,1985,1980,G,SOUL,2,1531,S,afternoon,Y,85
+Madness,House of Fun,1982,1980,G,POP,2,974,S,morning,Y,85
+Soft Cell,"Say Hello, Wave Goodbye",1981,1980,G,POP,1,2092,S,evening,Y,70
+Shakin' Stevens,Green Door,1981,1980,M,POP,2,1491,S,afternoon,Y,85
+Peter Gabriel,In Your Eyes,1986,1980,M,ROCK,1,1281,S,night,Y,70
+Culture Club,Karma Chameleon,1983,1980,G,POP,2,324,S,afternoon,Y,85
+Wham!,Last Christmas,1984,1980,G,CHRISTMAS,1,1755,S,night,Y,70
+James,Sit Down,1989,1980,G,ROCK,2,682,S,morning,Y,85
+Fairground Attraction,Perfect,1988,1980,G,POP,2,521,S,morning,Y,85
+Cindy Lauper,Girls Just Want to Have Fun,1983,1980,F,POP,2,301,S,afternoon,Y,85
+Phil Collins,Easy Lover,1984,1980,M,ROCK,2,1296,S,morning,Y,85
+Chicago,Hard to Say I'm Sorry,1982,1980,G,ROCK,1,288,S,night,Y,70
+Womack & Womack,Teardrops,1988,1980,G,SOUL,2,1794,S,morning,Y,85
+Lionel Richie,You Are,1982,1980,M,SOUL,2,937,S,morning,Y,85
+Daryl Hall & John Oates,You Make My Dreams (Come True),1980,1980,G,POP,2,334,S,afternoon,Y,85
+Dolly Parton,Islands in the Stream,1983,1980,F,COUNTRY,2,830,S,morning,Y,85
+Jennifer Warnes,(I've Had) The Time of My Life,1987,1980,F,POP,2,169,S,afternoon,Y,85
+Daryl Hall & John Oates,Out of Touch,1984,1980,G,POP,2,336,S,afternoon,Y,85
+Deniece Williams,Let's Hear It for the Boy,1984,1980,F,POP,2,362,S,afternoon,Y,85
+A-ha,Take on Me,1984,1980,G,POP,2,5,S,afternoon,Y,85
+Alison Moyet,Is This Love?,1986,1980,F,POP,2,56,S,afternoon,Y,85
+Midge Ure,If I Was,1985,1980,M,POP,2,2031,S,morning,Y,85
+Barbra Streisand,Woman in Love,1980,1980,F,POP,1,123,S,evening,Y,70
+Paul McCartney,Coming Up,1980,1980,M,ROCK,2,1246,S,morning,Y,85
+Mel & Kim,Respectable,1987,1980,G,POP,2,1056,S,afternoon,Y,85
+Michael Sembello,Maniac,1983,1980,M,POP,2,2029,S,morning,Y,85
+Firm,Star Trekkin',1987,1980,G,POP,2,1940,S,morning,Y,85
+Whitney Houston,I Wanna Dance with Somebody (Who Loves Me),1987,1980,F,POP,2,1766,S,afternoon,Y,85
+Kylie Minogue,I Should Be So Lucky,1987,1980,F,POP,2,861,S,morning,Y,85
+Bananarama,Cruel Summer,1983,1980,G,POP,2,118,S,morning,Y,85
+Boris Gardiner,I Want to Wake Up with You,1986,1980,M,REGGAE,1,1844,S,night,Y,70
+T'Pau,Heart and Soul,1987,1980,G,POP,2,1683,S,afternoon,Y,85
+Aretha Franklin,I Knew You Were Waiting (For Me),1987,1980,F,SOUL,2,88,S,afternoon,Y,85
+Michael Ball,Love Changes Everything,1989,1980,M,POP,1,1067,S,evening,Y,70
+Billy Joel,We Didn't Start the Fire,1989,1980,M,POP,2,190,S,afternoon,Y,85
+Human League,Don't You Want Me,1981,1980,G,POP,2,1980,S,afternoon,Y,85
+Blondie,The Tide Is High,1980,1980,G,POP,2,202,S,afternoon,Y,85
+Dire Straits,Money for Nothing,1985,1980,G,ROCK,2,385,S,morning,Y,85
+Queen,Radio Ga Ga,1984,1980,G,ROCK,2,1352,S,afternoon,Y,85
+Juice Newton,Angel of the Morning,1981,1980,F,COUNTRY,1,783,S,night,Y,70
+Wham!,The Edge of Heaven,1986,1980,G,POP,2,1759,S,afternoon,Y,85
+Stone Roses,Fools Gold,1989,1980,G,ROCK,2,1599,S,afternoon,Y,85
+Roy Orbison,You Got It,1989,1980,M,POP,2,1448,S,afternoon,Y,85
+Charlene,I've Never Been to Me,1982,1980,F,POP,1,1865,S,night,Y,70
+Genesis,Land of Confusion,1986,1980,G,ROCK,2,576,S,morning,Y,85
+Roxette,Listen to Your Heart,1988,1980,G,POP,1,1442,S,evening,Y,70
+S'Express,Theme from S-Express,1988,1980,G,DANCE,2,2075,S,morning,Y,85
+Gloria Estefan,01/02/2003,1988,1980,F,POP,2,605,S,morning,Y,85
+Wet Wet Wet,Wishing I Was Lucky,1987,1980,G,POP,2,2141,S,afternoon,Y,85
+UB40,Kingston Town,1989,1980,G,REGGAE,2,1706,S,afternoon,Y,85
+Stevie Wonder,I Just Called to Say I Love You,1984,1980,M,SOUL,1,1587,S,evening,Y,70
+Cindy Lauper,Time After Time,1983,1980,F,POP,1,302,S,evening,Y,70
+Steve Winwood,Higher Love,1986,1980,M,POP,2,1584,S,afternoon,Y,85
+Prince,1999,1982,1980,M,POP,2,1335,S,morning,Y,85
+Steve Miller Band,Abracadabra,1982,1980,G,ROCK,2,1582,S,afternoon,Y,85
+Smiths,There Is a Light That Never Goes Out,1986,1980,G,ROCK,1,1540,S,night,Y,70
+Julio Iglesias,Begin the Beguine (Volver a Empezar),1981,1980,M,POP,1,786,S,night,Y,70
+Robert Palmer,Addicted to Love,1985,1980,M,ROCK,2,1411,S,morning,Y,85
+Sade,Your Love Is King,1984,1980,F,SOUL,2,1454,S,morning,Y,85
+U2,Sunday Bloody Sunday,1983,1980,G,ROCK,2,1699,S,morning,Y,85
+Foreigner,Waiting for a Girl Like You,1981,1980,G,ROCK,1,544,S,evening,Y,70
+Janet Jackson,What Have You Done for Me Lately,1986,1980,F,SOUL,2,704,S,morning,Y,85
+Whitney Houston,One Moment in Time,1988,1980,F,POP,1,1768,S,night,Y,70
+Soft Cell,Tainted Love,1981,1980,G,POP,2,1547,S,afternoon,Y,85
+Huey Lewis & The News,The Power of Love,1985,1980,G,ROCK,2,655,S,afternoon,Y,85
+Status Quo,In the Army Now,1986,1980,G,ROCK,2,1568,S,morning,Y,85
+Robert Miles,Children,1995,1990,M,DANCE,2,2068,S,morning,Y,85
+Eternal,Stay,1993,1990,G,SOUL,2,1933,S,morning,Y,85
+Pulp,Disco 2000,1995,1990,G,ROCK,2,1343,S,afternoon,Y,85
+Annie Lennox,"No More ""I Love You's""",1995,1990,F,POP,1,82,S,evening,Y,70
+George Michael,Jesus to a Child,1996,1990,M,POP,1,587,S,night,Y,70
+Rednex,Cotton Eye Joe,1994,1990,G,DANCE,2,2062,S,morning,Y,85
+Jeff Buckley,Hallelujah,1994,1990,M,ROCK,1,711,S,evening,Y,70
+M People,Moving on Up,1993,1990,G,POP,2,965,S,morning,Y,85
+Alanis Morissette,Thank U,1998,1990,F,ROCK,2,48,S,morning,Y,85
+Richard Marx,Hazard,1991,1990,M,POP,1,1385,S,evening,Y,70
+Jordan Knight,Give It to You,1999,1990,M,POP,2,776,S,afternoon,Y,85
+Shania Twain,From This Moment On,1997,1990,F,COUNTRY,1,1496,S,night,Y,70
+Santana,Maria Maria (Solo Edit),1999,1990,M,ROCK,2,1472,S,afternoon,Y,85
+Pearl Jam,Alive,1991,1990,G,ROCK,2,1263,S,morning,Y,85
+Elvis Costello,She,1999,1990,M,POP,1,474,S,night,Y,70
+Enya,Anywhere Is,1995,1990,F,POP,2,498,S,morning,Y,85
+Oasis,Don't Look Back in Anger,1995,1990,G,ROCK,2,1178,S,morning,Y,85
+Luther Vandross,Always and Forever,1994,1990,M,SOUL,1,963,S,night,Y,70
+Eternal,I Wanna Be the Only One,1997,1990,G,SOUL,2,506,S,afternoon,Y,85
+New Order,World in Motion,1990,1990,G,POP,2,1152,S,morning,Y,85
+Pearl Jam,Jeremy,1991,1990,G,ROCK,2,1264,S,afternoon,Y,85
+Lighthouse Family,Lifted,1995,1990,G,POP,2,918,S,morning,Y,85
+Alice Deejay,Better Off Alone,1999,1990,G,POP,2,1805,S,morning,Y,85
+Depeche Mode,Enjoy the Silence,1990,1990,G,POP,2,363,S,afternoon,Y,85
+Crowded House,Weather with You,1991,1990,G,ROCK,2,323,S,morning,Y,85
+Natalie Imbruglia,Big Mistake,1998,1990,F,POP,2,2034,S,afternoon,Y,85
+Ricky Martin,Livin' la Vida Loca,1999,1990,M,POP,2,2066,S,morning,Y,85
+Manic Street Preachers,A Design for Life,1996,1990,G,ROCK,2,993,S,afternoon,Y,85
+Steps,Tragedy,1998,1990,G,POP,2,1576,S,afternoon,Y,85
+Westlife,Swear It Again,1999,1990,G,POP,1,1750,S,night,Y,70
+Backstreet Boys,Larger Than Life,1999,1990,G,POP,2,115,S,afternoon,Y,85
+Whitney Houston,I Will Always Love You,1992,1990,F,POP,1,1765,S,night,Y,70
+Celine Dion,The Power of Love,1993,1990,F,POP,1,274,S,night,Y,70
+Boyz II Men,End of the Road,1992,1990,G,SOUL,1,233,S,evening,Y,70
+Deep Blue Something,Breakfast at Tiffany's,1995,1990,G,ROCK,2,358,S,morning,Y,85
+Annie Lennox,Why,1992,1990,F,POP,1,80,S,night,Y,70
+Madonna,Vogue,1990,1990,F,POP,2,984,S,morning,Y,85
+Shania Twain,That Don't Impress Me Much,1997,1990,F,COUNTRY,2,1495,S,afternoon,Y,85
+M People,One Night in Heaven,1993,1990,G,POP,2,967,S,afternoon,Y,85
+Janet Jackson,That's the Way Love Goes,1993,1990,F,SOUL,2,707,S,afternoon,Y,85
+Genesis,I Can't Dance,1991,1990,G,ROCK,2,577,S,morning,Y,85
+Guns N' Roses,November Rain,1991,1990,G,ROCK,1,625,S,evening,Y,70
+Marc Cohn,Walking in Memphis,1991,1990,M,POP,2,1000,S,morning,Y,85
+George Michael,Freedom! '90,1990,1990,M,POP,2,586,S,afternoon,Y,85
+Maxi Priest,Close to You,1990,1990,M,REGGAE,2,1047,S,morning,Y,85
+Sheryl Crow,All I Wanna Do,1993,1990,F,ROCK,2,1501,S,afternoon,Y,85
+Spice Girls,Viva Forever,1997,1990,G,POP,1,1562,S,evening,Y,70
+Steps,One for Sorrow,1998,1990,G,POP,2,2103,S,afternoon,Y,85
+Take That,Never Forget,1995,1990,G,POP,2,1631,S,morning,Y,85
+Robbie Williams,She's the One,1999,1990,M,POP,1,1407,S,night,Y,70
+No Doubt,Don't Speak,1995,1990,G,ROCK,1,1170,S,evening,Y,70
+Savage Garden,I Knew I Loved You,1999,1990,G,POP,1,1475,S,evening,Y,70
+Honeyz,Finally Found,1998,1990,G,SOUL,1,651,S,night,Y,70
+Babylon Zoo,Spaceman,1996,1990,G,ROCK,2,1814,S,morning,Y,85
+Pato Banton,Baby Come Back,1994,1990,M,REGGAE,2,2051,S,morning,Y,85
+Gabrielle,Dreams,1993,1990,F,POP,2,565,S,afternoon,Y,85
+Wilson Phillips,Hold On,1990,1990,G,POP,2,1788,S,afternoon,Y,85
+Boyz II Men,I'll Make Love to You,1994,1990,G,SOUL,1,234,S,evening,Y,70
+Spice Girls,Spice Up Your Life,1997,1990,G,POP,2,1561,S,afternoon,Y,85
+Enrique Iglesias,Bailamos,1999,1990,M,POP,2,496,S,morning,Y,85
+All Saints,Never Ever,1997,1990,G,POP,1,57,S,night,Y,70
+Santana,Smooth (Solo Edit),1999,1990,M,ROCK,2,1471,S,afternoon,Y,85
+Savage Garden,Truly Madly Deeply,1997,1990,G,POP,1,1474,S,night,Y,70
+Oasis,Wonderwall,1995,1990,G,ROCK,1,1177,S,evening,Y,70
+Bryan Adams,(Everything I Do) I Do It for You,1991,1990,M,ROCK,1,255,S,night,Y,70
+Bon Jovi,Always,1994,1990,G,ROCK,1,224,S,night,Y,70
+Chesney Hawkes,The One and Only,1991,1990,M,POP,2,1867,S,morning,Y,85
+Elton John,Circle of Life,1994,1990,M,POP,1,470,S,night,Y,70
+Wet Wet Wet,Love Is All Around,1994,1990,G,POP,1,1751,S,evening,Y,70
+Shamen,Ebeneezer Goode,1992,1990,G,DANCE,2,2086,S,morning,Y,85
+Marti Pellow,Love Is All Around,1994,1990,M,POP,1,1024,S,night,Y,70
+UB40,Can't Help Falling in Love,1993,1990,G,REGGAE,2,1705,S,morning,Y,85
+Shaggy,Boombastic,1995,1990,M,REGGAE,2,2083,S,morning,Y,85
+Christina Aguilera,What a Girl Wants,1999,1990,F,POP,2,1879,S,afternoon,Y,85
+Peter Andre,Mysterious Girl (Solo Edit),1995,1990,M,POP,2,1279,S,morning,Y,85
+Tina Turner,GoldenEye,1995,1990,F,POP,1,1681,S,evening,Y,70
+George Michael,Fastlove,1996,1990,M,POP,2,588,S,morning,Y,85
+Eva Cassidy,Over the Rainbow,1992,1990,F,JAZZ,1,514,S,night,Y,70
+Vic Reeves,Dizzy,1991,1990,M,POP,2,2136,S,morning,Y,85
+Shania Twain,You're Still the One,1997,1990,F,COUNTRY,1,1493,S,evening,Y,70
+Roxette,Joyride,1991,1990,G,POP,2,1444,S,afternoon,Y,85
+Bette Midler,From a Distance,1990,1990,F,POP,1,155,S,night,Y,70
+Radiohead,Creep,1992,1990,G,ROCK,2,1366,S,afternoon,Y,85
+George Michael,Outside,1998,1990,M,POP,2,589,S,morning,Y,85
+Jamiroquai,Canned Heat,1999,1990,G,POP,2,701,S,morning,Y,85
+Michael Jackson,Black or White,1991,1990,M,POP,2,1084,S,morning,Y,85
+Fatboy Slim,Praise You,1999,1990,M,DANCE,2,526,S,afternoon,Y,85
+Backstreet Boys,Everybody (Backstreet's Back),1997,1990,G,POP,2,113,S,morning,Y,85
+Aqua,Barbie Girl,1997,1990,G,POP,2,83,S,afternoon,Y,85
+Pet Shop Boys,Go West,1993,1990,G,POP,2,1275,S,morning,Y,85
+Texas,Summer Son,1999,1990,G,POP,2,1662,S,morning,Y,85
+Eva Cassidy,Songbird,1998,1990,F,JAZZ,1,516,S,evening,Y,70
+Texas,Say What You Want,1997,1990,G,POP,2,1660,S,afternoon,Y,85
+Charles & Eddie,Would I Lie to You?,1992,1990,G,POP,2,280,S,afternoon,Y,85
+Backstreet Boys,I Want It That Way,1999,1990,G,POP,1,114,S,evening,Y,70
+Maria McKee,Show Me Heaven,1990,1990,F,POP,1,1001,S,night,Y,70
+Gina G,Ooh Aah... Just a Little Bit,1996,1990,F,POP,2,1961,S,afternoon,Y,85
+KLF,3am Eternal,1991,1990,G,POP,2,1999,S,morning,Y,85
+Eva Cassidy,Fields of Gold,1996,1990,F,JAZZ,1,515,S,evening,Y,70
+Lenny Kravitz,Fly Away,1998,1990,M,ROCK,2,897,S,afternoon,Y,85
+Extreme,More Than Words,1990,1990,G,ROCK,1,520,S,night,Y,70
+Bryan Adams,Please Forgive Me,1993,1990,M,ROCK,1,258,S,night,Y,70
+Radiohead,High and Dry,1995,1990,G,ROCK,1,1368,S,night,Y,70
+Oasis,Live Forever,1994,1990,G,ROCK,2,1179,S,morning,Y,85
+Texas,Black Eyed Boy,1997,1990,G,POP,2,1661,S,afternoon,Y,85
+Madonna,Frozen,1998,1990,F,POP,1,985,S,evening,Y,70
+Belinda Carlisle,Summer Rain,1990,1990,F,POP,2,149,S,morning,Y,85
+Rod Stewart,Have I Told You Lately,1991,1990,M,ROCK,1,1428,S,evening,Y,70
+Jonny Lang,Lie to Me,1997,1990,M,ROCK,2,773,S,afternoon,Y,85
+Queen,These Are the Days of Our Lives,1991,1990,G,ROCK,1,1358,S,evening,Y,70
+UB40,(I Can't Help) Falling in Love with You,1993,1990,G,REGGAE,2,2130,S,morning,Y,85
+Israel Kamakawiwo'ole,Somewhere Over the Rainbow / What a Wonderful World,1993,1990,M,POP,1,671,S,night,Y,70
+Adamski,Killer,1990,1990,M,POP,2,1802,S,afternoon,Y,85
+Nirvana,Come as You Are,1991,1990,G,ROCK,2,1169,S,afternoon,Y,85
+Verve,Bitter Sweet Symphony,1997,1990,G,ROCK,2,1729,S,morning,Y,85
+Mariah Carey,One Sweet Day,1995,1990,F,POP,1,1006,S,evening,Y,70
+Youssou N'Dour,7 Seconds,1994,1990,M,POP,1,1148,S,night,Y,70
+Omar,There's Nothing Like This,1990,1990,M,SOUL,1,1198,S,evening,Y,70
+Smash Mouth,All Star,1999,1990,G,ROCK,2,1538,S,morning,Y,85
+Elton John,Can You Feel the Love Tonight,1994,1990,M,POP,1,469,S,night,Y,70
+Verve,The Drugs Don't Work,1997,1990,G,ROCK,1,1730,S,night,Y,70
+S Club 7,Bring It All Back,1999,1990,G,POP,2,1450,S,afternoon,Y,85
+Ronan Keating,When You Say Nothing at All,1999,1990,M,POP,1,1436,S,evening,Y,70
+Natalie Imbruglia,Torn,1997,1990,F,POP,2,1131,S,morning,Y,85
+Boyzone,Words,1996,1990,G,POP,1,1847,S,night,Y,70
+James Morrison,You Give Me Something,2006,2000,M,POP,1,694,S,night,Y,70
+Emma Bunton,What Took You So Long?,2001,2000,F,POP,2,1926,S,morning,Y,85
+Craig David,7 Days,2000,2000,M,SOUL,2,321,S,afternoon,Y,85
+OneRepublic,Apologize,2007,2000,G,POP,1,1208,S,evening,Y,70
+Mary J. Blige,Be Without You,2005,2000,F,SOUL,1,1040,S,night,Y,70
+Leona Lewis,Better in Time,2008,2000,F,POP,1,904,S,night,Y,70
+Taylor Swift,Love Story,2008,2000,F,POP,2,1646,S,afternoon,Y,85
+Lady Gaga,Just Dance (Solo Version),2008,2000,F,POP,2,872,S,afternoon,Y,85
+All Saints,Black Coffee,2000,2000,G,POP,2,59,S,morning,Y,85
+John Legend,Ordinary People,2004,2000,M,SOUL,1,750,S,evening,Y,70
+Gary Jules,Mad World,2003,2000,M,POP,1,1066,S,evening,Y,70
+Marti Pellow,Close to You,2001,2000,M,POP,1,2022,S,night,Y,70
+Britney Spears,Toxic,2003,2000,F,POP,2,241,S,afternoon,Y,85
+Ronan Keating,Lovin' Each Day,2001,2000,M,POP,2,2071,S,morning,Y,85
+Sugababes,About You Now,2007,2000,G,POP,2,1604,S,morning,Y,85
+Hoobastank,The Reason,2003,2000,G,ROCK,1,652,S,evening,Y,70
+Daniel Bedingfield,If You're Not the One,2002,2000,M,POP,1,331,S,night,Y,70
+Alicia Keys,If I Ain't Got You,2003,2000,F,SOUL,1,50,S,evening,Y,70
+Train,Drops of Jupiter (Tell Me),2001,2000,G,ROCK,2,1688,S,afternoon,Y,85
+Blue,One Love,2002,2000,G,POP,2,1838,S,afternoon,Y,85
+Leona Lewis,Bleeding Love,2007,2000,F,POP,1,903,S,evening,Y,70
+Sugababes,Round Round,2002,2000,G,POP,2,2107,S,morning,Y,85
+Modjo,Lady (Hear Me Tonight),2000,2000,G,POP,2,2032,S,afternoon,Y,85
+Katie Melua,The Closest Thing to Crazy,2003,2000,F,POP,1,810,S,night,Y,70
+Gwen Stefani,The Sweet Escape,2006,2000,F,POP,2,628,S,afternoon,Y,85
+Las Ketchup,The Ketchup Song (Aserejé),2002,2000,G,POP,2,2004,S,afternoon,Y,85
+Liberty X,Just a Little,2002,2000,G,POP,2,2009,S,morning,Y,85
+Killers,Mr. Brightside,2003,2000,G,ROCK,2,835,S,morning,Y,85
+Kanye West,American Boy,2008,2000,M,RAP,2,505,S,morning,Y,85
+Timbaland,Apologize (Solo Version),2007,2000,M,POP,1,1674,S,night,Y,70
+Coldplay,Viva la Vida,2008,2000,G,ROCK,2,313,S,morning,Y,85
+Duffy,Warwick Avenue,2008,2000,F,POP,1,410,S,night,Y,70
+Script,The Man Who Can't Be Moved,2008,2000,G,POP,1,2081,S,night,Y,70
+Lady Antebellum,Need You Now,2009,2000,G,COUNTRY,1,871,S,evening,Y,70
+Britney Spears,Lucky,2000,2000,F,POP,1,1852,S,afternoon,Y,70
+Newton Faulkner,Dream Catch Me,2007,2000,M,ROCK,2,1155,S,morning,Y,85
+S Club 7,Reach,2000,2000,G,POP,2,2074,S,morning,Y,85
+Kings of Leon,Sex on Fire,2008,2000,G,ROCK,2,843,S,morning,Y,85
+Natalie Imbruglia,Shiver,2005,2000,F,POP,2,1132,S,afternoon,Y,85
+Florence + The Machine,Dog Days Are Over,2008,2000,F,POP,2,540,S,afternoon,Y,85
+Michael Andrews,Mad World,2003,2000,M,POP,1,1065,S,evening,Y,70
+Gareth Gates,Unchained Melody,2002,2000,M,POP,1,568,S,night,Y,70
+Jamie Cullum,Everlasting Love,2004,2000,M,JAZZ,2,1990,S,afternoon,Y,85
+Mumford & Sons,The Cave,2009,2000,G,ROCK,2,1121,S,morning,Y,85
+Paolo Nutini,Candy,2009,2000,M,POP,2,1221,S,afternoon,Y,85
+Beyoncé,Halo,2008,2000,F,SOUL,1,163,S,evening,Y,70
+Backstreet Boys,Shape of My Heart,2000,2000,G,POP,1,116,S,night,Y,70
+Jay-Z,Crazy in Love,2003,2000,M,RAP,2,157,S,morning,Y,85
+Taylor Swift,You Belong with Me,2008,2000,F,POP,2,1651,S,afternoon,Y,85
+Lady Gaga,Poker Face,2008,2000,F,POP,2,873,S,morning,Y,85
+Robyn,With Every Heartbeat,2007,2000,F,POP,2,1419,S,morning,Y,85
+Jack Johnson,Better Together,2005,2000,M,ROCK,1,674,S,night,Y,70
+Atomic Kitten,Eternal Flame,2001,2000,G,POP,1,101,S,night,Y,70
+Whitney Houston,Million Dollar Bill,2009,2000,F,POP,2,1772,S,morning,Y,85
+Snow Patrol,Run,2003,2000,G,ROCK,1,1546,S,evening,Y,70
+Owl City,Fireflies,2009,2000,M,POP,2,1213,S,afternoon,Y,85
+Pink,Get the Party Started,2001,2000,F,POP,2,1302,S,afternoon,Y,85
+Nickelback,Photograph,2005,2000,G,ROCK,2,1163,S,afternoon,Y,85
+Alicia Keys,No One,2007,2000,F,SOUL,1,51,S,evening,Y,70
+Smash Mouth,I'm a Believer,2001,2000,G,ROCK,2,1539,S,morning,Y,85
+Take That,Shine,2007,2000,G,POP,2,1638,S,afternoon,Y,85
+Geri Halliwell,It's Raining Men,2001,2000,F,POP,2,1955,S,morning,Y,85
+Green Day,Boulevard of Broken Dreams,2004,2000,G,ROCK,2,621,S,afternoon,Y,85
+Beyoncé,Baby Boy,2003,2000,F,SOUL,2,158,S,afternoon,Y,85
+Killers,All These Things That I've Done,2004,2000,G,ROCK,2,838,S,morning,Y,85
+Michael Bublé,Home,2005,2000,M,POP,1,1068,S,night,Y,70
+Green Day,Wake Me Up When September Ends,2004,2000,G,ROCK,1,620,S,night,Y,70
+Avril Lavigne,Complicated,2002,2000,F,POP,2,106,S,morning,Y,85
+Kings of Leon,Use Somebody,2008,2000,G,ROCK,2,844,S,morning,Y,85
+Joss Stone,You Had Me,2004,2000,F,SOUL,2,777,S,afternoon,Y,85
+Amy Winehouse,Valerie (Solo Version),2007,2000,F,SOUL,2,71,S,morning,Y,85
+Amy Winehouse,Rehab,2006,2000,F,SOUL,2,66,S,afternoon,Y,85
+James Blunt,Goodbye My Lover,2005,2000,M,POP,1,688,S,evening,Y,70
+Girls Aloud,Sound of the Underground,2002,2000,G,POP,2,596,S,afternoon,Y,85
+Sheryl Crow,The First Cut Is the Deepest,2003,2000,F,ROCK,1,1504,S,evening,Y,70
+Christina Aguilera,Beautiful,2002,2000,F,POP,1,293,S,evening,Y,70
+Atomic Kitten,Whole Again,2001,2000,G,POP,1,100,S,night,Y,70
+Steps,Deeper Shade of Blue,2000,2000,G,POP,2,2102,S,afternoon,Y,85
+Maroon 5,This Love,2004,2000,G,POP,2,1016,S,morning,Y,85
+Girls Aloud,Call the Shots,2007,2000,G,POP,2,1962,S,morning,Y,85
+George Michael,Amazing,2004,2000,M,POP,2,590,S,afternoon,Y,85
+Sophie Ellis-Bextor,Take Me Home,2001,2000,F,POP,2,2095,S,afternoon,Y,85
+Leona Lewis,Run,2008,2000,F,POP,1,905,S,night,Y,70
+Mariah Carey,We Belong Together,2005,2000,F,POP,1,1008,S,night,Y,70
+Killers,Human,2008,2000,G,ROCK,2,837,S,morning,Y,85
+Snow Patrol,Chasing Cars,2006,2000,G,ROCK,1,1545,S,evening,Y,70
+Michelle McManus,All This Time,2003,2000,F,POP,1,1091,S,evening,Y,70
+Atomic Kitten,The Tide Is High (Get the Feeling),2002,2000,G,POP,2,102,S,morning,Y,85
+Melanie C,Never Be the Same Again,2000,2000,F,POP,1,2028,S,evening,Y,70
+Nelly Furtado,Broken Strings,2008,2000,F,POP,1,696,S,evening,Y,70
+T-Pain,Buy U a Drank (Solo Version),2007,2000,M,SOUL,2,1684,S,morning,Y,85
+Jools Holland,Enjoy Yourself,2000,2000,M,JAZZ,2,774,S,morning,Y,85
+Justin Timberlake,Rock Your Body,2002,2000,M,POP,2,798,S,morning,Y,85
+Kevin Lyttle,Turn Me On,2003,2000,M,REGGAE,2,834,S,morning,Y,85
+Sophie Ellis-Bextor,Murder on the Dancefloor,2001,2000,F,POP,2,1549,S,afternoon,Y,85
+Duffy,Mercy,2008,2000,F,POP,2,409,S,morning,Y,85
+Pink,So What,2008,2000,F,POP,2,1304,S,afternoon,Y,85
+Uncle Kracker,Follow Me,2000,2000,M,ROCK,2,1710,S,afternoon,Y,85
+Christina Aguilera,Fighter,2002,2000,F,POP,2,294,S,afternoon,Y,85
+Paolo Nutini,Last Request,2006,2000,M,POP,1,1219,S,night,Y,70
+Norah Jones,Don't Know Why,2002,2000,F,JAZZ,1,1173,S,evening,Y,70
+Elvis Presley,A Little Less Conversation (JXL Remix),2002,2000,M,POP,2,485,S,morning,Y,85
+Kylie Minogue,Spinning Around,2000,2000,F,POP,2,865,S,morning,Y,85
+Mika,Happy Ending,2007,2000,M,POP,1,1094,S,night,Y,70
+Mumford & Sons,Little Lion Man,2009,2000,G,ROCK,2,1120,S,morning,Y,85
+Rihanna,Don't Stop the Music,2007,2000,F,POP,2,1401,S,morning,Y,85
+Stephen Gately,I Believe,2000,2000,M,POP,1,1573,S,night,Y,70
+Bon Jovi,It's My Life,2000,2000,G,ROCK,2,225,S,morning,Y,85
+Kylie Minogue,On a Night Like This,2000,2000,F,POP,2,2003,S,morning,Y,85
+Incubus,Drive,2000,2000,G,ROCK,1,663,S,night,Y,70
+Shakira,Underneath Your Clothes,2001,2000,F,POP,1,1488,S,evening,Y,70
+Panic! At The Disco,I Write Sins Not Tragedies,2005,2000,G,ROCK,2,1218,S,afternoon,Y,85
+Train,Hey Soul Sister,2009,2000,G,ROCK,2,1689,S,afternoon,Y,85
+Gorillaz,Feel Good Inc.,2005,2000,G,POP,2,1965,S,morning,Y,85
+Justin Timberlake,Cry Me a River,2002,2000,M,POP,1,797,S,evening,Y,70
+Norah Jones,Sunrise,2004,2000,F,JAZZ,1,1175,S,evening,Y,70
+Linkin Park,In the End,2000,2000,G,ROCK,2,929,S,morning,Y,85
+Robbie Williams,Rock DJ,2000,2000,M,POP,2,1408,S,morning,Y,85
+Nickelback,Rockstar,2005,2000,G,ROCK,2,1162,S,morning,Y,85
+Paolo Nutini,New Shoes,2006,2000,M,POP,2,1220,S,morning,Y,85
+Girls Aloud,The Promise,2008,2000,G,POP,2,597,S,morning,Y,85
+Westlife,You Raise Me Up,2005,2000,G,POP,1,1747,S,night,Y,70
+Adele,Chasing Pavements,2008,2000,F,POP,1,27,S,night,Y,70
+Katy Perry,Hot n Cold,2008,2000,F,POP,2,814,S,afternoon,Y,85
+Akon,The Sweet Escape,2006,2000,M,SOUL,2,629,S,afternoon,Y,85
+Avicii,Hey Brother,2013,2010,M,DANCE,2,104,S,morning,Y,85
+Aloe Blacc,The Man,2013,2010,M,SOUL,2,61,S,afternoon,Y,85
+Little Mix,Black Magic,2015,2010,G,POP,2,942,S,morning,Y,85
+Jess Glynne,Don't Be So Hard on Yourself,2015,2010,F,POP,2,721,S,afternoon,Y,85
+Imagine Dragons,Radioactive,2012,2010,G,ROCK,2,659,S,afternoon,Y,85
+Ed Sheeran,Castle on the Hill,2017,2010,M,POP,2,434,S,morning,Y,85
+One Direction,What Makes You Beautiful,2011,2010,G,POP,2,1201,S,afternoon,Y,85
+Take That,The Flood,2010,2010,G,POP,2,1635,S,morning,Y,85
+Tom Walker,Leave a Light On,2017,2010,M,POP,2,2123,S,afternoon,Y,85
+Taylor Swift,Cruel Summer,2019,2010,F,POP,2,1650,S,morning,Y,85
+Imagine Dragons,Thunder,2017,2010,G,ROCK,2,662,S,afternoon,Y,85
+Rag'n'Bone Man,Skin,2017,2010,M,SOUL,1,1370,S,night,Y,70
+Rihanna,We Found Love,2011,2010,F,POP,2,1400,S,afternoon,Y,85
+Calum Scott,Dancing on My Own,2016,2010,M,POP,1,1860,S,night,Y,70
+Foster the People,Pumped Up Kicks,2010,2010,G,ROCK,2,545,S,afternoon,Y,85
+Drake,One Dance,2016,2010,M,POP,2,1915,S,morning,Y,85
+Beyoncé,Best Thing I Never Had,2011,2010,F,SOUL,1,165,S,evening,Y,70
+Jessie J,Price Tag,2011,2010,F,POP,2,722,S,afternoon,Y,85
+Florence + The Machine,Shake It Out,2011,2010,F,POP,2,541,S,afternoon,Y,85
+One Direction,Best Song Ever,2013,2010,G,POP,2,1203,S,afternoon,Y,85
+Swedish House Mafia,Don't You Worry Child,2012,2010,G,DANCE,2,1619,S,morning,Y,85
+Kungs,This Girl,2016,2010,M,DANCE,2,857,S,morning,Y,85
+Katy Perry,Teenage Dream,2010,2010,F,POP,2,817,S,afternoon,Y,85
+Coldplay,Adventure of a Lifetime,2015,2010,G,ROCK,2,315,S,afternoon,Y,85
+Maroon 5,Payphone (Solo Edit),2012,2010,G,POP,2,1019,S,morning,Y,85
+Avicii,Levels,2011,2010,M,DANCE,2,105,S,afternoon,Y,85
+Sam Smith,Writing's on the Wall,2015,2010,M,POP,1,1465,S,night,Y,70
+John Newman,Love Me Again,2013,2010,M,SOUL,2,756,S,morning,Y,85
+Rihanna,Diamonds,2012,2010,F,POP,1,1396,S,evening,Y,70
+Marlon Roudette,When the Beat Drops Out,2014,2010,M,POP,2,1014,S,afternoon,Y,85
+Idina Menzel,Let It Go,2013,2010,F,POP,1,658,S,evening,Y,70
+Imagine Dragons,Believer,2017,2010,G,ROCK,2,661,S,afternoon,Y,85
+Maroon 5,Sugar,2015,2010,G,POP,2,1020,S,afternoon,Y,85
+Imagine Dragons,Demons,2012,2010,G,ROCK,1,660,S,evening,Y,70
+Pitbull,On the Floor,2011,2010,M,RAP,2,716,S,morning,Y,85
+Whitney Houston,Higher Love,2019,2010,F,POP,2,860,S,morning,Y,85
+Olly Murs,Please Don't Let Me Go,2010,2010,M,POP,2,1194,S,morning,Y,85
+Noel Gallagher's High Flying Birds,In the Heat of the Moment,2014,2010,G,ROCK,2,1172,S,morning,Y,85
+Rihanna,Stay,2013,2010,F,POP,1,1398,S,evening,Y,70
+Tinchy Stryder,Bring It,2011,2010,M,RAP,2,740,S,afternoon,Y,85
+Jessie J,Flashlight,2015,2010,F,POP,1,725,S,evening,Y,70
+Rag'n'Bone Man,Giant,2019,2010,M,POP,2,2060,S,morning,Y,85
+Katy Perry,Firework,2010,2010,F,POP,2,815,S,afternoon,Y,85
+Dua Lipa,Don't Start Now,2019,2010,F,POP,2,406,S,afternoon,Y,85
+Bruno Mars,The Lazy Song,2010,2010,M,POP,2,251,S,afternoon,Y,85
+Katy Perry,Dark Horse (Solo Version),2013,2010,F,POP,2,818,S,morning,Y,85
+Lana Del Rey,Summertime Sadness,2012,2010,F,POP,1,885,S,evening,Y,70
+Coldplay,Paradise,2011,2010,G,ROCK,2,314,S,afternoon,Y,85
+Billie Eilish,Ocean Eyes,2016,2010,F,POP,1,173,S,evening,Y,70
+Gotye,Somebody That I Used to Know,2011,2010,M,POP,2,612,S,afternoon,Y,85
+Pharrell Williams,Happy,2013,2010,M,POP,2,1288,S,morning,Y,85
+Robbie Williams,Candy,2012,2010,M,POP,2,1410,S,afternoon,Y,85
+Justin Bieber,What Do You Mean?,2015,2010,M,POP,2,794,S,afternoon,Y,85
+Adele,When We Were Young,2015,2010,F,POP,1,34,S,evening,Y,70
+Maroon 5,Memories,2019,2010,G,POP,1,1021,S,evening,Y,70
+Lorde,Royals,2013,2010,F,POP,2,949,S,afternoon,Y,85
+George Ezra,Blame It on Me,2014,2010,M,POP,2,1953,S,afternoon,Y,85
+Olly Murs,Dear Darlin',2013,2010,M,POP,1,1197,S,night,Y,70
+Carly Rae Jepsen,Call Me Maybe,2011,2010,F,POP,2,1863,S,morning,Y,85
+Selena Gomez,Lose You to Love Me,2019,2010,F,POP,1,1486,S,night,Y,70
+James Bay,Let It Go,2014,2010,M,POP,1,686,S,night,Y,70
+Sam Smith,I'm Not the Only One,2014,2010,M,POP,1,1464,S,night,Y,70
+Kygo,Firestone,2014,2010,M,DANCE,2,858,S,afternoon,Y,85
+Daft Punk,Get Lucky,2013,2010,G,DANCE,2,329,S,afternoon,Y,85
+Ariana Grande,No Tears Left to Cry,2018,2010,F,POP,2,91,S,afternoon,Y,85
+Demi Lovato,Skyscraper,2011,2010,F,POP,1,360,S,evening,Y,70
+Louis Tomlinson,Back to You (Solo Version),2017,2010,M,POP,2,955,S,afternoon,Y,85
+Ed Sheeran,Thinking Out Loud,2014,2010,M,POP,1,431,S,night,Y,70
+Jennifer Lopez,On the Floor,2011,2010,F,DANCE,2,715,S,morning,Y,85
+Paloma Faith,Picking Up the Pieces,2012,2010,F,POP,1,1216,S,evening,Y,70
+Of Monsters and Men,Little Talks,2011,2010,G,ROCK,2,1186,S,morning,Y,85
+Ellie Goulding,Starry Eyed,2010,2010,F,POP,2,459,S,afternoon,Y,85
+Mark Ronson,Uptown Funk (Solo Edit),2014,2010,M,POP,2,1010,S,morning,Y,85
+Rihanna,Only Girl (In the World),2010,2010,F,POP,2,1397,S,afternoon,Y,85
+Ed Sheeran,The A Team,2011,2010,M,POP,1,430,S,evening,Y,70
+Lorde,Green Light,2017,2010,F,POP,2,950,S,morning,Y,85
+Lily Allen,Somewhere Only We Know,2013,2010,F,POP,1,924,S,night,Y,70
+Bruno Mars,24K Magic,2016,2010,M,POP,2,253,S,afternoon,Y,85
+Niall Horan,This Town,2016,2010,M,POP,1,1156,S,evening,Y,70
+Kylie Minogue,All the Lovers,2010,2010,F,POP,2,866,S,morning,Y,85
+Lewis Capaldi,Someone You Loved,2018,2010,M,POP,1,913,S,evening,Y,70
+Adele,Set Fire to the Rain,2011,2010,F,POP,1,31,S,evening,Y,70
+Jess Glynne,Hold My Hand,2015,2010,F,POP,2,720,S,afternoon,Y,85
+Ed Sheeran,Photograph,2014,2010,M,POP,1,436,S,evening,Y,70
+Little Mix,Wings,2012,2010,G,POP,2,944,S,afternoon,Y,85
+One Direction,Story of My Life,2013,2010,G,POP,1,1202,S,evening,Y,70
+John Legend,All of Me,2013,2010,M,SOUL,1,749,S,night,Y,70
+Niall Horan,Slow Hands,2017,2010,M,POP,2,1157,S,afternoon,Y,85
+Demi Lovato,Sorry Not Sorry,2017,2010,F,POP,2,361,S,morning,Y,85
+Lady Gaga,Always Remember Us This Way,2018,2010,F,POP,1,880,S,evening,Y,70
+Harry Styles,Sign of the Times,2017,2010,M,POP,1,640,S,evening,Y,70
+Bruno Mars,Just the Way You Are,2010,2010,M,POP,1,249,S,evening,Y,70
+Olly Murs,Dance with Me Tonight,2011,2010,M,POP,2,1196,S,afternoon,Y,85
+Lewis Capaldi,Hold Me While You Wait,2019,2010,M,POP,1,2008,S,night,Y,70
+David Guetta,Titanium,2011,2010,M,DANCE,2,350,S,afternoon,Y,85
+Ariana Grande,One Last Time,2014,2010,F,POP,2,90,S,afternoon,Y,85
+Olly Murs,Heart Skips a Beat,2011,2010,M,POP,2,2042,S,afternoon,Y,85
+Rag'n'Bone Man,Human,2016,2010,M,SOUL,2,1369,S,morning,Y,85
+Adele,Send My Love (To Your New Lover),2016,2010,F,POP,2,35,S,afternoon,Y,85
+Charlie Puth,Attention,2017,2010,M,POP,2,281,S,afternoon,Y,85
+Jess Glynne,Take Me Home,2015,2010,F,POP,1,1995,S,night,Y,70
+Adele,Hello,2015,2010,F,POP,1,33,S,night,Y,70
+Pharrell Williams,Get Lucky,2013,2010,M,POP,2,330,S,morning,Y,85
+Labrinth,Jealous,2014,2010,M,POP,1,870,S,night,Y,70
+One Direction,Drag Me Down,2015,2010,G,POP,2,1205,S,morning,Y,85
+Paolo Nutini,Iron Sky,2014,2010,M,POP,2,1222,S,morning,Y,85
+One Direction,Night Changes,2014,2010,G,POP,1,1204,S,night,Y,70
+Anne-Marie,2002,2018,2010,F,POP,2,79,S,morning,Y,85
+Harry Styles,Adore You,2019,2010,M,POP,2,641,S,morning,Y,85
+Lewis Capaldi,Before You Go,2019,2010,M,POP,1,914,S,evening,Y,70
+OneRepublic,Counting Stars,2013,2010,G,POP,2,1206,S,morning,Y,85
+Robin Schulz,Prayer in C,2014,2010,M,DANCE,2,1416,S,morning,Y,85
+Adele,Rolling in the Deep,2010,2010,F,POP,2,29,S,afternoon,Y,85
+Weeknd,Blinding Lights,2019,2010,M,POP,2,1741,S,morning,Y,85
+Pink,Raise Your Glass,2010,2010,F,POP,2,1305,S,morning,Y,85
+James Arthur,Say You Won't Let Go,2016,2010,M,POP,1,683,S,evening,Y,70
+Maroon 5,Moves Like Jagger (Solo Edit),2011,2010,G,POP,2,1018,S,afternoon,Y,85
+Hozier,Take Me to Church,2013,2010,M,ROCK,1,653,S,evening,Y,70
+Ed Sheeran,Perfect,2017,2010,M,POP,1,433,S,night,Y,70
+Michael Bublé,It's a Beautiful Day,2013,2010,M,POP,2,1071,S,afternoon,Y,85
+Christina Perri,A Thousand Years,2011,2010,F,POP,1,295,S,night,Y,70
+Duncan Laurence,Arcade,2019,2010,M,POP,1,411,S,night,Y,70
+Bradley Cooper,Shallow,2018,2010,M,POP,1,879,S,evening,Y,70
+Usher,Climax,2012,2010,M,SOUL,1,1716,S,night,Y,70
+Bruno Mars,Uptown Funk,2014,2010,M,POP,2,1011,S,afternoon,Y,85
+Kid LAROI,Stay,2021,2020,M,POP,2,796,S,afternoon,Y,85
+Harry Styles,As It Was,2022,2020,M,POP,2,643,S,afternoon,Y,85
+Glass Animals,Heat Waves,2020,2020,G,ROCK,2,600,S,afternoon,Y,85
+Little Mix,Sweet Melody,2020,2020,G,POP,2,945,S,afternoon,Y,85
+Beyoncé,Cuff It,2022,2020,F,SOUL,2,166,S,morning,Y,85
+Ed Sheeran,Eyes Closed,2023,2020,M,POP,1,438,S,night,Y,70
+Taylor Swift,Anti-Hero,2022,2020,F,POP,2,1649,S,afternoon,Y,85
+Miley Cyrus,Flowers,2023,2020,F,POP,2,1102,S,afternoon,Y,85
+Weeknd,Save Your Tears,2020,2020,M,POP,1,1742,S,night,Y,70
+Billie Eilish,Happier Than Ever,2021,2020,F,POP,1,176,S,night,Y,70
+Lewis Capaldi,Pointless,2022,2020,M,POP,1,916,S,evening,Y,70
+Dua Lipa,Levitating,2020,2020,F,POP,2,405,S,morning,Y,85
+Elton John,Cold Heart (PNAU Remix),2021,2020,M,POP,2,471,S,afternoon,Y,85
+Olivia Rodrigo,Drivers License,2021,2020,F,POP,1,1191,S,night,Y,70
+OneRepublic,I Ain't Worried,2022,2020,G,POP,2,1209,S,morning,Y,85
+Billie Eilish,Birds of a Feather,2024,2020,F,POP,2,178,S,afternoon,Y,85
+Hozier,Too Sweet,2024,2020,M,ROCK,2,654,S,morning,Y,85
+Lewis Capaldi,Forget Me,2022,2020,M,POP,2,915,S,afternoon,Y,85
+Adele,Easy on Me,2021,2020,F,POP,1,36,S,night,Y,70
+Olivia Rodrigo,Vampire,2023,2020,F,POP,1,1193,S,night,Y,70
+Beyoncé,Texas Hold 'Em,2024,2020,F,COUNTRY,2,167,S,morning,Y,85
+Ed Sheeran,Bad Habits,2021,2020,M,POP,2,435,S,morning,Y,85
+Ariana Grande,Positions,2020,2020,F,POP,2,93,S,morning,Y,85
+Miley Cyrus,Used To Be Young,2023,2020,F,POP,1,1104,S,evening,Y,70
+Lady Gaga,Rain on Me,2020,2020,F,POP,2,881,S,afternoon,Y,85
+Ariana Grande,We Can't Be Friends (Wait for Your Love),2024,2020,F,POP,2,94,S,morning,Y,85
+Mimi Webb,House on Fire,2022,2020,F,POP,2,1106,S,morning,Y,85
+Rihanna,Lift Me Up,2022,2020,F,POP,1,1402,S,night,Y,70
+Benson Boone,Beautiful Things,2024,2020,M,POP,1,151,S,night,Y,70
+Pink,Trustfall,2023,2020,F,POP,2,1308,S,morning,Y,85
+Lady Gaga,Hold My Hand,2022,2020,F,POP,1,883,S,night,Y,70
+Olivia Rodrigo,Good 4 U,2021,2020,F,POP,2,1192,S,afternoon,Y,85
+Dua Lipa,Houdini,2023,2020,F,POP,2,408,S,morning,Y,85
+Ariana Grande,Rain on Me,2020,2020,F,POP,2,882,S,afternoon,Y,85
+Justin Bieber,Stay,2021,2020,M,POP,2,795,S,morning,Y,85
+Kylie Minogue,Padam Padam,2023,2020,F,POP,2,867,S,afternoon,Y,85
+Billie Eilish,What Was I Made For?,2023,2020,F,POP,1,177,S,evening,Y,70
+Dua Lipa,Cold Heart (PNAU Remix),2021,2020,F,POP,2,472,S,morning,Y,85
+Miley Cyrus,Midnight Sky,2020,2020,F,POP,2,1103,S,morning,Y,85
+Taylor Swift,All Too Well (10 Minute Version),2021,2020,F,POP,1,1652,S,evening,Y,70
+10cc,I'm Not in Love,1975,1970,G,POP,1,2,S,evening,Y,70
+10cc,Dreadlock Holiday,1978,1970,G,REGGAE,2,3,S,morning,Y,85
+ABBA,Dancing Queen,1976,1970,G,POP,2,10,S,morning,Y,85
+ABBA,Knowing Me Knowing You,1976,1970,G,POP,2,11,S,morning,Y,85
+ABBA,Take a Chance on Me,1977,1970,G,POP,2,12,S,morning,Y,85
+ABBA,The Winner Takes It All,1980,1980,G,POP,1,13,S,night,Y,70
+ABBA,Mamma Mia,1975,1970,G,POP,2,14,S,afternoon,Y,85
+ABBA,Fernando,1976,1970,G,POP,1,15,S,evening,Y,70
+ABBA,Waterloo,1974,1970,G,POP,2,16,S,morning,Y,85
+ABBA,SOS,1975,1970,G,POP,2,17,S,morning,Y,85
+ABBA,Gimme! Gimme! Gimme! (A Man After Midnight),1979,1970,G,POP,2,18,S,afternoon,Y,85
+ABBA,Super Trouper,1980,1980,G,POP,2,19,S,morning,Y,85
+ABBA,Chiquitita,1979,1970,G,POP,1,20,S,evening,Y,70
+ABBA,Money Money Money,1976,1970,G,POP,2,21,S,afternoon,Y,85
+ABBA,Voulez-Vous,1979,1970,G,POP,2,22,S,afternoon,Y,85
+Sia,Titanium,2011,2010,F,POP,2,351,S,morning,Y,85
+David Guetta,When Love Takes Over,2009,2000,M,DANCE,2,352,S,afternoon,Y,85
+Queen,Bohemian Rhapsody,1975,1970,G,ROCK,2,1346,S,afternoon,Y,85
+Queen,Don't Stop Me Now,1978,1970,G,ROCK,2,1347,S,afternoon,Y,85
+Queen,Somebody to Love,1976,1970,G,ROCK,2,1348,S,morning,Y,85
+Queen,We Are the Champions,1977,1970,G,ROCK,2,1349,S,morning,Y,85
+Queen,I Want to Break Free,1984,1980,G,ROCK,2,1353,S,morning,Y,85
+Queen,A Kind of Magic,1986,1980,G,ROCK,2,1356,S,afternoon,Y,85
+Queen,Another One Bites the Dust,1980,1980,G,ROCK,2,1357,S,afternoon,Y,85
+Queen,Love of My Life,1975,1970,G,ROCK,1,1359,S,night,Y,70
+Queen,Crazy Little Thing Called Love,1979,1970,G,ROCK,2,1360,S,afternoon,Y,85
+10cc,Rubber Bullets,1973,1970,G,POP,2,1799,S,morning,Y,85
+10cc,The Things We Do for Love,1976,1970,G,POP,2,1800,S,morning,Y,85
+10cc,Art for Art's Sake,1975,1970,G,ROCK,2,4738,S,morning,Y,85
+10cc,Donna,1972,1970,G,ROCK,2,4739,S,morning,Y,85
+10cc,Good Morning Judge,1977,1970,G,ROCK,2,4740,S,morning,Y,85
+10cc,I'm Mandy Fly Me,1976,1970,G,ROCK,2,4741,S,morning,Y,85
+10cc,Life Is a Minestrone,1975,1970,G,ROCK,2,4742,S,morning,Y,85
+10cc,Silly Love,1974,1970,G,ROCK,2,4743,S,morning,Y,85
+10cc,The Dean and I,1973,1970,G,ROCK,2,4744,S,morning,Y,85
+10cc,The Wall Street Shuffle,1974,1970,G,ROCK,2,4745,S,morning,Y,85
+ABBA,Angel Eyes,1979,1970,G,ROCK,2,4746,S,morning,Y,85
+ABBA,Does Your Mother Know,1979,1970,G,ROCK,2,4747,S,morning,Y,85
+ABBA,"Honey, Honey",1974,1970,G,ROCK,2,4748,S,morning,Y,85
+ABBA,"I Do, I Do, I Do, I Do, I Do",1975,1970,G,ROCK,2,4749,S,morning,Y,85
+ABBA,I Have a Dream,1979,1970,G,ROCK,2,4750,S,morning,Y,85
+ABBA,"Money, Money, Money",1976,1970,G,ROCK,2,4752,S,morning,Y,85
+ABBA,Name of the Game,1977,1970,G,ROCK,2,4753,S,morning,Y,85
+ABBA,Ring Ring,1974,1970,G,ROCK,2,4754,S,morning,Y,85
+ABBA,Summer Night City,1978,1970,G,ROCK,2,4755,S,morning,Y,85
+Queen,You're My Best Friend,1975,1970,G,ROCK,2,4868,S,morning,Y,85
+10cc,The Second Sitting for the Last Supper,1975,1970,G,ROCK,2,4941,S,morning,Y,85
