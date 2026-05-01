@@ -5,9 +5,7 @@
     <meta name="author" content="Tony Wilding">
     <title>Toneranger | Playlist Generator</title>
     <style>
-        /* Aesthetic adapted from 1.html[cite: 1] */
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
-        
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
@@ -17,31 +15,14 @@
             width: 100%; max-width: 550px; background: var(--card); padding: 30px; 
             border-radius: 16px; border: 1px solid #334155; display: flex; flex-direction: column;
         }
-        h2 { 
-            font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); 
-            letter-spacing: 2px; text-transform: uppercase; margin-top: 0;
-        }
-        .status { 
-            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; 
-            margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; 
-            border: 1px solid #475569; text-align: center; 
-        }
+        h2 { font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
+        .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; transition: all 0.3s; }
         .controls { margin-top: 20px; text-align: center; order: 3; }
-        button { 
-            width: 100%; background: var(--accent); color: #0f172a; border: none; 
-            padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; 
-            text-transform: uppercase; margin-bottom: 10px;
-        }
+        button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; }
         button:hover { opacity: 0.9; }
         button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
-        
         #outputArea { order: 2; margin-top: 20px; }
-        pre { 
-            background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; 
-            font-size: 0.9rem; white-space: pre-wrap; border-left: 4px solid var(--accent); 
-            line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0;
-        }
-        /* Foot of page credit[cite: 2] */
+        pre { background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; font-size: 0.9rem; white-space: pre-wrap; border-left: 4px solid var(--accent); line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0; }
         .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.9; }
     </style>
 </head>
@@ -49,11 +30,7 @@
     <div class="box">
         <h2>Toneranger</h2>
         <div id="loadStatus" class="status">INITIALIZING...</div>
-        
-        <div id="outputArea" style="display:none;">
-            <pre id="playlistDisplay"></pre>
-        </div>
-
+        <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
         <div class="controls">
             <button id="initialGenBtn" onclick="generateAdvancedShow()" disabled>Generate Show</button>
             <div id="bottomControls" style="display:none;">
@@ -63,20 +40,17 @@
             </div>
         </div>
     </div>
-
     <div class="credit-footer">Developed by Tony Wilding</div>
 
     <script>
-        /* Updated database path for the Radio repository and underscore file name[cite: 1, 2] */
         const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_Data.csv';
         let libraryData = [];
 
-        /* Security: Block inspection keys from 1.html[cite: 1] */
+        /* Security from File 1[cite: 1] */
         document.onkeydown = (e) => {
             if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
         };
 
-        /* Parsing and logic from 2.html[cite: 2] */
         function parseCSV(text) {
             const rows = []; let currRow = []; let currField = ""; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
@@ -96,28 +70,38 @@
             return rows;
         }
 
+        /* Enhanced multi-strategy fetch from File 2[cite: 2] */
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
-            const endpoints = [
+            const strategies = [
                 GITHUB_URL,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(GITHUB_URL)}`,
                 `https://corsproxy.io/?${encodeURIComponent(GITHUB_URL)}`
             ];
 
-            for (let url of endpoints) {
+            for (let i = 0; i < strategies.length; i++) {
                 try {
-                    status.innerText = `CONNECTING...`;
-                    let response = await fetch(url);
+                    status.innerText = `ATTEMPTING CONNECTION ${i + 1}...`;
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), 5000); // 5 sec timeout per attempt
+
+                    let response = await fetch(strategies[i], { signal: controller.signal });
+                    clearTimeout(id);
+
                     if (response.ok) {
                         const text = await response.text();
-                        if (text.length > 50) {
+                        if (text.length > 100 && text.includes(',')) {
                             processData(text);
                             return;
                         }
                     }
-                } catch (e) { console.log("Attempt failed"); }
+                } catch (e) { 
+                    console.log(`Strategy ${i + 1} failed:`, e.message); 
+                }
             }
-            status.innerText = "CONNECTION FAILED.";
+            status.innerText = "CONNECTION FAILED. CHECK GITHUB FILENAME.";
+            status.style.background = "#ef4444";
+            status.style.color = "white";
         }
 
         function processData(csvText) {
@@ -148,7 +132,7 @@
                 };
             }).filter(r => r && r.artist && r.artist !== "0" && r.artist !== "Artist");
 
-            status.innerText = `READY: ${libraryData.length} SONGS.`;
+            status.innerText = `CONNECTED: ${libraryData.length} TRACKS LOADED.`;
             status.style.background = "#10b981";
             status.style.color = "white";
             document.getElementById('initialGenBtn').disabled = false;
