@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Hospital Radio | Playlist Generator</title>
+    <title>Toneranger | Playlist Generator</title>
     <style>
-        /* Styles adapted from 1.html example */
+        /* Styles adapted from 1.html aesthetic */
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         
         body { 
@@ -46,7 +46,7 @@
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
-        <h2>Hospital Radio</h2>
+        <h2>Toneranger</h2>
         <div id="loadStatus" class="status">INITIALIZING...</div>
         
         <div id="outputArea" style="display:none;">
@@ -65,16 +65,16 @@
     </div>
 
     <script>
-        // DB Hosted in same location as file[cite: 2]
-        const DB_FILE = 'NHRRC.csv';
+        /* DB path updated to the 'Radio' repo as in example 1[cite: 1, 2] */
+        const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC%20Data.csv';
         let libraryData = [];
 
-        // Protection for prying eyes[cite: 1]
+        /* Security: Block inspection keys from example 1[cite: 1] */
         document.onkeydown = (e) => {
             if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
         };
 
-        // Logic remains identical to 2.html[cite: 2]
+        /* CSV parsing logic from example 2[cite: 2] */
         function parseCSV(text) {
             const rows = [];
             let currRow = [];
@@ -106,10 +106,11 @@
 
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
-            // Using exact same connection logic from 2.html[cite: 2]
+            /* Endpoint logic from example 2[cite: 2] */
             const endpoints = [
-                DB_FILE,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(window.location.href.replace(/[^/]*$/, '') + DB_FILE)}`
+                GITHUB_URL,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(GITHUB_URL)}`,
+                `https://corsproxy.io/?${encodeURIComponent(GITHUB_URL)}`
             ];
 
             for (let url of endpoints) {
@@ -118,7 +119,7 @@
                     let response = await fetch(url);
                     if (response.ok) {
                         const text = await response.text();
-                        if (text.length > 10) {
+                        if (text.length > 100) {
                             processData(text);
                             return;
                         }
@@ -194,6 +195,7 @@
             return title.toLowerCase().trim().replace(/[^a-z0-9]/g, "");
         }
 
+        /* Logic for 1 hour show (14 tracks) from example 2[cite: 2] */
         function generateAdvancedShow() {
             let currentHourArtKeys = [];
             let lastTrack = null;
@@ -265,7 +267,7 @@
             const text = document.getElementById('playlistDisplay').innerText;
             const blob = new Blob([text], { type: 'text/plain' });
             const anchor = document.createElement('a');
-            anchor.download = 'Hospital_Radio_Playlist.txt';
+            anchor.download = 'Toneranger_Playlist.txt';
             anchor.href = URL.createObjectURL(blob);
             anchor.click();
         }
