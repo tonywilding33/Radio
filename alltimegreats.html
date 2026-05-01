@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>ALL TIME GREATS 2 | Playlist Generator</title>
+    <title>ALL TIME GREATS! | Playlist Generator</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         body { 
@@ -13,7 +13,8 @@
         }
         .box { width: 100%; max-width: 550px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
         h2 { font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
-        .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; }
+        .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; }
+        .debug-info { font-size: 0.6rem; color: #64748b; text-align: center; margin-bottom: 20px; text-transform: uppercase; }
         button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; }
         pre { background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; font-size: 0.9rem; white-space: pre-wrap; border-left: 4px solid var(--accent); line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0; }
         .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
@@ -23,11 +24,12 @@
     <div class="box">
         <h2>ALL TIME GREATS *</h2>
         <div id="loadStatus" class="status">INITIALIZING...</div>
+        <div id="debugInfo" class="debug-info">MEMORY: 0 ITEMS BLOCKED</div>
         <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
         <div class="controls" id="bottomControls" style="display:none; margin-top: 20px;">
             <button style="background:var(--success); color:white;" onclick="downloadTxt()">Download Playlist (.txt)</button>
             <button onclick="generatePlaylist()">Generate New Show</button>
-            <button style="background:#475569; color:white;" onclick="manualReset()">Clear Session Memory</button>
+            <button style="background:#ef4444; color:white;" onclick="manualReset()">Force Reset All Memory</button>
         </div>
     </div>
     <div class="credit-footer">Developed by Tony Wilding</div>
@@ -35,6 +37,7 @@
     <script>
         const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/ATG3328152A.csv';
         let libraryData = [];
+        const TWO_HOURS = 7200000; // 120 Minutes
 
         function getCleanKey(str) {
             if (!str) return "unknown";
@@ -45,7 +48,6 @@
 
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
-            // Cache Buster: Appends a unique timestamp so the browser MUST reload[cite: 1]
             const CACHE_BUSTER = `${BASE_URL}?t=${Date.now()}`;
             try {
                 let response = await fetch(CACHE_BUSTER);
@@ -76,36 +78,57 @@
             generatePlaylist();
         }
 
+        function updateDebug() {
+            let count = 0;
+            const now = Date.now();
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key.startsWith('atg_')) {
+                    const time = parseInt(sessionStorage.getItem(key));
+                    if (now - time < TWO_HOURS) count++;
+                }
+            }
+            document.getElementById('debugInfo').innerText = `MEMORY: ${count} ARTISTS/SONGS BLOCKED (2HR LOCK)`;
+        }
+
         function generatePlaylist() {
             let playlist = [];
             let hourArtKeys = []; 
             let hourTitKeys = [];
             let genderHistory = [];
             let lastYear = 0;
-            const TWO_HOURS = 7200000; 
+            const now = Date.now();
 
             const sorted = [...libraryData].sort((a, b) => b.score - a.score);
 
             for (let i = 0; i < 16; i++) {
                 let pool = sorted.filter(r => {
-                    // Block if played in current 16 tracks
+                    // 1. Current Hour Block
                     if (hourArtKeys.includes(r.artistKey)) return false;
                     if (hourTitKeys.includes(r.titleKey)) return false;
 
-                    // Block if played in last 2 hours[cite: 1]
+                    // 2. 2-Hour Persistence Block
                     const lastArt = sessionStorage.getItem(`atg_art_${r.artistKey}`);
                     const lastTit = sessionStorage.getItem(`atg_tit_${r.titleKey}`);
-                    if (lastArt && (Date.now() - parseInt(lastArt) < TWO_HOURS)) return false;
-                    if (lastTit && (Date.now() - parseInt(lastTit) < TWO_HOURS)) return false;
+                    
+                    if (lastArt && (now - parseInt(lastArt) < TWO_HOURS)) return false;
+                    if (lastTit && (now - parseInt(lastTit) < TWO_HOURS)) return false;
                     
                     const genderClump = genderHistory.length >= 2 && genderHistory.every(g => g === r.gender);
                     const eraClump = lastYear !== 0 && Math.abs(r.year - lastYear) < 5;
                     return !genderClump && !eraClump;
                 });
 
-                // Fail-safe: Always prioritize Artist/Title separation
+                // Fail-safe: prioritizes keeping the 2-Hour Lock
                 if (pool.length === 0) {
-                    pool = sorted.filter(r => !hourArtKeys.includes(r.artistKey) && !hourTitKeys.includes(r.titleKey));
+                    pool = sorted.filter(r => {
+                        const lastArt = sessionStorage.getItem(`atg_art_${r.artistKey}`);
+                        const lastTit = sessionStorage.getItem(`atg_tit_${r.titleKey}`);
+                        return !hourArtKeys.includes(r.artistKey) && 
+                               !hourTitKeys.includes(r.titleKey) &&
+                               (!lastArt || (now - parseInt(lastArt) >= TWO_HOURS)) &&
+                               (!lastTit || (now - parseInt(lastTit) >= TWO_HOURS));
+                    });
                 }
                 
                 let pick = pool[Math.floor(Math.random() * Math.min(pool.length, 25))];
@@ -115,15 +138,16 @@
                     hourArtKeys.push(pick.artistKey);
                     hourTitKeys.push(pick.titleKey);
                     
-                    // Set Global Locks for 2 hours[cite: 1]
-                    sessionStorage.setItem(`atg_art_${pick.artistKey}`, Date.now());
-                    sessionStorage.setItem(`atg_tit_${pick.titleKey}`, Date.now());
+                    // Save to persistent session memory
+                    sessionStorage.setItem(`atg_art_${pick.artistKey}`, now.toString());
+                    sessionStorage.setItem(`atg_tit_${pick.titleKey}`, now.toString());
                     
                     genderHistory.push(pick.gender);
                     if (genderHistory.length > 2) genderHistory.shift();
                     lastYear = pick.year;
                 }
             }
+            updateDebug();
             display(playlist);
         }
 
