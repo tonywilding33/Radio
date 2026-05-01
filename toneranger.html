@@ -16,7 +16,7 @@
             border-radius: 16px; border: 1px solid #334155; display: flex; flex-direction: column;
         }
         h2 { font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
-        .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; transition: all 0.3s; }
+        .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; }
         .controls { margin-top: 20px; text-align: center; order: 3; }
         button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; }
         button:hover { opacity: 0.9; }
@@ -43,10 +43,12 @@
     <div class="credit-footer">Developed by Tony Wilding</div>
 
     <script>
-        const GITHUB_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_Data.csv';
+        /* FIXED: Exact Case Match NHRRC_DATA.csv and added cache-buster[cite: 1, 2] */
+        const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
+        const GITHUB_URL = `${BASE_URL}?v=${Math.random()}`;
+        
         let libraryData = [];
 
-        /* Security from File 1[cite: 1] */
         document.onkeydown = (e) => {
             if([123, 85, 73, 74, 67].includes(e.keyCode) && (e.ctrlKey || e.shiftKey || e.keyCode == 123)) return false;
         };
@@ -70,7 +72,6 @@
             return rows;
         }
 
-        /* Enhanced multi-strategy fetch from File 2[cite: 2] */
         async function fetchLibrary() {
             const status = document.getElementById('loadStatus');
             const strategies = [
@@ -79,29 +80,17 @@
                 `https://corsproxy.io/?${encodeURIComponent(GITHUB_URL)}`
             ];
 
-            for (let i = 0; i < strategies.length; i++) {
+            for (let url of strategies) {
                 try {
-                    status.innerText = `ATTEMPTING CONNECTION ${i + 1}...`;
-                    const controller = new AbortController();
-                    const id = setTimeout(() => controller.abort(), 5000); // 5 sec timeout per attempt
-
-                    let response = await fetch(strategies[i], { signal: controller.signal });
-                    clearTimeout(id);
-
+                    status.innerText = `CONNECTING...`;
+                    let response = await fetch(url);
                     if (response.ok) {
                         const text = await response.text();
-                        if (text.length > 100 && text.includes(',')) {
-                            processData(text);
-                            return;
-                        }
+                        if (text.length > 100) { processData(text); return; }
                     }
-                } catch (e) { 
-                    console.log(`Strategy ${i + 1} failed:`, e.message); 
-                }
+                } catch (e) { console.log("Fail"); }
             }
-            status.innerText = "CONNECTION FAILED. CHECK GITHUB FILENAME.";
-            status.style.background = "#ef4444";
-            status.style.color = "white";
+            status.innerText = "CONNECTION FAILED. CHECK CAPS IN GITHUB.";
         }
 
         function processData(csvText) {
@@ -132,9 +121,8 @@
                 };
             }).filter(r => r && r.artist && r.artist !== "0" && r.artist !== "Artist");
 
-            status.innerText = `CONNECTED: ${libraryData.length} TRACKS LOADED.`;
-            status.style.background = "#10b981";
-            status.style.color = "white";
+            status.innerText = `READY: ${libraryData.length} SONGS.`;
+            status.style.background = "#10b981"; status.style.color = "white";
             document.getElementById('initialGenBtn').disabled = false;
         }
 
