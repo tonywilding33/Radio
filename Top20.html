@@ -36,37 +36,55 @@
 
     <script>
         const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
-        const STAGE_DURATION = 72; // Seconds per stage
+        const STAGE_DURATION = 72; 
         const TOTAL_STAGES = 5;
+        let lastProcessedStage = -1;
 
         async function loadCSV() {
             try {
-                const resp = await fetch(`${CSV_URL}?t=${new Date().getTime()}`);
+                const resp = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache: "no-store" });
                 const text = await resp.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
                 let allSongs = lines.slice(1).map(line => {
+                    // Split while respecting quotes for song titles with commas
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (cols.length < 3) return null;
+                    if (cols.length < 5) return null; // Ensure we have enough columns
+
                     const clean = (val) => val ? val.replace(/["]+/g, '').trim() : "";
-                    let tyPos = parseInt(clean(cols[0]));
-                    let artist = clean(cols[1]);
-                    let title = clean(cols[2]);
-                    let lyRaw = clean(cols[4]); 
-                    if (!artist || artist.toLowerCase() === "artist") return null;
+                    
+                    let tyPos = parseInt(clean(cols[0])); // TY
+                    let artist = clean(cols[1]);        // Artist
+                    let title = clean(cols[2]);         // Title
+                    // cols[3] is Category - skipped
+                    let lyRaw = clean(cols[4]);         // LY (Last Week)
+                    
+                    if (!artist || isNaN(tyPos)) return null;
+                    
                     let lyPos = parseInt(lyRaw);
-                    let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
+                    let displayLY = (isNaN(lyPos) || lyPos === 0) ? "NE" : lyPos;
+
                     return { ty: tyPos, artist, title, ly: displayLY };
                 }).filter(s => s !== null);
 
-                let top20 = allSongs.filter(s => s.ty >= 1 && s.ty <= 20).sort((a, b) => a.ty - b.ty);
-                if (top20.length > 0) renderChart(top20);
+                // Sort 1-20 and then render
+                let top20 = allSongs
+                    .filter(s => s.ty >= 1 && s.ty <= 20)
+                    .sort((a, b) => a.ty - b.ty);
+
+                if (top20.length > 0) {
+                    renderChart(top20);
+                    console.log("Chart Updated:", new Date().toLocaleTimeString());
+                    console.table(top20);
+                }
             } catch (e) { 
                 document.getElementById('loadStatus').innerText = "CONNECTION LAGGING...";
+                console.error("Fetch error:", e);
             }
         }
 
         function renderChart(data) {
+            // Reverse for the "Countdown" visual effect (20 down to 1)
             let countdown = [...data].reverse();
             let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
             countdown.forEach((s) => {
@@ -83,7 +101,6 @@
             const timerBtn = document.getElementById('timerBtn');
             const now = Math.floor(Date.now() / 1000);
             
-            // Get or Set the session start time
             let sessionStart = localStorage.getItem('chartSessionStart');
             if (!sessionStart || (now - sessionStart) > (STAGE_DURATION * TOTAL_STAGES)) {
                 sessionStart = now;
@@ -96,20 +113,18 @@
                 const totalCycle = STAGE_DURATION * TOTAL_STAGES;
                 
                 if (elapsed >= totalCycle) {
-                    // 6 minutes up! Reset session and refresh
                     localStorage.removeItem('chartSessionStart');
                     location.reload();
                     return;
                 }
 
-                // Calculate which "stage" we are in (5 down to 1)
                 const stageIndex = Math.floor(elapsed / STAGE_DURATION);
                 const stagesLeft = TOTAL_STAGES - stageIndex;
                 timerBtn.innerText = `New Chart In ${stagesLeft}`;
 
-                // Check if we just crossed into a new 72s window to refresh data silently
-                const secondsInCurrentStage = elapsed % STAGE_DURATION;
-                if (secondsInCurrentStage === 0) {
+                // Trigger silent data refresh whenever the countdown number changes
+                if (stageIndex !== lastProcessedStage) {
+                    lastProcessedStage = stageIndex;
                     loadCSV();
                 }
             }
@@ -127,7 +142,6 @@
             anchor.click();
         }
 
-        loadCSV();
         startSmartTimer();
     </script>
 </body>
