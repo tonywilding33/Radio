@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Top 20 Chart Show</title>
+    <title>Top 20 Request Chart</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         body { 
@@ -24,12 +24,12 @@
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
-        <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">GENERATING RANDOM CHART...</div>
+        <h2>Top 20 Request Chart</h2>
+        <div id="loadStatus" class="status">COMPILING REQUEST DATA...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
-            <button class="btn-msg" onclick="location.reload()">Refresh for New Random Chart</button>
+            <button class="btn-msg" onclick="location.reload()">Refresh for New Request Chart</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
@@ -37,7 +37,7 @@
     <script>
         const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
 
-        async function loadAndRandomize() {
+        async function generateRequestChart() {
             try {
                 const response = await fetch(`${CSV_URL}?v=${Date.now()}`);
                 const text = await response.text();
@@ -49,39 +49,39 @@
                     return { artist: clean(cols[1]), title: clean(cols[2]) };
                 }).filter(s => s.artist && s.title);
 
-                // 1. DEDUPLICATE ARTISTS: Only keep one song per artist in the potential pool
+                // 1. DEDUPLICATE: Ensure an artist only appears once in the chart
                 const seenArtists = new Set();
                 const uniqueArtistPool = pool.filter(song => {
-                    const artistLower = song.artist.toLowerCase();
-                    if (seenArtists.has(artistLower)) return false;
-                    seenArtists.add(artistLower);
+                    const artistKey = song.artist.toLowerCase();
+                    if (seenArtists.has(artistKey)) return false;
+                    seenArtists.add(artistKey);
                     return true;
                 });
 
-                // 2. Shuffle the unique artist pool
+                // 2. SHUFFLE: Randomize the unique pool
                 const shuffled = uniqueArtistPool.sort(() => 0.5 - Math.random());
 
-                // 3. Take the top 20 and simulate movement
+                // 3. SELECTION: Take the first 20 and build the weekly "story"
                 const top20 = shuffled.slice(0, 20).map((song, index) => {
                     const currentPos = index + 1;
                     let ly;
 
-                    // REALISM RULES:
-                    // - Number 1 is NEVER a New Entry (must have climbed or stayed)
-                    // - 15% chance of NE for positions 2-20
+                    // REALISM LOGIC:
+                    // - Number 1 is never a New Entry (NE).
+                    // - 15% chance of NE for positions 2-20.
                     const canBeNE = currentPos > 1 && Math.random() < 0.15;
 
                     if (canBeNE) {
                         ly = "NE";
                     } else {
-                        // If it's #1, it was likely #1, #2, or #3 last week
-                        const maxVariance = (currentPos === 1) ? 2 : 5;
+                        // Movement variance: +/- 3 for top spots, +/- 5 for others
+                        const maxVariance = (currentPos <= 3) ? 2 : 5;
                         const variance = Math.floor(Math.random() * (maxVariance * 2 + 1)) - maxVariance;
                         ly = currentPos + variance;
                         
-                        // Bounds check: if variance pushes it to 0 or > 20, make it a small move or NE
+                        // Bounds cleanup
                         if (ly < 1) ly = currentPos + 1;
-                        if (ly > 20) ly = (currentPos === 1) ? 2 : "NE";
+                        if (ly > 20) ly = (currentPos <= 3) ? currentPos + 1 : "NE";
                     }
 
                     return { ty: currentPos, artist: song.artist, title: song.title, ly: ly };
@@ -89,13 +89,14 @@
 
                 renderChart(top20);
             } catch (e) {
-                document.getElementById('loadStatus').innerText = "CONNECTION ERROR";
+                document.getElementById('loadStatus').innerText = "DATA SYNC ERROR";
             }
         }
 
         function renderChart(data) {
+            // Reverse for the countdown visual (20 down to 1)
             let countdown = [...data].reverse();
-            let displayTxt = "--- TOP 20 RANDOM RUNDOWN ---\n\n";
+            let displayTxt = "--- TOP 20 REQUEST CHART RUNDOWN ---\n\n";
             
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
@@ -112,12 +113,12 @@
             const text = document.getElementById('chartDisplay').innerText;
             const blob = new Blob([text], { type: 'text/plain' });
             const anchor = document.createElement('a');
-            anchor.download = 'Random_Top_20.txt';
+            anchor.download = 'Request_Chart.txt';
             anchor.href = URL.createObjectURL(blob);
             anchor.click();
         }
 
-        loadAndRandomize();
+        generateRequestChart();
     </script>
 </body>
 </html>
