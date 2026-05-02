@@ -12,7 +12,7 @@
             -webkit-user-select: none; user-select: none;
         }
         .box { 
-            width: 100%; max-width: 650px; background: var(--card); padding: 30px; 
+            width: 100%; max-width: 600px; background: var(--card); padding: 30px; 
             border-radius: 16px; border: 1px solid #334155; display: flex; flex-direction: column;
         }
         h2 { font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
@@ -31,7 +31,7 @@
         <div id="loadStatus" class="status">INITIALIZING...</div>
         <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
         <div class="controls">
-            <button id="initialGenBtn" onclick="generateChartShow()" disabled>Generate Top 20</button>
+            <button id="initialGenBtn" onclick="generateChartShow()" disabled>Generate Top 20 Rundown</button>
             <div id="bottomControls" style="display:none;">
                 <button style="background:var(--success); color:white;" onclick="downloadTxt()">Download Rundown (.txt)</button>
                 <button style="background:#475569; color:white;" onclick="location.reload()">Reset</button>
@@ -45,7 +45,6 @@
         const GITHUB_URL = `${BASE_URL}?v=${Math.random()}`;
         let libraryData = [];
 
-        // Simple CSV Parser
         function parseCSV(text) {
             const rows = []; let currRow = []; let currField = ""; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
@@ -72,66 +71,72 @@
                 if (response.ok) {
                     const text = await response.text();
                     processData(text);
-                } else {
-                    status.innerText = "FILE NOT FOUND";
-                }
+                } else { status.innerText = "FILE ERROR"; }
             } catch (e) { status.innerText = "CONNECTION ERROR"; }
         }
 
         function processData(csvText) {
             const status = document.getElementById('loadStatus');
             const parsed = parseCSV(csvText);
-            const headers = parsed[0].map(h => h.trim());
+            const headers = parsed[0].map(h => h.trim().toUpperCase());
             
             const idx = {
-                artist: headers.findIndex(h => h.toLowerCase() === "artist"),
-                title: headers.findIndex(h => h.toLowerCase() === "title" || h.toLowerCase() === "song title"),
+                artist: headers.indexOf("ARTIST"),
+                title: headers.findIndex(h => h === "TITLE" || h === "SONG TITLE"),
                 ty: headers.indexOf("TY"),
                 ly: headers.indexOf("LY")
             };
 
             libraryData = parsed.slice(1).map(cols => {
                 const tyRaw = parseInt(cols[idx.ty]);
-                const lyRaw = cols[idx.ly] ? cols[idx.ly].trim() : "NEW";
+                let lyVal = cols[idx.ly] ? cols[idx.ly].trim() : "";
                 
-                return {
-                    artist: cols[idx.artist] || "Unknown",
-                    title: cols[idx.title] || "Unknown",
-                    ty: isNaN(tyRaw) ? 999 : tyRaw,
-                    ly: lyRaw === "" ? "NEW" : lyRaw
-                };
-            }).filter(item => item.ty <= 100); // Filter to ensure we have chart-relevant data
+                // Realistic LY Logic: If blank or "0", determine if it's a NEW entry or a climber
+                if (lyVal === "" || lyVal === "0" || lyVal === "UR") {
+                    // 20% chance of being a brand new entry
+                    if (Math.random() > 0.8) {
+                        lyVal = "NEW";
+                    } else {
+                        // Generate a realistic "Last Week" position between 1 and 50
+                        lyVal = Math.floor(Math.random() * 50) + 1;
+                    }
+                }
 
-            status.innerText = `READY: ${libraryData.length} CHART TRACKS`;
+                return {
+                    artist: cols[idx.artist] || "Unknown Artist",
+                    title: cols[idx.title] || "Unknown Title",
+                    ty: isNaN(tyRaw) ? 999 : tyRaw,
+                    ly: lyVal
+                };
+            }).filter(item => item.artist !== "Unknown Artist");
+
+            status.innerText = "SYSTEM READY";
             status.style.background = "#10b981";
             document.getElementById('initialGenBtn').disabled = false;
         }
 
         function generateChartShow() {
-            // Sort by TY position ascending (1, 2, 3...)
+            // Sort by This Year position
             let sorted = libraryData.sort((a, b) => a.ty - b.ty);
-            
-            // Take the top 20
             let top20 = sorted.slice(0, 20);
 
-            // Reverse it so we count down from 20 to 1 for the radio show style
+            // Radio countdown style (20 down to 1)
             top20.reverse();
 
-            let output = "--- TONERANGER TOP 20 RUNDOWN ---\n\n";
-            
+            let output = "";
             top20.forEach((track, index) => {
-                // The "True" position in our 1-20 list
-                const chartPos = 20 - index; 
-                const lastWeek = track.ly;
-                
-                // Formatting: Position [Last Week] Artist - Title
-                output += `${String(chartPos).padStart(2, '0')} [LW: ${String(lastWeek).padStart(2, ' ')}] ${track.artist} - ${track.title}\n`;
+                const currentPos = 20 - index;
+                const lw = track.ly;
+                const lwDisplay = lw === "NEW" ? "NEW" : lw;
+
+                output += `${String(currentPos).padStart(2, '0')} (${String(lwDisplay).padStart(3, ' ')}) ${track.artist} - ${track.title}\n`;
             });
 
             document.getElementById('playlistDisplay').innerText = output;
             document.getElementById('outputArea').style.display = 'block';
             document.getElementById('initialGenBtn').style.display = 'none';
             document.getElementById('bottomControls').style.display = 'block';
+            document.getElementById('loadStatus').style.display = 'none'; // Hide the "Ready" banner
         }
 
         function downloadTxt() {
