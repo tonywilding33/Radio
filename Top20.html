@@ -16,7 +16,7 @@
         .status { font-size: 0.8rem; font-weight: 700; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
         .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 1rem; transition: background 0.3s; }
-        .btn-msg { background: #334155; color: #94a3b8; cursor: default; border: 1px solid #475569; }
+        .btn-msg { background: #334155; color: #f8fafc; cursor: pointer; border: 1px solid #475569; }
         .btn-download { background: var(--success); color: white; display: none; margin-bottom: 10px; }
         pre { background: #0f172a; color: #fff; padding: 15px 25px; border-radius: 8px; font-size: 1rem; white-space: pre-wrap; line-height: 1.6; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
         .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
@@ -29,7 +29,7 @@
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
-            <button class="btn-msg" onclick="location.reload()" style="cursor:pointer; color:white;">Refresh for New Random Chart</button>
+            <button class="btn-msg" onclick="location.reload()">Refresh for New Random Chart</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
@@ -49,23 +49,39 @@
                     return { artist: clean(cols[1]), title: clean(cols[2]) };
                 }).filter(s => s.artist && s.title);
 
-                // 1. Shuffle the pool of 500
-                const shuffled = pool.sort(() => 0.5 - Math.random());
+                // 1. DEDUPLICATE ARTISTS: Only keep one song per artist in the potential pool
+                const seenArtists = new Set();
+                const uniqueArtistPool = pool.filter(song => {
+                    const artistLower = song.artist.toLowerCase();
+                    if (seenArtists.has(artistLower)) return false;
+                    seenArtists.add(artistLower);
+                    return true;
+                });
 
-                // 2. Take the first 20 and assign positions + random LY data
+                // 2. Shuffle the unique artist pool
+                const shuffled = uniqueArtistPool.sort(() => 0.5 - Math.random());
+
+                // 3. Take the top 20 and simulate movement
                 const top20 = shuffled.slice(0, 20).map((song, index) => {
                     const currentPos = index + 1;
-                    
-                    // Create a random "Last Week" (LY) for realism
-                    // 20% chance of New Entry, otherwise +/- 5 spots from current
-                    const isNE = Math.random() < 0.2;
                     let ly;
-                    if (isNE) {
+
+                    // REALISM RULES:
+                    // - Number 1 is NEVER a New Entry (must have climbed or stayed)
+                    // - 15% chance of NE for positions 2-20
+                    const canBeNE = currentPos > 1 && Math.random() < 0.15;
+
+                    if (canBeNE) {
                         ly = "NE";
                     } else {
-                        const variance = Math.floor(Math.random() * 11) - 5; // -5 to +5
+                        // If it's #1, it was likely #1, #2, or #3 last week
+                        const maxVariance = (currentPos === 1) ? 2 : 5;
+                        const variance = Math.floor(Math.random() * (maxVariance * 2 + 1)) - maxVariance;
                         ly = currentPos + variance;
-                        if (ly < 1 || ly > 20) ly = "NE"; 
+                        
+                        // Bounds check: if variance pushes it to 0 or > 20, make it a small move or NE
+                        if (ly < 1) ly = currentPos + 1;
+                        if (ly > 20) ly = (currentPos === 1) ? 2 : "NE";
                     }
 
                     return { ty: currentPos, artist: song.artist, title: song.title, ly: ly };
@@ -73,7 +89,7 @@
 
                 renderChart(top20);
             } catch (e) {
-                document.getElementById('loadStatus').innerText = "ERROR CONNECTING TO POOL";
+                document.getElementById('loadStatus').innerText = "CONNECTION ERROR";
             }
         }
 
