@@ -9,7 +9,114 @@
         body { 
             font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+        }<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>Top 20 Chart Show</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
         }
+        .box { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
+        .status { font-size: 0.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
+        button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
+        button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
+        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1.05rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
+        .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Top 20 Chart</h2>
+        <div id="loadStatus" class="status">CONNECTING...</div>
+        <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
+        <div class="controls" id="controlPanel">
+            <button id="genBtn" onclick="generateTop20()" disabled>Generate Rundown</button>
+        </div>
+    </div>
+    <div class="footer">Developed by Tony Wilding</div>
+
+    <script>
+        const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
+        let songs = [];
+
+        async function loadCSV() {
+            const status = document.getElementById('loadStatus');
+            try {
+                const resp = await fetch(`${CSV_URL}?v=${Math.random()}`);
+                const text = await resp.text();
+                const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+                
+                songs = lines.slice(1).map(line => {
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (cols.length < 3) return null;
+
+                    const clean = (val) => val ? val.replace(/["]+/g, '').trim() : "";
+
+                    let tyVal = parseInt(clean(cols[0]));
+                    let artist = clean(cols[1]);
+                    let title = clean(cols[2]);
+                    let lyRaw = clean(cols[4]); 
+
+                    if (!artist || artist.toLowerCase() === "artist") return null;
+
+                    // STRICT TOP 20 LOGIC:
+                    // If LY is 21 or higher, it's a NEW entry to this specific chart.
+                    let lyVal = parseInt(lyRaw);
+                    let finalLY = "";
+
+                    if (isNaN(lyVal) || lyVal === 0 || lyVal > 20) {
+                        finalLY = "NEW";
+                    } else {
+                        finalLY = lyVal;
+                    }
+
+                    return { artist, title, ty: isNaN(tyVal) ? 999 : tyVal, ly: finalLY };
+                }).filter(s => s !== null);
+
+                if (songs.length > 0) {
+                    status.innerText = "CHART DATA LOADED";
+                    status.style.background = "#10b981";
+                    document.getElementById('genBtn').disabled = false;
+                } else {
+                    status.innerText = "ERROR: NO DATA FOUND";
+                }
+            } catch (e) { 
+                status.innerText = "CONNECTION FAILED";
+                status.style.background = "#ef4444";
+            }
+        }
+
+        function generateTop20() {
+            // Sort by TY (This Year)
+            let sorted = songs.sort((a, b) => a.ty - b.ty);
+            
+            // Slice the actual Top 20 and reverse for countdown
+            let top20 = sorted.slice(0, 20).reverse();
+
+            let displayTxt = "";
+            top20.forEach((s, i) => {
+                const currentPos = 20 - i;
+                const lw = s.ly === "NEW" ? "NEW" : s.ly;
+                
+                displayTxt += `${String(currentPos).padStart(2, '0')} (${String(lw).padStart(3, ' ')}) ${s.artist} - ${s.title}\n`;
+            });
+
+            document.getElementById('chartDisplay').innerText = displayTxt;
+            document.getElementById('outputArea').style.display = 'block';
+            document.getElementById('loadStatus').style.display = 'none';
+            document.getElementById('controlPanel').style.display = 'none';
+        }
+
+        loadCSV();
+    </script>
+</body>
+</html>
         .box { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
         h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
         .status { font-size: 0.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
