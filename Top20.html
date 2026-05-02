@@ -11,7 +11,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
             -webkit-user-select: none; user-select: none;
         }
-        .box { width: 100%; max-width: 650px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        .box { width: 100%; max-width: 700px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
         h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
         .status { font-size: 0.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
         .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
@@ -54,12 +54,13 @@
                     let artist = clean(cols[1]);
                     let title = clean(cols[2]);
                     let lyRaw = clean(cols[4]); 
-                    let woc = clean(cols[5]) || "1"; // Weeks on Chart
-                    let weeksAtOne = clean(cols[6]) || "0"; // Weeks at No. 1
+                    let woc = clean(cols[5]) || "1";
+                    let weeksAtOne = clean(cols[6]) || "0";
 
                     if (!artist || artist.toLowerCase() === "artist") return null;
 
                     let lyPos = parseInt(lyRaw);
+                    // Standard Chart Logic: Strict Top 20 LW or NE
                     let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
                     return { 
@@ -78,7 +79,7 @@
                 if (top20.length > 0) {
                     renderChart(top20);
                 } else {
-                    status.innerText = "ERROR: NO SONGS FOUND IN POSITIONS 1-20";
+                    status.innerText = "ERROR: NO SONGS FOUND IN TOP 20";
                 }
             } catch (e) { 
                 status.innerText = "CONNECTION FAILED";
@@ -88,8 +89,8 @@
 
         function renderChart(data) {
             let countdown = [...data].reverse();
-
             let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
+
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
                 const weeksInfo = `[Wks: ${s.woc}]`;
