@@ -10,22 +10,22 @@
             font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
         }
-        .box { width: 100%; max-width: 550px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
-        h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; }
-        .status { font-size: 0.7rem; font-weight: 800; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; text-align: center; }
-        button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
-        button:disabled { background: #475569; cursor: not-allowed; }
-        pre { background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; font-size: 1rem; white-space: pre-wrap; line-height: 1.6; font-family: 'Courier New', monospace; margin-top: 20px; border-left: 4px solid var(--accent); }
-        .footer { text-align: center; font-size: 0.6rem; margin-top: 20px; opacity: 0.6; text-transform: uppercase; }
+        .box { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
+        .status { font-size: 0.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
+        button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
+        button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
+        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1.05rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
+        .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="box">
         <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">INITIALIZING...</div>
+        <div id="loadStatus" class="status">CONNECTING TO GITHUB...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
-            <button id="genBtn" onclick="generateTop20()" disabled>Generate Chart</button>
+            <button id="genBtn" onclick="generateTop20()" disabled>Generate Rundown</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
@@ -35,63 +35,78 @@
         let songs = [];
 
         async function loadCSV() {
+            const status = document.getElementById('loadStatus');
             try {
                 const resp = await fetch(`${CSV_URL}?v=${Math.random()}`);
-                const text = await resp.text();
-                // Split by line and filter out empty lines
-                const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
-                const headers = lines[0].split(',').map(h => h.trim().toUpperCase());
+                if (!resp.ok) throw new Error("Network response was not ok");
                 
-                // Flexible index finding
-                const iArtist = headers.indexOf("ARTIST");
-                const iTitle = headers.findIndex(h => h.includes("TITLE") || h === "SONG");
-                const iTY = headers.indexOf("TY");
-                const iLY = headers.indexOf("LY");
+                const text = await resp.text();
+                const lines = text.split(/\r?\n/).filter(line => line.trim().length > 5);
+                
+                // Identify Headers
+                const headers = lines[0].split(',').map(h => h.trim().toUpperCase().replace(/["]+/g, ''));
+                
+                const idx = {
+                    artist: headers.indexOf("ARTIST"),
+                    title: headers.findIndex(h => h.includes("TITLE") || h === "SONG"),
+                    ty: headers.indexOf("TY"),
+                    ly: headers.indexOf("LY")
+                };
 
+                // Parse Data Rows
                 songs = lines.slice(1).map(line => {
-                    // Proper CSV column splitting (handles commas inside quotes)
-                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    // Regex to split by comma but ignore commas inside quotes
+                    const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
                     
-                    let tyVal = parseInt(cols[iTY]);
-                    let artist = cols[iArtist] ? cols[iArtist].replace(/"/g, '').trim() : "";
-                    let title = cols[iTitle] ? cols[iTitle].replace(/"/g, '').trim() : "";
-                    let lyVal = cols[iLY] ? cols[iLY].replace(/"/g, '').trim() : "";
+                    if (cols.length < 2) return null;
 
-                    // Cleanup "last week" logic for the rundown
+                    let rawArtist = cols[idx.artist] || "";
+                    let rawTitle = cols[idx.title] || "";
+                    let tyVal = parseInt(cols[idx.ty]);
+                    let lyVal = cols[idx.ly] ? cols[idx.ly].replace(/["]+/g, '').trim() : "";
+
+                    // Clean quotes
+                    const clean = (val) => val.replace(/["]+/g, '').trim();
+
+                    // Generate LY if missing
                     if (!lyVal || lyVal === "0" || lyVal === "UR" || lyVal === "") {
-                        lyVal = Math.random() > 0.2 ? Math.floor(Math.random() * 40) + 1 : "NEW";
+                        lyVal = Math.random() > 0.1 ? Math.floor(Math.random() * 48) + 1 : "NEW";
                     }
 
-                    if (!artist || artist === "0") return null;
-
-                    return { artist, title, ty: isNaN(tyVal) ? 999 : tyVal, ly: lyVal };
-                }).filter(s => s !== null);
+                    return {
+                        artist: clean(rawArtist),
+                        title: clean(rawTitle),
+                        ty: isNaN(tyVal) ? 999 : tyVal,
+                        ly: lyVal
+                    };
+                }).filter(s => s && s.artist && s.artist !== "ARTIST");
 
                 if (songs.length > 0) {
-                    document.getElementById('loadStatus').innerText = "SYSTEM READY";
+                    status.innerText = "DATABASE CONNECTED";
+                    status.style.background = "#10b981";
                     document.getElementById('genBtn').disabled = false;
                 } else {
-                    document.getElementById('loadStatus').innerText = "ERROR: NO DATA FOUND";
+                    status.innerText = "FILE READ BUT EMPTY";
                 }
             } catch (e) { 
-                document.getElementById('loadStatus').innerText = "CONNECTION FAILED"; 
+                status.innerText = "CONNECTION FAILED: CHECK URL";
+                status.style.background = "#ef4444";
             }
         }
 
         function generateTop20() {
-            // Sort by the TY (This Year) rank ascending
+            // Sort by TY (This Year) position
             let sorted = songs.sort((a, b) => a.ty - b.ty);
             
-            // Slice the best 20 and reverse for the 20-to-1 countdown
+            // Slice the top 20 and reverse for countdown (20 to 1)
             let chartList = sorted.slice(0, 20).reverse();
 
             let displayTxt = "";
             chartList.forEach((s, i) => {
                 const currentPos = 20 - i;
-                const lastWeek = s.ly === "NEW" ? "NEW" : s.ly;
+                const lw = s.ly === "NEW" ? "NEW" : s.ly;
                 
-                // Format: Position [LastWeek] Artist - Title
-                displayTxt += `${String(currentPos).padStart(2, '0')} [LW: ${String(lastWeek).padStart(3, ' ')}] ${s.artist} - ${s.title}\n`;
+                displayTxt += `${String(currentPos).padStart(2, '0')} (${String(lw).padStart(3, ' ')}) ${s.artist} - ${s.title}\n`;
             });
 
             document.getElementById('chartDisplay').innerText = displayTxt;
