@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Tony Wilding">
-    <title>Top 20 Chart Show</title>
+    <title>Top 20 Weekly Chart</title>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
         body { 
@@ -24,17 +24,18 @@
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
-        <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">SYNCING WITH DATABASE...</div>
+        <h2>Top 20 Weekly Chart</h2>
+        <div id="loadStatus" class="status">FETCHING LATEST DATA...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
-            <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
-            <button id="timerBtn" disabled>New Chart In 5</button>
+            <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Weekly Chart</button>
+            <button id="timerBtn" disabled>Updating In 5</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
 
     <script>
+        // Ensure this URL is exactly where your CSV lives
         const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
         const STAGE_DURATION = 72; 
         const TOTAL_STAGES = 5;
@@ -42,13 +43,20 @@
 
         async function loadCSV() {
             try {
-                // Cache-busting fetch
-                const resp = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache: "no-store" });
+                // Using two layers of cache busting: unique URL param + Request Init
+                const cacheBuster = Date.now();
+                const resp = await fetch(`${CSV_URL}?nocache=${cacheBuster}`, { 
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
+                
                 const text = await resp.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
                 let allSongs = lines.slice(1).map(line => {
-                    // Splits by comma but ignores commas inside double quotes
+                    // Regex to handle quoted titles with commas inside
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length < 5) return null;
 
@@ -57,40 +65,39 @@
                     let tyPos = parseInt(clean(cols[0])); // This Week
                     let artist = clean(cols[1]);        // Artist
                     let title = clean(cols[2]);         // Title
-                    // cols[3] is Category - Ignored
-                    let lyRaw = clean(cols[4]);         // Last Week Position
+                    // cols[3] is Category - Skipping
+                    let lyRaw = clean(cols[4]);         // Last Week (Simulator)
                     
                     if (!artist || isNaN(tyPos)) return null;
                     
                     let lyPos = parseInt(lyRaw);
                     
-                    /** 
-                     * SIMULATION LOGIC:
-                     * If the previous position is 0, empty, or > 20, 
-                     * it is treated as a New Entry (NE).
-                     */
+                    // SIMULATION: If position was outside top 20 last week, it's a New Entry
                     let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
                     return { ty: tyPos, artist, title, ly: displayLY };
                 }).filter(s => s !== null);
 
-                // Filter only current Top 20 and sort ascending
+                // Sort 1-20
                 let top20 = allSongs
                     .filter(s => s.ty >= 1 && s.ty <= 20)
                     .sort((a, b) => a.ty - b.ty);
 
                 if (top20.length > 0) {
                     renderChart(top20);
+                } else {
+                    document.getElementById('loadStatus').innerText = "CHART DATA EMPTY";
                 }
             } catch (e) { 
-                document.getElementById('loadStatus').innerText = "CONNECTION LAGGING...";
+                document.getElementById('loadStatus').innerText = "SYNC ERROR - RETRYING...";
+                console.error("Fetch Error:", e);
             }
         }
 
         function renderChart(data) {
-            // Reverse for the visual countdown effect (showing #20 first)
+            // Countdowns usually show #20 first
             let countdown = [...data].reverse();
-            let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
+            let displayTxt = "--- WEEKLY TOP 20 RUNDOWN ---\n\n";
             
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
@@ -105,30 +112,24 @@
 
         function startSmartTimer() {
             const timerBtn = document.getElementById('timerBtn');
-            const now = Math.floor(Date.now() / 1000);
             
-            let sessionStart = localStorage.getItem('chartSessionStart');
-            if (!sessionStart || (now - sessionStart) > (STAGE_DURATION * TOTAL_STAGES)) {
-                sessionStart = now;
-                localStorage.setItem('chartSessionStart', sessionStart);
-            }
-
             function update() {
-                const currentTime = Math.floor(Date.now() / 1000);
-                const elapsed = currentTime - sessionStart;
-                const totalCycle = STAGE_DURATION * TOTAL_STAGES;
+                const now = Math.floor(Date.now() / 1000);
+                let sessionStart = localStorage.getItem('chartSessionStart');
                 
-                if (elapsed >= totalCycle) {
-                    localStorage.removeItem('chartSessionStart');
-                    location.reload();
-                    return;
+                // If no session or cycle complete (360s), reset
+                if (!sessionStart || (now - sessionStart) > (STAGE_DURATION * TOTAL_STAGES)) {
+                    sessionStart = now;
+                    localStorage.setItem('chartSessionStart', sessionStart);
                 }
 
+                const elapsed = now - sessionStart;
                 const stageIndex = Math.floor(elapsed / STAGE_DURATION);
                 const stagesLeft = TOTAL_STAGES - stageIndex;
-                timerBtn.innerText = `New Chart In ${stagesLeft}`;
+                
+                timerBtn.innerText = `Update In ${stagesLeft}`;
 
-                // Fetch new data precisely when the stage changes
+                // Trigger reload only when entering a new stage
                 if (stageIndex !== lastProcessedStage) {
                     lastProcessedStage = stageIndex;
                     loadCSV();
@@ -143,7 +144,7 @@
             const text = document.getElementById('chartDisplay').innerText;
             const blob = new Blob([text], { type: 'text/plain' });
             const anchor = document.createElement('a');
-            anchor.download = 'Top_20_Chart.txt';
+            anchor.download = 'Weekly_Chart.txt';
             anchor.href = URL.createObjectURL(blob);
             anchor.click();
         }
