@@ -20,20 +20,16 @@
         .btn-download { background: var(--success); color: white; display: none; }
         pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1.05rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
         .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
-        .sync-tag { font-size: 0.6rem; color: #64748b; margin-top: 10px; text-align: right; display: block; }
     </style>
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
         <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">BYPASSING CACHE...</div>
-        <div id="outputArea" style="display:none;">
-            <pre id="chartDisplay"></pre>
-            <span id="syncTime" class="sync-tag"></span>
-        </div>
+        <div id="loadStatus" class="status">FETCHING LATEST DATA...</div>
+        <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
-            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem;" onclick="hardReload()">Refresh Data</button>
+            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem;" onclick="location.reload()">Refresh from Source</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
@@ -44,11 +40,16 @@
         async function loadCSV() {
             const status = document.getElementById('loadStatus');
             try {
-                // Generate a random string to ensure the URL is never the same twice
-                const salt = Math.random().toString(36).substring(2, 15);
-                const response = await fetch(`${CSV_URL}?nocache=${salt}`);
+                // Fetch with a unique timestamp AND no-cache headers to minimize lag
+                const response = await fetch(`${CSV_URL}?v=${new Date().getTime()}`, {
+                    cache: "no-store",
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 
-                if (!response.ok) throw new Error('Could not reach GitHub');
+                if (!response.ok) throw new Error('Network offline');
                 
                 const text = await response.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
@@ -75,12 +76,11 @@
                 if (songs.length > 0) {
                     renderChart(songs);
                 } else {
-                    status.innerText = "NO DATA FOUND IN TOP 20";
+                    status.innerText = "NO VALID TOP 20 DATA FOUND";
                 }
             } catch (e) { 
-                status.innerText = "SYNC ERROR: TRY AGAIN IN 30 SECONDS";
+                status.innerText = "CONNECTION FAILED";
                 status.style.background = "#ef4444";
-                document.getElementById('resetBtn').style.display = 'block';
             }
         }
 
@@ -94,8 +94,6 @@
                 displayTxt += `${String(s.ty).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title}\n`;
             });
 
-            const now = new Date();
-            document.getElementById('syncTime').innerText = "Last Sync: " + now.toLocaleTimeString();
             document.getElementById('chartDisplay').innerText = displayTxt;
             document.getElementById('outputArea').style.display = 'block';
             document.getElementById('loadStatus').style.display = 'none';
@@ -110,11 +108,6 @@
             anchor.download = 'Top_20_Chart.txt';
             anchor.href = URL.createObjectURL(blob);
             anchor.click();
-        }
-
-        function hardReload() {
-            // Force a reload by changing the query string of the page itself
-            window.location.href = window.location.origin + window.location.pathname + '?r=' + Math.random();
         }
 
         loadCSV();
