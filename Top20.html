@@ -11,25 +11,25 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
             -webkit-user-select: none; user-select: none;
         }
-        .box { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        .box { width: 100%; max-width: 650px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
         h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
-        .status { font-size: 0.8rem; font-weight: 700; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; transition: 0.3s; }
+        .status { font-size: 0.8rem; font-weight: 700; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
         .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
         button:hover { opacity: 0.9; }
         .btn-download { background: var(--success); color: white; display: none; }
-        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1.05rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
+        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
         .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
     </style>
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
         <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">CONNECTING TO DATABASE...</div>
+        <div id="loadStatus" class="status">SYNCING WITH DATABASE...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
-            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem;" onclick="location.reload()">Retry Connection</button>
+            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem; padding: 10px;" onclick="location.reload()">Refresh from File</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
@@ -37,18 +37,15 @@
     <script>
         const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
 
-        async function loadCSV(retryCount = 0) {
+        async function loadCSV() {
             const status = document.getElementById('loadStatus');
             try {
-                // Simplified fetch to reduce "Connection Failed" errors
-                const response = await fetch(CSV_URL + '?v=' + Date.now());
-                
-                if (!response.ok) throw new Error('File not found');
-                
-                const text = await response.text();
+                // Using a simple timestamp query to help bypass basic browser cache
+                const resp = await fetch(`${CSV_URL}?t=${new Date().getTime()}`);
+                const text = await resp.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
-                const songs = lines.slice(1).map(line => {
+                let allSongs = lines.slice(1).map(line => {
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length < 3) return null;
 
@@ -62,33 +59,35 @@
                     if (!artist || artist.toLowerCase() === "artist") return null;
 
                     let lyPos = parseInt(lyRaw);
+                    // If LY is missing or outside top 20, set as New Entry
                     let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
-                    return { ty: tyPos, artist, title, ly: displayLY };
-                }).filter(s => s !== null && s.ty <= 20);
+                    return { 
+                        ty: tyPos, 
+                        artist, 
+                        title, 
+                        ly: displayLY
+                    };
+                }).filter(s => s !== null);
 
-                if (songs.length > 0) {
-                    renderChart(songs);
+                let top20 = allSongs.filter(s => s.ty >= 1 && s.ty <= 20).sort((a, b) => a.ty - b.ty);
+
+                if (top20.length > 0) {
+                    renderChart(top20);
                 } else {
-                    status.innerText = "DATA ERROR: TOP 20 EMPTY";
+                    status.innerText = "ERROR: NO DATA FOUND";
                 }
             } catch (e) { 
-                if (retryCount < 1) {
-                    status.innerText = "RECONNECTING...";
-                    setTimeout(() => loadCSV(retryCount + 1), 2000);
-                } else {
-                    status.innerText = "OFFLINE: CHECK GITHUB CONNECTION";
-                    status.style.background = "#ef4444";
-                    document.getElementById('resetBtn').style.display = 'block';
-                }
+                status.innerText = "CONNECTION FAILED";
+                status.style.background = "#ef4444";
+                document.getElementById('resetBtn').style.display = 'block';
             }
         }
 
         function renderChart(data) {
-            data.sort((a, b) => a.ty - b.ty);
             let countdown = [...data].reverse();
-
             let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
+
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
                 displayTxt += `${String(s.ty).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title}\n`;
