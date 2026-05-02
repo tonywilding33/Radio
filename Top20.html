@@ -22,7 +22,7 @@
 <body>
     <div class="box">
         <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">CONNECTING TO GITHUB...</div>
+        <div id="loadStatus" class="status">CONNECTING...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="genBtn" onclick="generateTop20()" disabled>Generate Rundown</button>
@@ -38,71 +38,58 @@
             const status = document.getElementById('loadStatus');
             try {
                 const resp = await fetch(`${CSV_URL}?v=${Math.random()}`);
-                if (!resp.ok) throw new Error("Network response was not ok");
-                
                 const text = await resp.text();
-                const lines = text.split(/\r?\n/).filter(line => line.trim().length > 5);
                 
-                // Identify Headers
-                const headers = lines[0].split(',').map(h => h.trim().toUpperCase().replace(/["]+/g, ''));
+                // Split lines and remove empty ones
+                const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
-                const idx = {
-                    artist: headers.indexOf("ARTIST"),
-                    title: headers.findIndex(h => h.includes("TITLE") || h === "SONG"),
-                    ty: headers.indexOf("TY"),
-                    ly: headers.indexOf("LY")
-                };
-
-                // Parse Data Rows
+                // Direct mapping based on your column order: TY, Artist, Song Title, Category, LY
                 songs = lines.slice(1).map(line => {
-                    // Regex to split by comma but ignore commas inside quotes
-                    const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',');
+                    // Split by comma, but handle quoted strings correctly
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     
-                    if (cols.length < 2) return null;
+                    if (cols.length < 3) return null;
 
-                    let rawArtist = cols[idx.artist] || "";
-                    let rawTitle = cols[idx.title] || "";
-                    let tyVal = parseInt(cols[idx.ty]);
-                    let lyVal = cols[idx.ly] ? cols[idx.ly].replace(/["]+/g, '').trim() : "";
+                    const clean = (val) => val ? val.replace(/["]+/g, '').trim() : "";
 
-                    // Clean quotes
-                    const clean = (val) => val.replace(/["]+/g, '').trim();
+                    let tyVal = parseInt(clean(cols[0]));
+                    let artist = clean(cols[1]);
+                    let title = clean(cols[2]);
+                    let lyVal = clean(cols[4]); // LY is the 5th column (index 4)
 
-                    // Generate LY if missing
+                    // Skip rows where artist is missing or the header is repeated
+                    if (!artist || artist.toLowerCase() === "artist") return null;
+
+                    // Realistic LY fallback logic
                     if (!lyVal || lyVal === "0" || lyVal === "UR" || lyVal === "") {
-                        lyVal = Math.random() > 0.1 ? Math.floor(Math.random() * 48) + 1 : "NEW";
+                        lyVal = Math.random() > 0.15 ? Math.floor(Math.random() * 45) + 5 : "NEW";
                     }
 
-                    return {
-                        artist: clean(rawArtist),
-                        title: clean(rawTitle),
-                        ty: isNaN(tyVal) ? 999 : tyVal,
-                        ly: lyVal
-                    };
-                }).filter(s => s && s.artist && s.artist !== "ARTIST");
+                    return { artist, title, ty: isNaN(tyVal) ? 999 : tyVal, ly: lyVal };
+                }).filter(s => s !== null);
 
                 if (songs.length > 0) {
-                    status.innerText = "DATABASE CONNECTED";
+                    status.innerText = "CHART DATA LOADED";
                     status.style.background = "#10b981";
                     document.getElementById('genBtn').disabled = false;
                 } else {
-                    status.innerText = "FILE READ BUT EMPTY";
+                    status.innerText = "ERROR: NO VALID ROWS FOUND";
                 }
             } catch (e) { 
-                status.innerText = "CONNECTION FAILED: CHECK URL";
+                status.innerText = "CONNECTION FAILED";
                 status.style.background = "#ef4444";
             }
         }
 
         function generateTop20() {
-            // Sort by TY (This Year) position
+            // Sort by This Year position (1 at the top)
             let sorted = songs.sort((a, b) => a.ty - b.ty);
             
-            // Slice the top 20 and reverse for countdown (20 to 1)
-            let chartList = sorted.slice(0, 20).reverse();
+            // Take the 20 with the lowest TY values and reverse for 20->1 countdown
+            let top20 = sorted.slice(0, 20).reverse();
 
             let displayTxt = "";
-            chartList.forEach((s, i) => {
+            top20.forEach((s, i) => {
                 const currentPos = 20 - i;
                 const lw = s.ly === "NEW" ? "NEW" : s.ly;
                 
