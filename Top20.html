@@ -25,11 +25,11 @@
 <body oncontextmenu="return false;">
     <div class="box">
         <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">FETCHING LATEST DATA...</div>
+        <div id="loadStatus" class="status">GENERATING NEW RUNDOWN...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
-            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem; padding: 10px;" onclick="forceReset()">Reset & Refresh Data</button>
+            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem; padding: 10px;" onclick="location.reload()">Generate New Selection</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
@@ -41,9 +41,7 @@
         async function loadCSV() {
             const status = document.getElementById('loadStatus');
             try {
-                // Cache-busting: adds a unique timestamp to the URL to force GitHub to send the newest file
-                const cacheBuster = new Date().getTime();
-                const resp = await fetch(`${CSV_URL}?t=${cacheBuster}`);
+                const resp = await fetch(`${CSV_URL}?t=${new Date().getTime()}`);
                 const text = await resp.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
@@ -53,7 +51,6 @@
 
                     const clean = (val) => val ? val.replace(/["]+/g, '').trim() : "";
 
-                    let tyVal = parseInt(clean(cols[0]));
                     let artist = clean(cols[1]);
                     let title = clean(cols[2]);
                     let lyRaw = clean(cols[4]); 
@@ -61,15 +58,16 @@
                     if (!artist || artist.toLowerCase() === "artist") return null;
 
                     let lyVal = parseInt(lyRaw);
+                    // NE Logic: If original position was outside top 20
                     let finalLY = (isNaN(lyVal) || lyVal === 0 || lyVal > 20) ? "NE" : lyVal;
 
-                    return { artist, title, ty: isNaN(tyVal) ? 999 : tyVal, ly: finalLY };
+                    return { artist, title, ly: finalLY };
                 }).filter(s => s !== null);
 
-                if (songs.length > 0) {
-                    generateTop20();
+                if (songs.length >= 20) {
+                    generateRandomTop20();
                 } else {
-                    status.innerText = "ERROR: CSV DATA EMPTY OR INVALID";
+                    status.innerText = "ERROR: NOT ENOUGH SONGS IN CSV";
                 }
             } catch (e) { 
                 status.innerText = "CONNECTION FAILED";
@@ -77,12 +75,15 @@
             }
         }
 
-        function generateTop20() {
-            let sorted = songs.sort((a, b) => a.ty - b.ty);
-            let top20 = sorted.slice(0, 20).reverse();
+        function generateRandomTop20() {
+            // Shuffle the entire array to ensure a different selection every reset
+            let shuffled = songs.sort(() => 0.5 - Math.random());
+            
+            // Pick 20 songs
+            let selected = shuffled.slice(0, 20);
 
             let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
-            top20.forEach((s, i) => {
+            selected.forEach((s, i) => {
                 const currentPos = 20 - i;
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
                 displayTxt += `${String(currentPos).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title}\n`;
@@ -102,11 +103,6 @@
             anchor.download = 'Top_20_Chart.txt';
             anchor.href = URL.createObjectURL(blob);
             anchor.click();
-        }
-
-        function forceReset() {
-            // Forces a full reload from the server, not the cache
-            window.location.reload(true);
         }
 
         loadCSV();
