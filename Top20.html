@@ -11,14 +11,14 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
             -webkit-user-select: none; user-select: none;
         }
-        .box { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        .box { width: 100%; max-width: 650px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
         h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
         .status { font-size: 0.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
         .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
         button:hover { opacity: 0.9; }
         .btn-download { background: var(--success); color: white; display: none; }
-        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1.05rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
+        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
         .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
     </style>
 </head>
@@ -40,7 +40,6 @@
         async function loadCSV() {
             const status = document.getElementById('loadStatus');
             try {
-                // Fetch with cache-buster to ensure we get your latest GitHub edits
                 const resp = await fetch(`${CSV_URL}?t=${new Date().getTime()}`);
                 const text = await resp.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
@@ -55,20 +54,25 @@
                     let artist = clean(cols[1]);
                     let title = clean(cols[2]);
                     let lyRaw = clean(cols[4]); 
+                    let woc = clean(cols[5]) || "1"; // Weeks on Chart
+                    let weeksAtOne = clean(cols[6]) || "0"; // Weeks at No. 1
 
                     if (!artist || artist.toLowerCase() === "artist") return null;
 
                     let lyPos = parseInt(lyRaw);
-                    // Standard Chart Logic: If it wasn't in the Top 20 last week, it's a New Entry (NE)
                     let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
-                    return { ty: tyPos, artist, title, ly: displayLY };
+                    return { 
+                        ty: tyPos, 
+                        artist, 
+                        title, 
+                        ly: displayLY, 
+                        woc: woc, 
+                        atOne: weeksAtOne 
+                    };
                 }).filter(s => s !== null);
 
-                // Filter to only songs currently in the Top 20 (TY 1-20)
                 let top20 = allSongs.filter(s => s.ty >= 1 && s.ty <= 20);
-                
-                // Sort by TY so 1 is at the top of the logic
                 top20.sort((a, b) => a.ty - b.ty);
 
                 if (top20.length > 0) {
@@ -83,13 +87,15 @@
         }
 
         function renderChart(data) {
-            // Reverse so we count down from 20 to 1 for the radio rundown
             let countdown = [...data].reverse();
 
             let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
-                displayTxt += `${String(s.ty).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title}\n`;
+                const weeksInfo = `[Wks: ${s.woc}]`;
+                const no1Info = parseInt(s.atOne) > 0 ? ` (#1 x${s.atOne})` : "";
+                
+                displayTxt += `${String(s.ty).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title} ${weeksInfo}${no1Info}\n`;
             });
 
             document.getElementById('chartDisplay').innerText = displayTxt;
