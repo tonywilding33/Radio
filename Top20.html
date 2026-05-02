@@ -16,7 +16,7 @@
         .status { font-size: 0.8rem; font-weight: 700; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
         .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 1rem; transition: background 0.3s; }
-        button:disabled { background: #475569; color: #94a3b8; cursor: default; }
+        .btn-msg { background: #334155; color: #94a3b8; cursor: default; border: 1px solid #475569; }
         .btn-download { background: var(--success); color: white; display: none; margin-bottom: 10px; }
         pre { background: #0f172a; color: #fff; padding: 15px 25px; border-radius: 8px; font-size: 1rem; white-space: pre-wrap; line-height: 1.6; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
         .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
@@ -24,55 +24,51 @@
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
-        <h2>Top 20 Weekly Chart</h2>
-        <div id="loadStatus" class="status">INITIALIZING SYNC...</div>
+        <h2>Top 20 Chart Show</h2>
+        <div id="loadStatus" class="status">CONNECTING TO DATABASE...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
-            <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Weekly Chart</button>
-            <button id="timerBtn" disabled>Update In 5</button>
+            <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
+            <button class="btn-msg">Chart Updated Every Day - see you tomorrow</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
 
     <script>
         const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
-        const STAGE_DURATION = 72; 
-        const TOTAL_STAGES = 5;
-        let lastProcessedStage = -1;
 
         async function loadCSV() {
             const statusEl = document.getElementById('loadStatus');
             try {
-                // Simplified fetch to prevent CORS/Header rejections while still busting cache
+                // Fetch the latest data with a simple cache-buster
                 const response = await fetch(`${CSV_URL}?v=${Date.now()}`);
-                
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) throw new Error("Fetch failed");
 
                 const text = await response.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
-                if (lines.length < 2) throw new Error("CSV file appears empty");
-
                 let allSongs = lines.slice(1).map(line => {
+                    // Split while respecting quotes
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length < 5) return null;
 
                     const clean = (val) => val ? val.replace(/["]+/g, '').trim() : "";
                     
-                    let tyPos = parseInt(clean(cols[0])); 
-                    let artist = clean(cols[1]);        
-                    let title = clean(cols[2]);         
-                    let lyRaw = clean(cols[4]);         
+                    let tyPos = parseInt(clean(cols[0])); // This Week
+                    let artist = clean(cols[1]);        // Artist
+                    let title = clean(cols[2]);         // Title
+                    let lyRaw = clean(cols[4]);         // Last Week Position
                     
                     if (!artist || isNaN(tyPos)) return null;
                     
                     let lyPos = parseInt(lyRaw);
-                    // WEEKLY SIMULATION: Positions > 20 are New Entries (NE)
+                    // If position > 20, it's a New Entry (NE)
                     let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
                     return { ty: tyPos, artist, title, ly: displayLY };
                 }).filter(s => s !== null);
 
+                // Sort 1-20 for the display
                 let top20 = allSongs
                     .filter(s => s.ty >= 1 && s.ty <= 20)
                     .sort((a, b) => a.ty - b.ty);
@@ -80,19 +76,20 @@
                 if (top20.length > 0) {
                     renderChart(top20);
                 } else {
-                    statusEl.innerText = "NO TOP 20 DATA FOUND";
+                    statusEl.innerText = "CHART CURRENTLY UNAVAILABLE";
                 }
             } catch (e) { 
                 console.error("Sync Error:", e);
-                statusEl.innerText = "SYNC ERROR - RETRYING IN 3s...";
-                // Auto-retry after 3 seconds
-                setTimeout(loadCSV, 3000);
+                statusEl.innerText = "OFFLINE - CHECKING CONNECTION...";
+                // Retry once after 5 seconds if initial load fails
+                setTimeout(loadCSV, 5000);
             }
         }
 
         function renderChart(data) {
+            // Reverse for the visual countdown effect (#20 down to #1)
             let countdown = [...data].reverse();
-            let displayTxt = "--- WEEKLY TOP 20 RUNDOWN ---\n\n";
+            let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
             
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
@@ -105,45 +102,17 @@
             document.getElementById('dlBtn').style.display = 'block';
         }
 
-        function startSmartTimer() {
-            const timerBtn = document.getElementById('timerBtn');
-            
-            function update() {
-                const now = Math.floor(Date.now() / 1000);
-                let sessionStart = localStorage.getItem('chartSessionStart');
-                
-                if (!sessionStart || (now - sessionStart) > (STAGE_DURATION * TOTAL_STAGES)) {
-                    sessionStart = now;
-                    localStorage.setItem('chartSessionStart', sessionStart);
-                }
-
-                const elapsed = now - sessionStart;
-                const stageIndex = Math.floor(elapsed / STAGE_DURATION);
-                const stagesLeft = TOTAL_STAGES - stageIndex;
-                
-                timerBtn.innerText = `Update In ${stagesLeft}`;
-
-                if (stageIndex !== lastProcessedStage) {
-                    lastProcessedStage = stageIndex;
-                    loadCSV();
-                }
-            }
-
-            setInterval(update, 1000);
-            update();
-        }
-
         function downloadTxt() {
             const text = document.getElementById('chartDisplay').innerText;
             const blob = new Blob([text], { type: 'text/plain' });
             const anchor = document.createElement('a');
-            anchor.download = 'Weekly_Chart.txt';
+            anchor.download = 'Top_20_Chart.txt';
             anchor.href = URL.createObjectURL(blob);
             anchor.click();
         }
 
-        // Initialize
-        startSmartTimer();
+        // Run on load
+        loadCSV();
     </script>
 </body>
 </html>
