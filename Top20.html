@@ -11,51 +11,45 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
             -webkit-user-select: none; user-select: none;
         }
-        .box { width: 100%; max-width: 750px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        .box { width: 100%; max-width: 600px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; }
         h2 { font-size: 1.6rem; text-align: center; color: var(--accent); text-transform: uppercase; margin-top: 0; letter-spacing: 1px; }
-        .status { font-size: 0.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
+        .status { font-size: 0.8rem; font-weight: 700; color: #f8fafc; margin-bottom: 20px; padding: 12px; background: #334155; border-radius: 8px; text-align: center; }
         .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 1rem; }
         button:hover { opacity: 0.9; }
         .btn-download { background: var(--success); color: white; display: none; }
-        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 0.95rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
+        pre { background: #0f172a; color: #fff; padding: 25px; border-radius: 8px; font-size: 1.05rem; white-space: pre-wrap; line-height: 1.8; font-family: 'Consolas', 'Courier New', monospace; margin-top: 20px; border-left: 5px solid var(--accent); }
         .footer { text-align: center; font-size: 0.65rem; margin-top: 25px; opacity: 0.7; text-transform: uppercase; }
     </style>
 </head>
 <body oncontextmenu="return false;">
     <div class="box">
         <h2>Top 20 Chart</h2>
-        <div id="loadStatus" class="status">FORCING DATABASE SYNC...</div>
+        <div id="loadStatus" class="status">LOADING DATA...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Chart (txt)</button>
-            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem; padding: 10px;" onclick="hardReset()">Force Clear Cache & Refresh</button>
+            <button id="resetBtn" style="background:#475569; color:white; display:none; font-size: 0.8rem;" onclick="location.reload()">Reset Session</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
 
     <script>
+        // Directly using the raw URL. 
         const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
 
         async function loadCSV() {
             const status = document.getElementById('loadStatus');
             try {
-                // Use a combination of timestamp and random string to bypass GitHub CDN cache
-                const uniqueKey = Date.now() + Math.random().toString(36).substring(7);
+                // Simplified fetch with a basic timestamp to prevent caching
+                const response = await fetch(`${CSV_URL}?v=${new Date().getTime()}`);
                 
-                const resp = await fetch(`${CSV_URL}?nocache=${uniqueKey}`, {
-                    method: 'GET',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
-
-                const text = await resp.text();
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const text = await response.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
-                let allSongs = lines.slice(1).map(line => {
+                const songs = lines.slice(1).map(line => {
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length < 3) return null;
 
@@ -65,47 +59,35 @@
                     let artist = clean(cols[1]);
                     let title = clean(cols[2]);
                     let lyRaw = clean(cols[4]); 
-                    let wocRaw = clean(cols[5]);
-                    let no1Raw = clean(cols[6]);
 
                     if (!artist || artist.toLowerCase() === "artist") return null;
 
                     let lyPos = parseInt(lyRaw);
                     let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
-                    return { 
-                        ty: tyPos, 
-                        artist, 
-                        title, 
-                        ly: displayLY, 
-                        woc: wocRaw || "1", 
-                        atOne: no1Raw || "0" 
-                    };
-                }).filter(s => s !== null);
+                    return { ty: tyPos, artist, title, ly: displayLY };
+                }).filter(s => s !== null && s.ty <= 20);
 
-                let top20 = allSongs.filter(s => s.ty >= 1 && s.ty <= 20).sort((a, b) => a.ty - b.ty);
-
-                if (top20.length > 0) {
-                    renderChart(top20);
+                if (songs.length > 0) {
+                    renderChart(songs);
                 } else {
-                    status.innerText = "ERROR: DATA MISMATCH IN POSITIONS 1-20";
+                    status.innerText = "NO CHART DATA FOUND";
                 }
             } catch (e) { 
-                status.innerText = "CONNECTION FAILED";
+                status.innerText = "CONNECTION FAILED: " + e.message;
                 status.style.background = "#ef4444";
             }
         }
 
         function renderChart(data) {
+            // Sort by position 1-20 then reverse for the countdown display
+            data.sort((a, b) => a.ty - b.ty);
             let countdown = [...data].reverse();
-            let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
 
+            let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
-                const wks = `[Wks: ${String(s.woc).padStart(2, ' ')}]`;
-                const no1 = parseInt(s.atOne) > 0 ? ` (#1 x${s.atOne})` : "";
-                
-                displayTxt += `${String(s.ty).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title} ${wks}${no1}\n`;
+                displayTxt += `${String(s.ty).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title}\n`;
             });
 
             document.getElementById('chartDisplay').innerText = displayTxt;
@@ -122,11 +104,6 @@
             anchor.download = 'Top_20_Chart.txt';
             anchor.href = URL.createObjectURL(blob);
             anchor.click();
-        }
-
-        function hardReset() {
-            // Clears any local storage and reloads from server
-            window.location.href = window.location.pathname + "?" + Date.now();
         }
 
         loadCSV();
