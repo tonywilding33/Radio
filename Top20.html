@@ -25,60 +25,54 @@
 <body oncontextmenu="return false;">
     <div class="box">
         <h2>Top 20 Weekly Chart</h2>
-        <div id="loadStatus" class="status">FETCHING LATEST DATA...</div>
+        <div id="loadStatus" class="status">INITIALIZING SYNC...</div>
         <div id="outputArea" style="display:none;"><pre id="chartDisplay"></pre></div>
         <div class="controls" id="controlPanel">
             <button id="dlBtn" class="btn-download" onclick="downloadTxt()">Download Weekly Chart</button>
-            <button id="timerBtn" disabled>Updating In 5</button>
+            <button id="timerBtn" disabled>Update In 5</button>
         </div>
     </div>
     <div class="footer">Developed by Tony Wilding</div>
 
     <script>
-        // Ensure this URL is exactly where your CSV lives
         const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
         const STAGE_DURATION = 72; 
         const TOTAL_STAGES = 5;
         let lastProcessedStage = -1;
 
         async function loadCSV() {
+            const statusEl = document.getElementById('loadStatus');
             try {
-                // Using two layers of cache busting: unique URL param + Request Init
-                const cacheBuster = Date.now();
-                const resp = await fetch(`${CSV_URL}?nocache=${cacheBuster}`, { 
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-                });
+                // Simplified fetch to prevent CORS/Header rejections while still busting cache
+                const response = await fetch(`${CSV_URL}?v=${Date.now()}`);
                 
-                const text = await resp.text();
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const text = await response.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
+                if (lines.length < 2) throw new Error("CSV file appears empty");
+
                 let allSongs = lines.slice(1).map(line => {
-                    // Regex to handle quoted titles with commas inside
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if (cols.length < 5) return null;
 
                     const clean = (val) => val ? val.replace(/["]+/g, '').trim() : "";
                     
-                    let tyPos = parseInt(clean(cols[0])); // This Week
-                    let artist = clean(cols[1]);        // Artist
-                    let title = clean(cols[2]);         // Title
-                    // cols[3] is Category - Skipping
-                    let lyRaw = clean(cols[4]);         // Last Week (Simulator)
+                    let tyPos = parseInt(clean(cols[0])); 
+                    let artist = clean(cols[1]);        
+                    let title = clean(cols[2]);         
+                    let lyRaw = clean(cols[4]);         
                     
                     if (!artist || isNaN(tyPos)) return null;
                     
                     let lyPos = parseInt(lyRaw);
-                    
-                    // SIMULATION: If position was outside top 20 last week, it's a New Entry
+                    // WEEKLY SIMULATION: Positions > 20 are New Entries (NE)
                     let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
                     return { ty: tyPos, artist, title, ly: displayLY };
                 }).filter(s => s !== null);
 
-                // Sort 1-20
                 let top20 = allSongs
                     .filter(s => s.ty >= 1 && s.ty <= 20)
                     .sort((a, b) => a.ty - b.ty);
@@ -86,16 +80,17 @@
                 if (top20.length > 0) {
                     renderChart(top20);
                 } else {
-                    document.getElementById('loadStatus').innerText = "CHART DATA EMPTY";
+                    statusEl.innerText = "NO TOP 20 DATA FOUND";
                 }
             } catch (e) { 
-                document.getElementById('loadStatus').innerText = "SYNC ERROR - RETRYING...";
-                console.error("Fetch Error:", e);
+                console.error("Sync Error:", e);
+                statusEl.innerText = "SYNC ERROR - RETRYING IN 3s...";
+                // Auto-retry after 3 seconds
+                setTimeout(loadCSV, 3000);
             }
         }
 
         function renderChart(data) {
-            // Countdowns usually show #20 first
             let countdown = [...data].reverse();
             let displayTxt = "--- WEEKLY TOP 20 RUNDOWN ---\n\n";
             
@@ -117,7 +112,6 @@
                 const now = Math.floor(Date.now() / 1000);
                 let sessionStart = localStorage.getItem('chartSessionStart');
                 
-                // If no session or cycle complete (360s), reset
                 if (!sessionStart || (now - sessionStart) > (STAGE_DURATION * TOTAL_STAGES)) {
                     sessionStart = now;
                     localStorage.setItem('chartSessionStart', sessionStart);
@@ -129,7 +123,6 @@
                 
                 timerBtn.innerText = `Update In ${stagesLeft}`;
 
-                // Trigger reload only when entering a new stage
                 if (stageIndex !== lastProcessedStage) {
                     lastProcessedStage = stageIndex;
                     loadCSV();
@@ -149,6 +142,7 @@
             anchor.click();
         }
 
+        // Initialize
         startSmartTimer();
     </script>
 </body>
