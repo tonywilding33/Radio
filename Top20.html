@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>Toneranger | Chart Rundown</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+            -webkit-user-select: none; user-select: none;
+        }
+        .box { 
+            width: 100%; max-width: 650px; background: var(--card); padding: 30px; 
+            border-radius: 16px; border: 1px solid #334155; display: flex; flex-direction: column;
+        }
+        h2 { font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
+        .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; }
+        .controls { margin-top: 20px; text-align: center; }
+        button { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; }
+        button:hover { opacity: 0.9; }
+        button:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
+        pre { background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; font-size: 0.95rem; white-space: pre-wrap; border-left: 4px solid var(--accent); line-height: 1.8; font-family: 'Courier New', monospace; overflow-x: auto; margin: 0; }
+        .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.9; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div class="box">
+        <h2>Toneranger Chart</h2>
+        <div id="loadStatus" class="status">INITIALIZING...</div>
+        <div id="outputArea" style="display:none;"><pre id="playlistDisplay"></pre></div>
+        <div class="controls">
+            <button id="initialGenBtn" onclick="generateChartShow()" disabled>Generate Top 20</button>
+            <div id="bottomControls" style="display:none;">
+                <button style="background:var(--success); color:white;" onclick="downloadTxt()">Download Rundown (.txt)</button>
+                <button style="background:#475569; color:white;" onclick="location.reload()">Reset</button>
+            </div>
+        </div>
+    </div>
+    <div class="credit-footer">Developed by Tony Wilding</div>
+
+    <script>
+        const BASE_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/NHRRC_DATA.csv';
+        const GITHUB_URL = `${BASE_URL}?v=${Math.random()}`;
+        let libraryData = [];
+
+        // Simple CSV Parser
+        function parseCSV(text) {
+            const rows = []; let currRow = []; let currField = ""; let inQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') {
+                    if (inQuotes && text[i+1] === '"') { currField += '"'; i++; }
+                    else { inQuotes = !inQuotes; }
+                } else if (char === ',' && !inQuotes) {
+                    currRow.push(currField.trim()); currField = "";
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (currField || currRow.length > 0) { currRow.push(currField.trim()); rows.push(currRow); }
+                    currRow = []; currField = "";
+                    if (char === '\r' && text[i+1] === '\n') i++;
+                } else { currField += char; }
+            }
+            if (currField || currRow.length > 0) { currRow.push(currField.trim()); rows.push(currRow); }
+            return rows;
+        }
+
+        async function fetchLibrary() {
+            const status = document.getElementById('loadStatus');
+            try {
+                let response = await fetch(GITHUB_URL);
+                if (response.ok) {
+                    const text = await response.text();
+                    processData(text);
+                } else {
+                    status.innerText = "FILE NOT FOUND";
+                }
+            } catch (e) { status.innerText = "CONNECTION ERROR"; }
+        }
+
+        function processData(csvText) {
+            const status = document.getElementById('loadStatus');
+            const parsed = parseCSV(csvText);
+            const headers = parsed[0].map(h => h.trim());
+            
+            const idx = {
+                artist: headers.findIndex(h => h.toLowerCase() === "artist"),
+                title: headers.findIndex(h => h.toLowerCase() === "title" || h.toLowerCase() === "song title"),
+                ty: headers.indexOf("TY"),
+                ly: headers.indexOf("LY")
+            };
+
+            libraryData = parsed.slice(1).map(cols => {
+                const tyRaw = parseInt(cols[idx.ty]);
+                const lyRaw = cols[idx.ly] ? cols[idx.ly].trim() : "NEW";
+                
+                return {
+                    artist: cols[idx.artist] || "Unknown",
+                    title: cols[idx.title] || "Unknown",
+                    ty: isNaN(tyRaw) ? 999 : tyRaw,
+                    ly: lyRaw === "" ? "NEW" : lyRaw
+                };
+            }).filter(item => item.ty <= 100); // Filter to ensure we have chart-relevant data
+
+            status.innerText = `READY: ${libraryData.length} CHART TRACKS`;
+            status.style.background = "#10b981";
+            document.getElementById('initialGenBtn').disabled = false;
+        }
+
+        function generateChartShow() {
+            // Sort by TY position ascending (1, 2, 3...)
+            let sorted = libraryData.sort((a, b) => a.ty - b.ty);
+            
+            // Take the top 20
+            let top20 = sorted.slice(0, 20);
+
+            // Reverse it so we count down from 20 to 1 for the radio show style
+            top20.reverse();
+
+            let output = "--- TONERANGER TOP 20 RUNDOWN ---\n\n";
+            
+            top20.forEach((track, index) => {
+                // The "True" position in our 1-20 list
+                const chartPos = 20 - index; 
+                const lastWeek = track.ly;
+                
+                // Formatting: Position [Last Week] Artist - Title
+                output += `${String(chartPos).padStart(2, '0')} [LW: ${String(lastWeek).padStart(2, ' ')}] ${track.artist} - ${track.title}\n`;
+            });
+
+            document.getElementById('playlistDisplay').innerText = output;
+            document.getElementById('outputArea').style.display = 'block';
+            document.getElementById('initialGenBtn').style.display = 'none';
+            document.getElementById('bottomControls').style.display = 'block';
+        }
+
+        function downloadTxt() {
+            const text = document.getElementById('playlistDisplay').innerText;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.download = 'Chart_Rundown.txt';
+            anchor.href = URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        fetchLibrary();
+    </script>
+</body>
+</html>
