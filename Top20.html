@@ -42,55 +42,61 @@
 
         async function loadCSV() {
             try {
+                // Cache-busting fetch
                 const resp = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache: "no-store" });
                 const text = await resp.text();
                 const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
                 
                 let allSongs = lines.slice(1).map(line => {
-                    // Split while respecting quotes for song titles with commas
+                    // Splits by comma but ignores commas inside double quotes
                     const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (cols.length < 5) return null; // Ensure we have enough columns
+                    if (cols.length < 5) return null;
 
                     const clean = (val) => val ? val.replace(/["]+/g, '').trim() : "";
                     
-                    let tyPos = parseInt(clean(cols[0])); // TY
+                    let tyPos = parseInt(clean(cols[0])); // This Week
                     let artist = clean(cols[1]);        // Artist
                     let title = clean(cols[2]);         // Title
-                    // cols[3] is Category - skipped
-                    let lyRaw = clean(cols[4]);         // LY (Last Week)
+                    // cols[3] is Category - Ignored
+                    let lyRaw = clean(cols[4]);         // Last Week Position
                     
                     if (!artist || isNaN(tyPos)) return null;
                     
                     let lyPos = parseInt(lyRaw);
-                    let displayLY = (isNaN(lyPos) || lyPos === 0) ? "NE" : lyPos;
+                    
+                    /** 
+                     * SIMULATION LOGIC:
+                     * If the previous position is 0, empty, or > 20, 
+                     * it is treated as a New Entry (NE).
+                     */
+                    let displayLY = (isNaN(lyPos) || lyPos === 0 || lyPos > 20) ? "NE" : lyPos;
 
                     return { ty: tyPos, artist, title, ly: displayLY };
                 }).filter(s => s !== null);
 
-                // Sort 1-20 and then render
+                // Filter only current Top 20 and sort ascending
                 let top20 = allSongs
                     .filter(s => s.ty >= 1 && s.ty <= 20)
                     .sort((a, b) => a.ty - b.ty);
 
                 if (top20.length > 0) {
                     renderChart(top20);
-                    console.log("Chart Updated:", new Date().toLocaleTimeString());
-                    console.table(top20);
                 }
             } catch (e) { 
                 document.getElementById('loadStatus').innerText = "CONNECTION LAGGING...";
-                console.error("Fetch error:", e);
             }
         }
 
         function renderChart(data) {
-            // Reverse for the "Countdown" visual effect (20 down to 1)
+            // Reverse for the visual countdown effect (showing #20 first)
             let countdown = [...data].reverse();
             let displayTxt = "--- TOP 20 CHART RUNDOWN ---\n\n";
+            
             countdown.forEach((s) => {
                 const lw = s.ly === "NE" ? "NE" : String(s.ly).padStart(2, ' ');
                 displayTxt += `${String(s.ty).padStart(2, '0')} (${lw}) ${s.artist} - ${s.title}\n`;
             });
+
             document.getElementById('chartDisplay').innerText = displayTxt;
             document.getElementById('outputArea').style.display = 'block';
             document.getElementById('loadStatus').style.display = 'none';
@@ -122,7 +128,7 @@
                 const stagesLeft = TOTAL_STAGES - stageIndex;
                 timerBtn.innerText = `New Chart In ${stagesLeft}`;
 
-                // Trigger silent data refresh whenever the countdown number changes
+                // Fetch new data precisely when the stage changes
                 if (stageIndex !== lastProcessedStage) {
                     lastProcessedStage = stageIndex;
                     loadCSV();
