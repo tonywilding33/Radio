@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.2 (Energy-Drive)</title>
+    <title>RHR | Virtual Producer v1.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -66,7 +66,7 @@
             <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ NEW SHIFT</button>
         </div>
     </div>
-    <div class="footer">ENGINE V4.0 | ENERGY-DRIVE MODE</div>
+    <div class="footer">ENGINE V4.1 | ENERGY-DRIVE LOGIC</div>
 </div>
 
 <script>
@@ -77,7 +77,6 @@
     let aiLibrary = [];
     let currentPlaylist = [];
 
-    // Energy Weighting Profiles
     const WEIGHTS = {
         DAY: { 5: 35, 4: 30, 3: 20, 2: 10, 1: 5 },
         NIGHT: { 1: 35, 2: 30, 3: 20, 4: 10, 5: 5 }
@@ -131,12 +130,9 @@
 
         while (elapsedSec < (totalMinutes * 60)) {
             let currentHour = (startHour + Math.floor(elapsedSec / 3600)) % 24;
-            
-            // 1. Determine Energy Profile based on time
             const isDay = (currentHour >= 7 && currentHour < 23);
             const activeWeights = isDay ? WEIGHTS.DAY : WEIGHTS.NIGHT;
 
-            // 2. Roll for Target Energy Level
             let roll = Math.random() * 100;
             let targetEnergy = 3;
             let cumulative = 0;
@@ -151,16 +147,12 @@
             const checkRules = (song, currentTime) => {
                 const lastS = history.findLast(h => h.id === (song.ID || song.Title));
                 const lastA = history.findLast(h => h.artist === song.Artist);
-                // Separation: 12 hours for same song, 3 hours for same artist
                 return (!lastS || (currentTime - lastS.time > 43200)) && (!lastA || (currentTime - lastA.time > 10800));
             };
 
             let pick = null;
-
-            // Logic: Filter library by targeted Energy Level AND rules (Ignoring Daypart field)
             let potentialPicks = masterLibrary.filter(s => parseInt(s.Energy) === targetEnergy && checkRules(s, elapsedSec));
 
-            // Fallback: If no song in targeted energy level fits rules, look at adjacent energy levels
             if (potentialPicks.length === 0) {
                 potentialPicks = masterLibrary.filter(s => Math.abs(parseInt(s.Energy) - targetEnergy) <= 1 && checkRules(s, elapsedSec));
             }
@@ -168,7 +160,6 @@
             if (potentialPicks.length > 0) {
                 pick = {...potentialPicks[Math.floor(Math.random() * potentialPicks.length)]};
             } else if (aiLibrary.length > 0) {
-                // Last ditch fallback to AI pool if primary DB fails
                 let fallback = aiLibrary.filter(s => checkRules(s, elapsedSec));
                 if (fallback.length > 0) pick = {...fallback[Math.floor(Math.random() * fallback.length)]};
             }
@@ -180,7 +171,7 @@
                 currentPlaylist.push(pick);
                 history.push({id: (pick.ID || pick.Title), artist: pick.Artist, time: elapsedSec});
             }
-            elapsedSec += 240; // Approx 4 mins per song
+            elapsedSec += 240; 
         }
         render();
     }
@@ -188,11 +179,11 @@
     function render() {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('stat-view').innerText = `Energy-Driven Log | ${currentPlaylist.length} Tracks`;
+        document.getElementById('stat-view').innerText = `Scheduled Log | ${currentPlaylist.length} Tracks`;
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map(t => `
             <div class="track-row">
                 <div class="track-info">
-                    <div class="t-artist">${t.displayArtist} <span style="font-size:0.7rem; color:#aaa;">[E${t.Energy}]</span></div>
+                    <div class="t-artist">${t.displayArtist}</div>
                     <div class="t-title">${t.Title}</div>
                 </div>
                 <div class="time-col">${t.timeStr}</div>
@@ -201,7 +192,7 @@
     }
 
     function copyToClipboard() {
-        const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title} (E${t.Energy})`).join('\n');
+        const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title}`).join('\n');
         navigator.clipboard.writeText(txt).then(() => alert("Log copied!"));
     }
 </script>
