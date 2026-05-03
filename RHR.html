@@ -3,93 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Tony Wilding">
-    <title>RHR | Cross-Platform Playlist Engine</title>
+    <title>RHR | Smart Logic Engine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
             --rhr-red: #e31e24; 
-            --rhr-pink-fill: #fde2e2;
-            --ai-gold: #b58900;
-            --ai-bg: #fffcf0;
-            --btn-gray: #555;
+            --ai-gold: #b58900; 
+            --ai-bg: #fffcf0; 
         }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
-            background-color: #f4f4f4; 
-            margin: 0; 
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-        }
-
+        body { font-family: -apple-system, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 500px; padding-top: 20px; }
-
-        .card { 
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            border: 1px solid #eee;
-        }
-
+        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         .header { text-align: center; margin-bottom: 20px; }
         .station-name { color: var(--rhr-red); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; }
-        .badge { font-size: 0.65rem; background: #333; color: #fff; padding: 3px 10px; border-radius: 20px; margin-top: 5px; display: inline-block; }
-
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85rem; color: #444; }
-        select { 
-            width: 100%; 
-            padding: 14px; 
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            background: #fff;
-            -webkit-appearance: none; /* iOS Clean Look */
-        }
-
-        .btn { 
-            width: 100%; 
-            border: none; 
-            padding: 16px; 
-            font-size: 1rem; 
-            font-weight: bold; 
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: opacity 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn:active { opacity: 0.7; }
-
+        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; }
+        select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; -webkit-appearance: none; background: #fff; }
+        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .btn-main { background: var(--rhr-red); color: #fff; }
-        .btn-sec { background: var(--btn-gray); color: #fff; }
+        .btn-sec { background: #555; color: #fff; }
         .btn-outline { background: transparent; border: 1px solid #ddd; color: #777; }
-
-        #playlist-box { 
-            border: 1px solid #eee; 
-            border-radius: 8px; 
-            max-height: 400px; 
-            overflow-y: auto; 
-            margin: 15px 0;
-            -webkit-overflow-scrolling: touch; /* Smooth iOS scroll */
-        }
-
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
         .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; }
         .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
-
-        .num-col { width: 25px; font-size: 0.75rem; color: #aaa; font-weight: bold; }
-        .track-info { flex-grow: 1; padding-right: 10px; }
-        .t-artist { font-weight: bold; color: #000; font-size: 0.95rem; line-height: 1.2; }
+        .track-info { flex-grow: 1; }
+        .t-artist { font-weight: bold; font-size: 0.95rem; }
         .t-title { color: #666; font-size: 0.85rem; }
-        .time-col { font-weight: bold; color: var(--rhr-red); font-family: monospace; font-size: 0.9rem; }
-        .ai-label { font-size: 0.6rem; color: var(--ai-gold); font-weight: 800; display: block; margin-top: 2px; }
-
-        .footer { text-align: center; margin-top: 20px; font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        .time-col { font-weight: bold; color: var(--rhr-red); font-family: monospace; }
+        .ai-label { font-size: 0.6rem; color: var(--ai-gold); font-weight: 800; display: block; }
+        .footer { text-align: center; font-size: 0.65rem; color: #aaa; margin-top: 15px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -98,32 +39,24 @@
     <div id="setup-view" class="card">
         <div class="header">
             <div class="station-name">Rugby Hospital Radio</div>
-            <div class="badge">AI Stress Test (100 Song Pool)</div>
+            <div style="font-size:0.7rem; color:#666; font-weight: bold;">STRICT SEPARATION MODE</div>
         </div>
-        
-        <label>Start Hour</label>
-        <select id="start-hour"></select>
-
-        <label>Duration</label>
-        <select id="duration"></select>
-
-        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
+        <label>Start Hour</label><select id="start-hour"></select>
+        <label>Duration</label><select id="duration"></select>
+        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE LOG</button>
     </div>
 
     <div id="monitor" style="display:none;" class="card">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:900; color:var(--rhr-red)">PLAYLIST LOG</span>
-            <span id="track-count" style="font-size:0.7rem; font-weight:bold; color:#777;"></span>
+            <span style="font-weight:900; color:var(--rhr-red)">STATION LOG</span>
+            <span id="track-count" style="font-size:0.7rem; font-weight:bold;"></span>
         </div>
-
         <div id="playlist-box"></div>
-        
-        <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG TO CLIPBOARD</button>
-        <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD LOG (.TXT)</button>
-        <button class="btn btn-outline" onclick="buildAnother()">↺ BUILD ANOTHER PLAYLIST</button>
+        <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY TO CLIPBOARD</button>
+        <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
+        <button class="btn btn-outline" onclick="buildNew()">↺ BUILD NEW</button>
     </div>
-    
-    <div class="footer">v2.1 Cross-Platform Engine</div>
+    <div class="footer">v2.2 Cross-Platform | Anti-Repeat Active</div>
 </div>
 
 <script>
@@ -131,12 +64,22 @@
     let masterLibrary = [];
     let currentPlaylist = [];
 
+    const AI_POOL = [
+        { ID: "AI-101", Artist: "Queen", Title: "Radio Ga Ga" },
+        { ID: "AI-102", Artist: "Ed Sheeran", Title: "Castle On The Hill" },
+        { ID: "AI-103", Artist: "Adele", Title: "Rolling In The Deep" },
+        { ID: "AI-104", Artist: "Coldplay", Title: "Fix You" },
+        { ID: "AI-105", Artist: "Harry Styles", Title: "Watermelon Sugar" },
+        { ID: "AI-106", Artist: "Dua Lipa", Title: "Don't Start Now" },
+        { ID: "AI-107", Artist: "George Ezra", Title: "Budapest" },
+        { ID: "AI-108", Artist: "Elton John", Title: "I'm Still Standing" }
+    ];
+
     window.onload = function() {
-        const hourBox = document.getElementById('start-hour');
-        for(let i=0; i<24; i++) hourBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
-        
-        const durBox = document.getElementById('duration');
-        [1, 2, 3, 4, 6, 12].forEach(h => durBox.add(new Option(h + (h===1?' Hour':' Hours'), h * 60)));
+        const hBox = document.getElementById('start-hour');
+        for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
+        const dBox = document.getElementById('duration');
+        [1, 2, 3, 4, 6, 12].forEach(h => dBox.add(new Option(h + " Hours", h * 60)));
     };
 
     async function connectAndBuild() {
@@ -147,12 +90,11 @@
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
                     const filtered = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
-                    // STRESS TEST: Slice to 100
-                    masterLibrary = filtered.slice(0, 100);
+                    masterLibrary = filtered.slice(0, 100); // 100 song restriction
                     runLogic();
                 }
             });
-        } catch (err) { alert("Network Error. Check connection."); }
+        } catch (err) { alert("Load Error."); }
     }
 
     async function runLogic() {
@@ -165,27 +107,40 @@
         while (sec < (dur * 60)) {
             let hour = (start + Math.floor(sec / 3600)) % 24;
             let dp = (hour >= 6 && hour < 12) ? "Morning" : (hour >= 12 && hour < 18) ? "Afternoon" : "Evening";
-            let pool = masterLibrary.filter(s => {
-                if (s.Daypart !== dp) return false;
-                const lastS = history.findLast(h => h.id === s.ID);
-                const lastA = history.findLast(h => h.artist === s.Artist);
-                return (!lastS || (sec - lastS.time > 15300)) && (!lastA || (sec - lastA.time > 6300));
-            });
+
+            // CONSOLIDATED SEPARATION CHECK
+            const checkRules = (song, currentTime) => {
+                const lastSong = history.findLast(h => h.id === song.ID);
+                const lastArtist = history.findLast(h => h.artist === song.Artist);
+                
+                // Song Sep: 4.25hr (15300s) | Artist Sep: 1.75hr (6300s)
+                const songOk = !lastSong || (currentTime - lastSong.time > 15300);
+                const artistOk = !lastArtist || (currentTime - lastArtist.time > 6300);
+                
+                return songOk && artistOk;
+            };
+
+            // Step 1: Filter DB
+            let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, sec));
 
             let pick;
-            if (pool.length === 0) {
-                // Mock AI Logic
-                const aiList = [{A:"Queen", T:"Don't Stop Me Now"}, {A:"Ed Sheeran", T:"Perfect"}, {A:"Adele", T:"Hello"}];
-                const res = aiList[Math.floor(Math.random()*aiList.length)];
-                pick = { ID: "AI"+sec, Artist: res.A, Title: res.T, isAI: true };
-            } else {
+            if (pool.length > 0) {
                 pick = {...pool[Math.floor(Math.random() * pool.length)], isAI: false};
+            } else {
+                // Step 2: Filter AI Pool with same strict rules
+                let aiPool = AI_POOL.filter(s => checkRules(s, sec));
+                if (aiPool.length > 0) {
+                    pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], isAI: true};
+                } else {
+                    // Step 3: Hard Fallback (Rules broken only as absolute last resort)
+                    pick = {...AI_POOL[0], isAI: true, Title: AI_POOL[0].Title + " (RECOVERY)"};
+                }
             }
 
             pick.timeStr = ((start + Math.floor(sec/3600))%24).toString().padStart(2,'0')+":"+(Math.floor((sec%3600)/60)).toString().padStart(2,'0');
             currentPlaylist.push(pick);
             history.push({id: pick.ID, artist: pick.Artist, time: sec});
-            sec += 240;
+            sec += 240; 
         }
         render();
     }
@@ -193,14 +148,13 @@
     function render() {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('track-count').innerText = currentPlaylist.length + " ITEMS";
+        document.getElementById('track-count').innerText = currentPlaylist.length + " TRACKS";
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map((t, i) => `
             <div class="track-row ${t.isAI ? 'ai-fill' : ''}">
-                <div class="num-col">${i+1}</div>
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    ${t.isAI ? '<span class="ai-label">✨ AI SIMILARITY MATCH</span>' : ''}
+                    ${t.isAI ? '<span class="ai-label">✨ ANTI-REPEAT ACTIVE</span>' : ''}
                 </div>
                 <div class="time-col">${t.timeStr}</div>
             </div>
@@ -208,24 +162,20 @@
     }
 
     function copyToClipboard() {
-        const text = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        navigator.clipboard.writeText(text).then(() => {
-            alert("Log copied to clipboard! You can now paste it anywhere.");
-        }).catch(() => {
-            alert("Clipboard failed. Try the Download button.");
-        });
+        const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
+        navigator.clipboard.writeText(txt).then(() => alert("Copied to Clipboard!"));
     }
 
     function downloadTxt() {
-        const text = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        const blob = new Blob([text], { type: 'text/plain' });
+        const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
+        const blob = new Blob([txt], { type: 'text/plain' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "RHR_Playlist.txt";
+        a.download = "RHR_Station_Log.txt";
         a.click();
     }
 
-    function buildAnother() {
+    function buildNew() {
         document.getElementById('monitor').style.display = 'none';
         document.getElementById('setup-view').style.display = 'block';
     }
