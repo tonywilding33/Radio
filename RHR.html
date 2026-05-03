@@ -3,25 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Smart Logic Engine</title>
+    <title>RHR | Smart Playlist Engine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
             --rhr-red: #e31e24; 
+            --rhr-pink-fill: #fde2e2;
+            --rhr-pink-line: #f1a9a9;
             --ai-gold: #b58900; 
             --ai-bg: #fffcf0; 
         }
         body { font-family: -apple-system, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
-        .wrapper { width: 100%; max-width: 500px; padding-top: 20px; }
-        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-        .header { text-align: center; margin-bottom: 20px; }
-        .station-name { color: var(--rhr-red); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; }
-        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; }
+        .wrapper { width: 100%; max-width: 500px; padding-top: 10px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        
+        /* Restored Logo Styles */
+        .logo-container { text-align: center; margin-bottom: 10px; }
+        .rhr-logo-svg { width: 140px; height: auto; display: block; margin: 0 auto; }
+        .station-name { color: var(--rhr-red); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
+
+        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
         select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; -webkit-appearance: none; background: #fff; }
+        
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .btn-main { background: var(--rhr-red); color: #fff; }
         .btn-sec { background: #555; color: #fff; }
         .btn-outline { background: transparent; border: 1px solid #ddd; color: #777; }
+
         #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
         .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; }
         .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
@@ -30,17 +38,24 @@
         .t-title { color: #666; font-size: 0.85rem; }
         .time-col { font-weight: bold; color: var(--rhr-red); font-family: monospace; }
         .ai-label { font-size: 0.6rem; color: var(--ai-gold); font-weight: 800; display: block; }
-        .footer { text-align: center; font-size: 0.65rem; color: #aaa; margin-top: 15px; text-transform: uppercase; }
+        .footer { text-align: center; font-size: 0.6rem; color: #aaa; margin-top: 15px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
     <div id="setup-view" class="card">
-        <div class="header">
-            <div class="station-name">Rugby Hospital Radio</div>
-            <div style="font-size:0.7rem; color:#666; font-weight: bold;">STRICT SEPARATION MODE</div>
+        <!-- Station Logo Restored -->
+        <div class="logo-container">
+            <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+                <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
+                <path d="M80 125C80 125 15 88 15 45C15 22 32 10 50 10C62 10 74 18 80 30C86 18 98 10 110 10C128 10 145 22 145 45C145 88 80 125 80 125Z" fill="none" stroke="var(--rhr-pink-line)" stroke-width="2" />
+                <path d="M80 115C80 115 25 82 25 45C25 28 38 20 50 20C60 20 72 25 80 35C88 25 100 20 110 20C122 20 135 28 135 45C135 82 80 115 80 115Z" fill="none" stroke="var(--rhr-pink-line)" stroke-width="1.5" />
+                <text x="50%" y="65%" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="48" fill="var(--rhr-red)" font-weight="900">RHR</text>
+            </svg>
         </div>
+        <div class="station-name">Rugby Hospital Radio</div>
+
         <label>Start Hour</label><select id="start-hour"></select>
         <label>Duration</label><select id="duration"></select>
         <button class="btn btn-main" onclick="connectAndBuild()">GENERATE LOG</button>
@@ -56,7 +71,7 @@
         <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
         <button class="btn btn-outline" onclick="buildNew()">↺ BUILD NEW</button>
     </div>
-    <div class="footer">v2.2 Cross-Platform | Anti-Repeat Active</div>
+    <div class="footer">v2.3 | Station Logo Restored | Anti-Repeat Active</div>
 </div>
 
 <script>
@@ -72,7 +87,9 @@
         { ID: "AI-105", Artist: "Harry Styles", Title: "Watermelon Sugar" },
         { ID: "AI-106", Artist: "Dua Lipa", Title: "Don't Start Now" },
         { ID: "AI-107", Artist: "George Ezra", Title: "Budapest" },
-        { ID: "AI-108", Artist: "Elton John", Title: "I'm Still Standing" }
+        { ID: "AI-108", Artist: "The Beatles", Title: "Hey Jude" },
+        { ID: "AI-109", Artist: "Oasis", Title: "Wonderwall" },
+        { ID: "AI-110", Artist: "Elton John", Title: "Rocket Man" }
     ];
 
     window.onload = function() {
@@ -90,7 +107,7 @@
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
                     const filtered = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
-                    masterLibrary = filtered.slice(0, 100); // 100 song restriction
+                    masterLibrary = filtered.slice(0, 100); 
                     runLogic();
                 }
             });
@@ -108,31 +125,24 @@
             let hour = (start + Math.floor(sec / 3600)) % 24;
             let dp = (hour >= 6 && hour < 12) ? "Morning" : (hour >= 12 && hour < 18) ? "Afternoon" : "Evening";
 
-            // CONSOLIDATED SEPARATION CHECK
             const checkRules = (song, currentTime) => {
                 const lastSong = history.findLast(h => h.id === song.ID);
                 const lastArtist = history.findLast(h => h.artist === song.Artist);
-                
-                // Song Sep: 4.25hr (15300s) | Artist Sep: 1.75hr (6300s)
                 const songOk = !lastSong || (currentTime - lastSong.time > 15300);
                 const artistOk = !lastArtist || (currentTime - lastArtist.time > 6300);
-                
                 return songOk && artistOk;
             };
 
-            // Step 1: Filter DB
             let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, sec));
 
             let pick;
             if (pool.length > 0) {
                 pick = {...pool[Math.floor(Math.random() * pool.length)], isAI: false};
             } else {
-                // Step 2: Filter AI Pool with same strict rules
                 let aiPool = AI_POOL.filter(s => checkRules(s, sec));
                 if (aiPool.length > 0) {
                     pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], isAI: true};
                 } else {
-                    // Step 3: Hard Fallback (Rules broken only as absolute last resort)
                     pick = {...AI_POOL[0], isAI: true, Title: AI_POOL[0].Title + " (RECOVERY)"};
                 }
             }
@@ -154,7 +164,7 @@
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    ${t.isAI ? '<span class="ai-label">✨ ANTI-REPEAT ACTIVE</span>' : ''}
+                    ${t.isAI ? '<span class="ai-label">✨ SEPARATION PROTECTED</span>' : ''}
                 </div>
                 <div class="time-col">${t.timeStr}</div>
             </div>
