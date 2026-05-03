@@ -12,7 +12,7 @@
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         .station-name { color: var(--rhr-red); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px;}
         .logo-container { text-align: center; margin-bottom: 20px; }
-        .logo-container img { max-width: 120px; height: auto; }
+        .logo-container img { max-width: 200px; height: auto; display: block; margin: 0 auto; }
         label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
         select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; }
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
@@ -33,7 +33,7 @@
 <div class="wrapper">
     <div id="setup-view" class="card">
         <div class="logo-container">
-            <img src="https://rugbyhospitalradio.org/wp-content/uploads/2019/10/RHR-Logo-2019-1.png" alt="RHR Logo">
+            <img src="https://rugbyhospitalradio.org/wp-content/uploads/2019/10/RHR-Logo-2019.png" alt="Rugby Hospital Radio">
         </div>
         <div class="station-name">Rugby Hospital Radio</div>
         <label>Start Hour</label><select id="start-hour"></select>
@@ -49,42 +49,34 @@
         <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG</button>
         <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET</button>
     </div>
-    <div class="footer">v3.7 | Deep Pool (600 Songs) | 24-Hr Artist Protection</div>
+    <div class="footer">v3.7 | Deep Pool (600 Tracks) | 24-Hr Artist Protection</div>
 </div>
 
 <script>
     const _CORE_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
     
-    // Virtual Crate: 600-song logic focused on UK Artists
     const AI_CRATE_600 = [
         { Artist: "The Beatles", Title: "Penny Lane", Dec: 1960 },
         { Artist: "Petula Clark", Title: "Sailor", Dec: 1960 },
         { Artist: "The Searchers", Title: "Needles and Pins", Dec: 1960 },
-        { Artist: "Tom Jones", Title: "Delilah", Dec: 1960 },
+        { Artist: "Tom Jones", Title: "Green Green Grass of Home", Dec: 1960 },
         { Artist: "Shirley Bassey", Title: "Goldfinger", Dec: 1960 },
-        { Artist: "Cilla Black", Title: "Anyone Who Had a Heart", Dec: 1960 },
-        { Artist: "The Kinks", Title: "Sunny Afternoon", Dec: 1960 },
-        { Artist: "Gerry & The Pacemakers", Title: "Ferry Cross the Mersey", Dec: 1960 },
-        { Artist: "The Hollies", Title: "Bus Stop", Dec: 1960 },
-        { Artist: "Herman's Hermits", Title: "I'm Into Something Good", Dec: 1960 },
-        { Artist: "Elton John", Title: "Goodbye Yellow Brick Road", Dec: 1970 },
-        { Artist: "Queen", Title: "Killer Queen", Dec: 1970 },
-        { Artist: "David Bowie", Title: "Starman", Dec: 1970 },
-        { Artist: "ELO", Title: "Livin' Thing", Dec: 1970 },
-        { Artist: "Rod Stewart", Title: "You're in My Heart", Dec: 1970 },
-        { Artist: "Kate Bush", Title: "Babooshka", Dec: 1980 },
-        { Artist: "Phil Collins", Title: "Two Hearts", Dec: 1980 },
-        { Artist: "George Michael", Title: "Faith", Dec: 1980 },
-        { Artist: "Duran Duran", Title: "Rio", Dec: 1980 },
-        { Artist: "Spandau Ballet", Title: "Gold", Dec: 1980 },
-        { Artist: "Eurythmics", Title: "There Must Be an Angel", Dec: 1980 },
-        { Artist: "Robbie Williams", Title: "She's The One", Dec: 1990 },
-        { Artist: "Spice Girls", Title: "2 Become 1", Dec: 1990 },
-        { Artist: "Coldplay", Title: "The Scientist", Dec: 2000 },
-        { Artist: "Adele", Title: "Hello", Dec: 2010 },
-        { Artist: "Ed Sheeran", Title: "Thinking Out Loud", Dec: 2010 },
-        { Artist: "George Ezra", Title: "Paradise", Dec: 2010 },
-        { Artist: "Harry Styles", Title: "Sign of the Times", Dec: 2010 }
+        { Artist: "Cilla Black", Title: "You're My World", Dec: 1960 },
+        { Artist: "The Kinks", Title: "Waterloo Sunset", Dec: 1960 },
+        { Artist: "The Tremeloes", Title: "Silence Is Golden", Dec: 1960 },
+        { Artist: "Elton John", Title: "Rocket Man", Dec: 1970 },
+        { Artist: "Queen", Title: "Somebody to Love", Dec: 1970 },
+        { Artist: "David Bowie", Title: "Space Oddity", Dec: 1970 },
+        { Artist: "Kate Bush", Title: "Wuthering Heights", Dec: 1970 },
+        { Artist: "Annie Lennox", Title: "Walking on Broken Glass", Dec: 1980 },
+        { Artist: "Phil Collins", Title: "Against All Odds", Dec: 1980 },
+        { Artist: "Wham!", Title: "Freedom", Dec: 1980 },
+        { Artist: "Rick Astley", Title: "Never Gonna Give You Up", Dec: 1980 },
+        { Artist: "Robbie Williams", Title: "Millennium", Dec: 1990 },
+        { Artist: "Coldplay", Title: "Yellow", Dec: 2000 },
+        { Artist: "Amy Winehouse", Title: "Rehab", Dec: 2000 },
+        { Artist: "Adele", Title: "Rolling in the Deep", Dec: 2010 },
+        { Artist: "Ed Sheeran", Title: "Perfect", Dec: 2010 }
     ].map((s, i) => ({ ...s, ID: `AI-600-${i}` }));
 
     window.onload = function() {
@@ -118,15 +110,15 @@
             let currentHour = (startHour + Math.floor(elapsedSec / 3600)) % 24;
             let dp = (currentHour >= 6 && currentHour < 12) ? "Morning" : (currentHour >= 12 && currentHour < 18) ? "Afternoon" : (currentHour >= 18 && currentHour < 24) ? "Evening" : "Night";
 
-            const checkRules = (song, currentTime, gap) => {
+            const checkRules = (song, currentTime) => {
                 const lastS = history.findLast(h => h.id === song.ID);
                 const lastA = history.findLast(h => h.artist === song.Artist);
-                return (!lastS || (currentTime - lastS.time > gap)) && (!lastA || (currentTime - lastA.time > (gap/2)));
+                return (!lastS || (currentTime - lastS.time > 86400)) && (!lastA || (currentTime - lastA.time > 43200));
             };
 
             let pick;
             if (Math.random() < 0.22) { 
-                let pool = AI_CRATE_600.filter(s => checkRules(s, elapsedSec, 86400));
+                let pool = AI_CRATE_600.filter(s => checkRules(s, elapsedSec));
                 if (pool.length > 0) {
                     pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'AI'};
                     aiCount++;
@@ -134,11 +126,11 @@
             }
 
             if (!pick) {
-                let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec, 14400));
+                let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
                 if (pool.length > 0) {
                     pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
                 } else {
-                    let freshAI = AI_CRATE_600.filter(s => checkRules(s, elapsedSec, 43200));
+                    let freshAI = AI_CRATE_600.filter(s => checkRules(s, elapsedSec));
                     if (freshAI.length > 0) {
                         pick = {...freshAI[Math.floor(Math.random() * freshAI.length)], type: 'AI'};
                         aiCount++;
@@ -160,13 +152,13 @@
     function render(aiCount) {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('stat-view').innerText = `${currentPlaylist.length} TRACKS | ${((aiCount/currentPlaylist.length)*100).toFixed(0)}% DEEP POOL`;
+        document.getElementById('stat-view').innerText = `${currentPlaylist.length} TRACKS | ${((aiCount/currentPlaylist.length)*100).toFixed(0)}% AI POOL`;
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map(t => `
             <div class="track-row ${t.type === 'AI' ? 'ai-fill' : ''}">
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    ${t.type === 'AI' ? '<span class="ai-tag">VIRTUAL CRATE DISCOVERY</span>' : ''}
+                    ${t.type === 'AI' ? '<span class="ai-tag">AI DISCOVERY</span>' : ''}
                 </div>
                 <div class="time-col">${t.timeStr}</div>
             </div>
@@ -175,7 +167,7 @@
 
     function copyToClipboard() {
         const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        navigator.clipboard.writeText(txt).then(() => alert("Log copied."));
+        navigator.clipboard.writeText(txt).then(() => alert("Log copied to clipboard."));
     }
 </script>
 </body>
