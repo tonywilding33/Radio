@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Dual-Engine Production v3.9.1</title>
+    <title>RHR | Dual-Engine Production v3.9.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
             --rhr-red: #e31e24; 
             --rhr-pink-fill: #fde2e2;
             --rhr-pink-line: #f1a9a9;
-            --ai-gold: #b58900; 
-            --ai-bg: #fffcf0; 
         }
         body { font-family: -apple-system, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 500px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         
-        /* Persistent Logo Styling */
         .logo-container { text-align: center; margin-bottom: 10px; }
         .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
         .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
@@ -31,13 +28,11 @@
         #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; }
         .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; font-size: 0.9rem; }
         .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
-        .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
         
         .track-info { flex-grow: 1; }
         .t-artist { font-weight: bold; }
         .t-title { color: #666; font-size: 0.8rem; }
         .time-col { font-weight: bold; color: var(--rhr-red); font-family: monospace; }
-        .ai-tag { font-size: 0.6rem; font-weight: 800; color: var(--ai-gold); display: block; margin-top: 2px; }
         .footer { text-align: center; font-size: 0.6rem; color: #aaa; margin-top: 15px; }
         
         .stat-bar { background: #eee; padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; text-align: center; margin-bottom: 10px; color: #666; }
@@ -46,7 +41,6 @@
 <body>
 <div class="wrapper">
     <div class="card">
-        <!-- Persistent Header Content -->
         <div class="logo-container">
             <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
                 <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
@@ -57,14 +51,12 @@
         </div>
         <div class="station-name">Rugby Hospital Radio</div>
 
-        <!-- View 1: Input -->
         <div id="setup-view">
             <label>Start Hour</label><select id="start-hour"></select>
             <label>Duration (Hours)</label><select id="duration"></select>
             <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
         </div>
 
-        <!-- View 2: Result -->
         <div id="monitor" style="display:none;">
             <div class="stat-bar" id="stat-view"></div>
             <div id="playlist-box"></div>
@@ -72,11 +64,10 @@
             <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET ENGINE</button>
         </div>
     </div>
-    <div class="footer">v3.9.1 | Persistent Branding | 800-Song AI Library Support</div>
+    <div class="footer">v3.9.2 | Seamless Multi-Library Integration</div>
 </div>
 
 <script>
-    // --- DATABASE LINKS ---
     const _MAIN_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
     const _AI_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/RHR_AI_Pool_800.csv'; 
 
@@ -110,7 +101,7 @@
                     });
                 }
             });
-        } catch (err) { alert("Link Error: Check your GitHub file names."); }
+        } catch (err) { alert("Database Connection Error."); }
     }
 
     function runLogic() {
@@ -119,7 +110,6 @@
         currentPlaylist = [];
         let history = []; 
         let elapsedSec = 0;
-        let aiCount = 0;
 
         while (elapsedSec < (totalMinutes * 60)) {
             let currentHour = (startHour + Math.floor(elapsedSec / 3600)) % 24;
@@ -135,20 +125,18 @@
             if (Math.random() < 0.22 && aiLibrary.length > 0) { 
                 let aiPool = aiLibrary.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
-                    pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], type: 'AI'};
-                    aiCount++;
+                    pick = {...aiPool[Math.floor(Math.random() * aiPool.length)]};
                 }
             }
 
             if (!pick) {
                 let dbPool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
                 if (dbPool.length > 0) {
-                    pick = {...dbPool[Math.floor(Math.random() * dbPool.length)], type: 'DB'};
+                    pick = {...dbPool[Math.floor(Math.random() * dbPool.length)]};
                 } else {
                     let fallback = aiLibrary.filter(s => checkRules(s, elapsedSec));
                     if (fallback.length > 0) {
-                        pick = {...fallback[Math.floor(Math.random() * fallback.length)], type: 'AI'};
-                        aiCount++;
+                        pick = {...fallback[Math.floor(Math.random() * fallback.length)]};
                     }
                 }
             }
@@ -161,19 +149,18 @@
             }
             elapsedSec += 240; 
         }
-        render(aiCount);
+        render();
     }
 
-    function render(aiCount) {
+    function render() {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('stat-view').innerText = `TOTAL: ${currentPlaylist.length} TRACKS | INJECTION: ${((aiCount/currentPlaylist.length)*100).toFixed(0)}% AI POOL`;
+        document.getElementById('stat-view').innerText = `BROADCAST LOG | ${currentPlaylist.length} TRACKS SCHEDULED`;
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map(t => `
-            <div class="track-row ${t.type === 'AI' ? 'ai-fill' : ''}">
+            <div class="track-row">
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    ${t.type === 'AI' ? '<span class="ai-tag">VIRTUAL CRATE INJECTION</span>' : ''}
                 </div>
                 <div class="time-col">${t.timeStr}</div>
             </div>
@@ -182,7 +169,7 @@
 
     function copyToClipboard() {
         const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        navigator.clipboard.writeText(txt).then(() => alert("Broadcast log copied!"));
+        navigator.clipboard.writeText(txt).then(() => alert("Log copied to clipboard!"));
     }
 </script>
 </body>
