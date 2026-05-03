@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.0.1</title>
+    <title>RHR | Virtual Producer v1.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -31,11 +31,9 @@
 
         #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
         
-        /* Zebra Striping */
         .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; }
         .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
         
-        /* Overrides for AI and Recovery */
         .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
         .track-row.recovery-fill { background-color: #ffebeb !important; border-left: 4px solid var(--rhr-red); }
         
@@ -77,7 +75,7 @@
         <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
         <button class="btn btn-outline" onclick="buildNew()">↺ NEW LOG</button>
     </div>
-    <div class="footer">v3.0.1 | Full Production | Zebra Styling Applied</div>
+    <div class="footer">v3.1 | Hybrid AI Injection (20%) | Zebra Styling</div>
 </div>
 
 <script>
@@ -86,6 +84,7 @@
     let masterLibrary = [];
     let currentPlaylist = [];
 
+    // Expanded AI Pool with recognizable hospital-friendly artists
     const AI_POOL = [
         { ID: "AI-101", Artist: "Queen", Title: "Radio Ga Ga" },
         { ID: "AI-102", Artist: "Ed Sheeran", Title: "Castle On The Hill" },
@@ -96,7 +95,11 @@
         { ID: "AI-107", Artist: "George Ezra", Title: "Budapest" },
         { ID: "AI-108", Artist: "The Beatles", Title: "Hey Jude" },
         { ID: "AI-109", Artist: "Oasis", Title: "Wonderwall" },
-        { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams" }
+        { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams" },
+        { ID: "AI-111", Artist: "Elton John", Title: "Rocket Man" },
+        { ID: "AI-112", Artist: "Tom Jones", Title: "It's Not Unusual" },
+        { ID: "AI-113", Artist: "Fleetwood Mac", Title: "Go Your Own Way" },
+        { ID: "AI-114", Artist: "ABBA", Title: "Dancing Queen" }
     ];
 
     window.onload = function() {
@@ -146,27 +149,36 @@
                 return separationPass;
             };
 
-            let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
             let pick;
+            // AGGRESSIVE AI: 20% chance to force an AI track even if DB is available
+            const forceAI = Math.random() < 0.20;
 
-            if (pool.length > 0) {
-                pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
-            } else {
+            if (forceAI) {
                 let aiPool = AI_POOL.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
                     pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], type: 'AI'};
+                }
+            }
+
+            // If not forced AI or AI pool was empty, try Database
+            if (!pick) {
+                let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
+                if (pool.length > 0) {
+                    pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
                 } else {
-                    let recoveryPool = AI_POOL.filter(s => checkRules(s, elapsedSec, false));
-                    if (recoveryPool.length > 0) {
-                        let recoveryPick = recoveryPool[Math.floor(Math.random() * recoveryPool.length)];
-                        pick = {...recoveryPick, type: 'RECOVERY'};
+                    // Fallback to AI if DB fails rules
+                    let aiFallback = AI_POOL.filter(s => checkRules(s, elapsedSec));
+                    if (aiFallback.length > 0) {
+                        pick = {...aiFallback[Math.floor(Math.random() * aiFallback.length)], type: 'AI'};
                     } else {
-                        let sortedByLastPlayed = [...AI_POOL].sort((a, b) => {
-                            const lastA = history.findLast(h => h.id === a.ID)?.time || -1;
-                            const lastB = history.findLast(h => h.id === b.ID)?.time || -1;
-                            return lastA - lastB;
-                        });
-                        pick = {...sortedByLastPlayed[0], type: 'RECOVERY'};
+                        // Emergency Recovery
+                        let recoveryPool = AI_POOL.filter(s => checkRules(s, elapsedSec, false));
+                        if (recoveryPool.length > 0) {
+                            pick = {...recoveryPool[Math.floor(Math.random() * recoveryPool.length)], type: 'RECOVERY'};
+                        } else {
+                            let sorted = [...AI_POOL].sort((a,b) => (history.findLast(h=>h.id===a.ID)?.time||-1) - (history.findLast(h=>h.id===b.ID)?.time||-1));
+                            pick = {...sorted[0], type: 'RECOVERY'};
+                        }
                     }
                 }
             }
@@ -192,7 +204,7 @@
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
                     <span class="ai-label" style="color:${t.type === 'DB' ? '#aaa' : (t.type === 'AI' ? 'var(--ai-gold)' : 'var(--rhr-red)')}">
-                        ${t.currentDP} • ${t.type === 'RECOVERY' ? 'RECOVERY' : (t.type === 'AI' ? 'AI SEPARATION' : 'STATION DATABASE')}
+                        ${t.currentDP} • ${t.type === 'RECOVERY' ? 'RECOVERY' : (t.type === 'AI' ? 'AI INJECTION' : 'STATION DATABASE')}
                     </span>
                 </div>
                 <div class="time-col">${t.timeStr}</div>
