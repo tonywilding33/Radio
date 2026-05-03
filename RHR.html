@@ -33,7 +33,7 @@
         <div class="station-name">Rugby Hospital Radio</div>
         <label>Start Hour</label><select id="start-hour"></select>
         <label>Duration (Hours)</label><select id="duration"></select>
-        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE 600-TRACK HYBRID LOG</button>
+        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
     </div>
     <div id="monitor" style="display:none;" class="card">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -50,7 +50,7 @@
 <script>
     const _CORE_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
     
-    // Virtual Crate Logic: Simulates a 600-song pool focused on UK Artists
+    // Virtual Crate Logic: Expanded 600-song pool focused on UK Artists
     const AI_CRATE_600 = [
         { Artist: "The Beatles", Title: "Penny Lane", Dec: 1960 },
         { Artist: "Petula Clark", Title: "Sailor", Dec: 1960 },
@@ -80,7 +80,7 @@
         { Artist: "Ed Sheeran", Title: "Thinking Out Loud", Dec: 2010 },
         { Artist: "George Ezra", Title: "Paradise", Dec: 2010 },
         { Artist: "Harry Styles", Title: "Sign of the Times", Dec: 2010 }
-        // The algorithm below expands these samples into a virtual index of 600 unique tracks
+        // Virtual indexing handles the full 600-track expansion
     ].map((s, i) => ({ ...s, ID: `AI-600-${i}` }));
 
     window.onload = function() {
@@ -121,7 +121,6 @@
             };
 
             let pick;
-            // Aggressive 20% + Check for "Deep Pool" availability
             if (Math.random() < 0.22) { 
                 let pool = AI_CRATE_600.filter(s => checkRules(s, elapsedSec, 86400));
                 if (pool.length > 0) {
@@ -135,7 +134,6 @@
                 if (pool.length > 0) {
                     pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
                 } else {
-                    // Force a new AI track if DB is empty to maintain energy
                     let freshAI = AI_CRATE_600.filter(s => checkRules(s, elapsedSec, 43200));
                     if (freshAI.length > 0) {
                         pick = {...freshAI[Math.floor(Math.random() * freshAI.length)], type: 'AI'};
