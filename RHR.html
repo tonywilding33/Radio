@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.1</title>
+    <title>RHR | Production Engine v3.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -75,7 +75,7 @@
         <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
         <button class="btn btn-outline" onclick="buildNew()">↺ NEW LOG</button>
     </div>
-    <div class="footer">v3.1 | Hybrid AI Injection (20%) | Zebra Styling</div>
+    <div class="footer">v3.2 | Balanced AI Injection | Hospital Profile Enforcement</div>
 </div>
 
 <script>
@@ -84,22 +84,22 @@
     let masterLibrary = [];
     let currentPlaylist = [];
 
-    // Expanded AI Pool with recognizable hospital-friendly artists
+    // AI Pool re-balanced to favor 60s/70s/80s (Mirroring DB stats)
     const AI_POOL = [
-        { ID: "AI-101", Artist: "Queen", Title: "Radio Ga Ga" },
-        { ID: "AI-102", Artist: "Ed Sheeran", Title: "Castle On The Hill" },
-        { ID: "AI-103", Artist: "Adele", Title: "Rolling In The Deep" },
-        { ID: "AI-104", Artist: "Coldplay", Title: "Fix You" },
-        { ID: "AI-105", Artist: "Harry Styles", Title: "Watermelon Sugar" },
-        { ID: "AI-106", Artist: "Dua Lipa", Title: "Don't Start Now" },
-        { ID: "AI-107", Artist: "George Ezra", Title: "Budapest" },
-        { ID: "AI-108", Artist: "The Beatles", Title: "Hey Jude" },
-        { ID: "AI-109", Artist: "Oasis", Title: "Wonderwall" },
-        { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams" },
-        { ID: "AI-111", Artist: "Elton John", Title: "Rocket Man" },
-        { ID: "AI-112", Artist: "Tom Jones", Title: "It's Not Unusual" },
-        { ID: "AI-113", Artist: "Fleetwood Mac", Title: "Go Your Own Way" },
-        { ID: "AI-114", Artist: "ABBA", Title: "Dancing Queen" }
+        // 60s/70s (The core)
+        { ID: "AI-108", Artist: "The Beatles", Title: "Hey Jude", Dec: 1960 },
+        { ID: "AI-112", Artist: "Tom Jones", Title: "It's Not Unusual", Dec: 1960 },
+        { ID: "AI-114", Artist: "ABBA", Title: "Dancing Queen", Dec: 1970 },
+        { ID: "AI-111", Artist: "Elton John", Title: "Rocket Man", Dec: 1970 },
+        { ID: "AI-113", Artist: "Fleetwood Mac", Title: "Go Your Own Way", Dec: 1970 },
+        { ID: "AI-101", Artist: "Queen", Title: "Radio Ga Ga", Dec: 1980 },
+        { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams", Dec: 1980 },
+        { ID: "AI-109", Artist: "Oasis", Title: "Wonderwall", Dec: 1990 },
+        // Modern (Weighted lower in logic)
+        { ID: "AI-103", Artist: "Adele", Title: "Rolling In The Deep", Dec: 2010 },
+        { ID: "AI-107", Artist: "George Ezra", Title: "Budapest", Dec: 2010 },
+        { ID: "AI-102", Artist: "Ed Sheeran", Title: "Castle On The Hill", Dec: 2010 },
+        { ID: "AI-104", Artist: "Coldplay", Title: "Fix You", Dec: 2000 }
     ];
 
     window.onload = function() {
@@ -139,46 +139,43 @@
             const checkRules = (song, currentTime, strict = true) => {
                 const lastSong = history.findLast(h => h.id === song.ID);
                 const lastArtist = history.findLast(h => h.artist === song.Artist);
-                
                 const songGap = strict ? 15300 : 7200; 
                 const artistGap = strict ? 6300 : 3600;
-
-                const separationPass = (!lastSong || (currentTime - lastSong.time > songGap)) && 
-                                       (!lastArtist || (currentTime - lastArtist.time > artistGap));
-
-                return separationPass;
+                return (!lastSong || (currentTime - lastSong.time > songGap)) && 
+                       (!lastArtist || (currentTime - lastArtist.time > artistGap));
             };
 
             let pick;
-            // AGGRESSIVE AI: 20% chance to force an AI track even if DB is available
-            const forceAI = Math.random() < 0.20;
+            // 20% injection probability
+            const injectAI = Math.random() < 0.20;
 
-            if (forceAI) {
-                let aiPool = AI_POOL.filter(s => checkRules(s, elapsedSec));
-                if (aiPool.length > 0) {
-                    pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], type: 'AI'};
+            if (injectAI) {
+                // DECADE WEIGHTING: 70% chance to pick Pre-1990 AI track to protect station sound
+                let targetDecadeMax = Math.random() < 0.70 ? 1989 : 2025;
+                let filteredAI = AI_POOL.filter(s => s.Dec <= targetDecadeMax && checkRules(s, elapsedSec));
+                
+                if (filteredAI.length > 0) {
+                    pick = {...filteredAI[Math.floor(Math.random() * filteredAI.length)], type: 'AI'};
                 }
             }
 
-            // If not forced AI or AI pool was empty, try Database
             if (!pick) {
                 let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
                 if (pool.length > 0) {
                     pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
                 } else {
-                    // Fallback to AI if DB fails rules
-                    let aiFallback = AI_POOL.filter(s => checkRules(s, elapsedSec));
-                    if (aiFallback.length > 0) {
-                        pick = {...aiFallback[Math.floor(Math.random() * aiFallback.length)], type: 'AI'};
+                    // Fallback uses core AI pool first
+                    let coreAI = AI_POOL.filter(s => s.Dec <= 1989 && checkRules(s, elapsedSec));
+                    let poolToUse = coreAI.length > 0 ? coreAI : AI_POOL.filter(s => checkRules(s, elapsedSec));
+                    
+                    if (poolToUse.length > 0) {
+                        pick = {...poolToUse[Math.floor(Math.random() * poolToUse.length)], type: 'AI'};
                     } else {
                         // Emergency Recovery
                         let recoveryPool = AI_POOL.filter(s => checkRules(s, elapsedSec, false));
-                        if (recoveryPool.length > 0) {
-                            pick = {...recoveryPool[Math.floor(Math.random() * recoveryPool.length)], type: 'RECOVERY'};
-                        } else {
-                            let sorted = [...AI_POOL].sort((a,b) => (history.findLast(h=>h.id===a.ID)?.time||-1) - (history.findLast(h=>h.id===b.ID)?.time||-1));
-                            pick = {...sorted[0], type: 'RECOVERY'};
-                        }
+                        pick = recoveryPool.length > 0 ? 
+                               {...recoveryPool[Math.floor(Math.random() * recoveryPool.length)], type: 'RECOVERY'} : 
+                               {...[...AI_POOL].sort((a,b) => (history.findLast(h=>h.id===a.ID)?.time||-1) - (history.findLast(h=>h.id===b.ID)?.time||-1))[0], type: 'RECOVERY'};
                     }
                 }
             }
