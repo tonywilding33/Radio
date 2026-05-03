@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Full 24H Production Engine</title>
+    <title>RHR | Production Engine v2.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -32,11 +32,12 @@
         #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
         .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; }
         .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
+        .track-row.recovery-fill { background-color: #ffebeb !important; border-left: 4px solid var(--rhr-red); }
         .track-info { flex-grow: 1; }
         .t-artist { font-weight: bold; font-size: 0.95rem; }
         .t-title { color: #666; font-size: 0.85rem; }
         .time-col { font-weight: bold; color: var(--rhr-red); font-family: monospace; }
-        .ai-label { font-size: 0.6rem; color: var(--ai-gold); font-weight: 800; display: block; }
+        .ai-label { font-size: 0.6rem; font-weight: 800; display: block; }
         .footer { text-align: center; font-size: 0.6rem; color: #aaa; margin-top: 15px; text-transform: uppercase; }
     </style>
 </head>
@@ -57,7 +58,7 @@
         <label>Start Hour</label><select id="start-hour"></select>
         <label>Duration (Hours)</label><select id="duration"></select>
         
-        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE FULL LOG</button>
+        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
     </div>
 
     <div id="monitor" style="display:none;" class="card">
@@ -70,7 +71,7 @@
         <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
         <button class="btn btn-outline" onclick="buildNew()">↺ RESET ENGINE</button>
     </div>
-    <div class="footer">v2.5 | 4-Daypart Logic (Inc. Night) | Anti-Repeat Active</div>
+    <div class="footer">v2.6 | Optimized Recovery Logic | Strict Separation</div>
 </div>
 
 <script>
@@ -88,13 +89,12 @@
         { ID: "AI-107", Artist: "George Ezra", Title: "Budapest" },
         { ID: "AI-108", Artist: "The Beatles", Title: "Hey Jude" },
         { ID: "AI-109", Artist: "Oasis", Title: "Wonderwall" },
-        { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams (Are Made of This)" } // Good Night/Late track
+        { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams" }
     ];
 
     window.onload = function() {
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
-        
         const dBox = document.getElementById('duration');
         for(let i=1; i<=24; i++) dBox.add(new Option(i + (i===1 ? " Hour" : " Hours"), i * 60));
     };
@@ -123,13 +123,9 @@
 
         while (elapsedSec < (totalMinutes * 60)) {
             let currentHour = (startHour + Math.floor(elapsedSec / 3600)) % 24;
-            
-            // UPDATED 4-PART DAYPARTING
-            let dp = "";
-            if (currentHour >= 6 && currentHour < 12) dp = "Morning";
-            else if (currentHour >= 12 && currentHour < 18) dp = "Afternoon";
-            else if (currentHour >= 18 && currentHour < 24) dp = "Evening";
-            else dp = "Night"; // 00:00 - 05:59
+            let dp = (currentHour >= 6 && currentHour < 12) ? "Morning" : 
+                     (currentHour >= 12 && currentHour < 18) ? "Afternoon" : 
+                     (currentHour >= 18 && currentHour < 24) ? "Evening" : "Night";
 
             const checkRules = (song, currentTime) => {
                 const lastSong = history.findLast(h => h.id === song.ID);
@@ -139,22 +135,26 @@
             };
 
             let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
-
             let pick;
+
             if (pool.length > 0) {
-                pick = {...pool[Math.floor(Math.random() * pool.length)], isAI: false};
+                pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
             } else {
                 let aiPool = AI_POOL.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
-                    pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], isAI: true};
+                    pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], type: 'AI'};
                 } else {
-                    pick = {...AI_POOL[Math.floor(Math.random() * AI_POOL.length)], isAI: true, Title: "LOOP RECOVERY"};
+                    // EMERGENCY RECOVERY: Pick any random AI track that wasn't literally the LAST track
+                    const lastTrack = history.length > 0 ? history[history.length - 1] : null;
+                    let recoveryPool = AI_POOL.filter(s => !lastTrack || s.ID !== lastTrack.id);
+                    let recoveryPick = recoveryPool[Math.floor(Math.random() * recoveryPool.length)];
+                    pick = {...recoveryPick, type: 'RECOVERY', Title: recoveryPick.Title + " (Recovery)"};
                 }
             }
 
             let displayMin = Math.floor((elapsedSec % 3600) / 60);
             pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
-            pick.currentDP = dp; // For rendering debug if needed
+            pick.currentDP = dp;
             
             currentPlaylist.push(pick);
             history.push({id: pick.ID, artist: pick.Artist, time: elapsedSec});
@@ -168,12 +168,12 @@
         document.getElementById('monitor').style.display = 'block';
         document.getElementById('track-count').innerText = currentPlaylist.length + " TRACKS";
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map((t, i) => `
-            <div class="track-row ${t.isAI ? 'ai-fill' : ''}">
+            <div class="track-row ${t.type === 'AI' ? 'ai-fill' : (t.type === 'RECOVERY' ? 'recovery-fill' : '')}">
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    <span class="ai-label" style="color:${t.isAI ? 'var(--ai-gold)' : '#aaa'}">
-                        ${t.currentDP} ${t.isAI ? '• AI FALLBACK' : '• DB MATCH'}
+                    <span class="ai-label" style="color:${t.type === 'DB' ? '#aaa' : (t.type === 'AI' ? 'var(--ai-gold)' : 'var(--rhr-red)')}">
+                        ${t.currentDP} • ${t.type === 'RECOVERY' ? 'EMERGENCY SHUFFLE' : (t.type === 'AI' ? 'AI FALLBACK' : 'DATABASE')}
                     </span>
                 </div>
                 <div class="time-col">${t.timeStr}</div>
