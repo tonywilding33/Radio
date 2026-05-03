@@ -78,8 +78,9 @@
 
 <script>
     // --- SYSTEM CONFIG ---
-    const _CORE_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_2500.csv';
-    const TEST_MODE = true; // Set to FALSE for production; TRUE to limit to 100 songs.
+    // Pointed to the newly rebalanced database file
+    const _CORE_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
+    const TEST_MODE = true; // KEEPING IN TEST MODE (100 SLICE)
 
     let masterLibrary = [];
     let currentPlaylist = [];
@@ -114,7 +115,7 @@
                 complete: function(results) {
                     let filtered = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
                     
-                    // Apply Slice logic for testing
+                    // Slice for testing
                     masterLibrary = TEST_MODE ? filtered.slice(0, 100) : filtered;
                     runLogic();
                 }
@@ -136,13 +137,11 @@
                      (currentHour >= 18 && currentHour < 24) ? "Evening" : "Night";
 
             const checkRules = (song, currentTime) => {
-                // Separation Logic
                 const lastSong = history.findLast(h => h.id === song.ID);
                 const lastArtist = history.findLast(h => h.artist === song.Artist);
                 const separationPass = (!lastSong || (currentTime - lastSong.time > 15300)) && 
                                        (!lastArtist || (currentTime - lastArtist.time > 6300));
 
-                // Twice-a-Day Logic
                 const dailyCount = history.filter(h => h.id === song.ID).length;
                 const frequencyPass = dailyCount < 2;
 
@@ -172,7 +171,7 @@
             
             currentPlaylist.push(pick);
             history.push({id: pick.ID, artist: pick.Artist, time: elapsedSec});
-            elapsedSec += 240; // Average 4 min per track
+            elapsedSec += 240; 
         }
         render();
     }
