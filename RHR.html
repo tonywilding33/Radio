@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Smart Playlist Engine</title>
+    <title>RHR | Full 24H Production Engine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -17,13 +17,12 @@
         .wrapper { width: 100%; max-width: 500px; padding-top: 10px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         
-        /* Restored Logo Styles */
         .logo-container { text-align: center; margin-bottom: 10px; }
         .rhr-logo-svg { width: 140px; height: auto; display: block; margin: 0 auto; }
         .station-name { color: var(--rhr-red); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
 
         label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
-        select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; -webkit-appearance: none; background: #fff; }
+        select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; -webkit-appearance: none; background: #fff; cursor: pointer; }
         
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .btn-main { background: var(--rhr-red); color: #fff; }
@@ -45,7 +44,6 @@
 
 <div class="wrapper">
     <div id="setup-view" class="card">
-        <!-- Station Logo Restored -->
         <div class="logo-container">
             <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
                 <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
@@ -57,8 +55,9 @@
         <div class="station-name">Rugby Hospital Radio</div>
 
         <label>Start Hour</label><select id="start-hour"></select>
-        <label>Duration</label><select id="duration"></select>
-        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE LOG</button>
+        <label>Duration (Hours)</label><select id="duration"></select>
+        
+        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE FULL LOG</button>
     </div>
 
     <div id="monitor" style="display:none;" class="card">
@@ -69,9 +68,9 @@
         <div id="playlist-box"></div>
         <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY TO CLIPBOARD</button>
         <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
-        <button class="btn btn-outline" onclick="buildNew()">↺ BUILD NEW</button>
+        <button class="btn btn-outline" onclick="buildNew()">↺ RESET ENGINE</button>
     </div>
-    <div class="footer">v2.3 | Station Logo Restored | Anti-Repeat Active</div>
+    <div class="footer">v2.5 | 4-Daypart Logic (Inc. Night) | Anti-Repeat Active</div>
 </div>
 
 <script>
@@ -89,14 +88,15 @@
         { ID: "AI-107", Artist: "George Ezra", Title: "Budapest" },
         { ID: "AI-108", Artist: "The Beatles", Title: "Hey Jude" },
         { ID: "AI-109", Artist: "Oasis", Title: "Wonderwall" },
-        { ID: "AI-110", Artist: "Elton John", Title: "Rocket Man" }
+        { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams (Are Made of This)" } // Good Night/Late track
     ];
 
     window.onload = function() {
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
+        
         const dBox = document.getElementById('duration');
-        [1, 2, 3, 4, 6, 12].forEach(h => dBox.add(new Option(h + " Hours", h * 60)));
+        for(let i=1; i<=24; i++) dBox.add(new Option(i + (i===1 ? " Hour" : " Hours"), i * 60));
     };
 
     async function connectAndBuild() {
@@ -111,46 +111,54 @@
                     runLogic();
                 }
             });
-        } catch (err) { alert("Load Error."); }
+        } catch (err) { alert("Data fetch failed."); }
     }
 
-    async function runLogic() {
-        const dur = parseInt(document.getElementById('duration').value);
-        const start = parseInt(document.getElementById('start-hour').value);
+    function runLogic() {
+        const totalMinutes = parseInt(document.getElementById('duration').value);
+        const startHour = parseInt(document.getElementById('start-hour').value);
         currentPlaylist = [];
         let history = [];
-        let sec = 0;
+        let elapsedSec = 0;
 
-        while (sec < (dur * 60)) {
-            let hour = (start + Math.floor(sec / 3600)) % 24;
-            let dp = (hour >= 6 && hour < 12) ? "Morning" : (hour >= 12 && hour < 18) ? "Afternoon" : "Evening";
+        while (elapsedSec < (totalMinutes * 60)) {
+            let currentHour = (startHour + Math.floor(elapsedSec / 3600)) % 24;
+            
+            // UPDATED 4-PART DAYPARTING
+            let dp = "";
+            if (currentHour >= 6 && currentHour < 12) dp = "Morning";
+            else if (currentHour >= 12 && currentHour < 18) dp = "Afternoon";
+            else if (currentHour >= 18 && currentHour < 24) dp = "Evening";
+            else dp = "Night"; // 00:00 - 05:59
 
             const checkRules = (song, currentTime) => {
                 const lastSong = history.findLast(h => h.id === song.ID);
                 const lastArtist = history.findLast(h => h.artist === song.Artist);
-                const songOk = !lastSong || (currentTime - lastSong.time > 15300);
-                const artistOk = !lastArtist || (currentTime - lastArtist.time > 6300);
-                return songOk && artistOk;
+                return (!lastSong || (currentTime - lastSong.time > 15300)) && 
+                       (!lastArtist || (currentTime - lastArtist.time > 6300));
             };
 
-            let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, sec));
+            let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
 
             let pick;
             if (pool.length > 0) {
                 pick = {...pool[Math.floor(Math.random() * pool.length)], isAI: false};
             } else {
-                let aiPool = AI_POOL.filter(s => checkRules(s, sec));
+                let aiPool = AI_POOL.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
                     pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], isAI: true};
                 } else {
-                    pick = {...AI_POOL[0], isAI: true, Title: AI_POOL[0].Title + " (RECOVERY)"};
+                    pick = {...AI_POOL[Math.floor(Math.random() * AI_POOL.length)], isAI: true, Title: "LOOP RECOVERY"};
                 }
             }
 
-            pick.timeStr = ((start + Math.floor(sec/3600))%24).toString().padStart(2,'0')+":"+(Math.floor((sec%3600)/60)).toString().padStart(2,'0');
+            let displayMin = Math.floor((elapsedSec % 3600) / 60);
+            pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
+            pick.currentDP = dp; // For rendering debug if needed
+            
             currentPlaylist.push(pick);
-            history.push({id: pick.ID, artist: pick.Artist, time: sec});
-            sec += 240; 
+            history.push({id: pick.ID, artist: pick.Artist, time: elapsedSec});
+            elapsedSec += 240; 
         }
         render();
     }
@@ -164,7 +172,9 @@
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    ${t.isAI ? '<span class="ai-label">✨ SEPARATION PROTECTED</span>' : ''}
+                    <span class="ai-label" style="color:${t.isAI ? 'var(--ai-gold)' : '#aaa'}">
+                        ${t.currentDP} ${t.isAI ? '• AI FALLBACK' : '• DB MATCH'}
+                    </span>
                 </div>
                 <div class="time-col">${t.timeStr}</div>
             </div>
@@ -173,7 +183,7 @@
 
     function copyToClipboard() {
         const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        navigator.clipboard.writeText(txt).then(() => alert("Copied to Clipboard!"));
+        navigator.clipboard.writeText(txt).then(() => alert("Copied!"));
     }
 
     function downloadTxt() {
@@ -181,7 +191,7 @@
         const blob = new Blob([txt], { type: 'text/plain' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "RHR_Station_Log.txt";
+        a.download = "RHR_Broadcast_Log.txt";
         a.click();
     }
 
