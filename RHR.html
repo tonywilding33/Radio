@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer</title>
+    <title>RHR | Virtual Producer v1.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -39,7 +39,6 @@
         .time-col { font-weight: bold; color: var(--rhr-red); font-family: monospace; }
         .ai-label { font-size: 0.6rem; font-weight: 800; display: block; }
         .footer { text-align: center; font-size: 0.6rem; color: #aaa; margin-top: 15px; text-transform: uppercase; }
-        .mode-indicator { font-size: 0.7rem; text-align: center; margin-bottom: 10px; font-weight: bold; color: #888; }
     </style>
 </head>
 <body>
@@ -55,7 +54,6 @@
             </svg>
         </div>
         <div class="station-name">Rugby Hospital Radio</div>
-        <div id="mode-text" class="mode-indicator"></div>
 
         <label>Start Hour</label><select id="start-hour"></select>
         <label>Duration (Hours)</label><select id="duration"></select>
@@ -71,16 +69,14 @@
         <div id="playlist-box"></div>
         <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY TO CLIPBOARD</button>
         <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
-        <button class="btn btn-outline" onclick="buildNew()">↺ RESET ENGINE</button>
+        <button class="btn btn-outline" onclick="buildNew()">↺ NEW LOG</button>
     </div>
-    <div class="footer">v2.7.1 | Anti-Panic Protection | Testing Slice Enabled</div>
+    <div class="footer">v3.0 | Full Database Production | Separation Enforced</div>
 </div>
 
 <script>
-    // --- SYSTEM CONFIG ---
     const _CORE_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
-    const TEST_MODE = true; 
-
+    
     let masterLibrary = [];
     let currentPlaylist = [];
 
@@ -98,7 +94,6 @@
     ];
 
     window.onload = function() {
-        document.getElementById('mode-text').innerText = TEST_MODE ? "ENGINE MODE: TESTING (100 SLICE)" : "ENGINE MODE: PRODUCTION (FULL)";
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
         const dBox = document.getElementById('duration');
@@ -112,12 +107,12 @@
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
-                    let filtered = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
-                    masterLibrary = TEST_MODE ? filtered.slice(0, 100) : filtered;
+                    // FULL DATABASE - NO SLICING
+                    masterLibrary = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
                     runLogic();
                 }
             });
-        } catch (err) { alert("Data fetch failed. Check GitHub connection."); }
+        } catch (err) { alert("Data fetch failed."); }
     }
 
     function runLogic() {
@@ -133,21 +128,18 @@
                      (currentHour >= 12 && currentHour < 18) ? "Afternoon" : 
                      (currentHour >= 18 && currentHour < 24) ? "Evening" : "Night";
 
-            // Rules Engine: strict=true (Production Gaps), strict=false (Emergency Gaps)
             const checkRules = (song, currentTime, strict = true) => {
                 const lastSong = history.findLast(h => h.id === song.ID);
                 const lastArtist = history.findLast(h => h.artist === song.Artist);
                 
-                const songGap = strict ? 15300 : 7200; // 4.25hr vs 2hr
-                const artistGap = strict ? 6300 : 3600; // 1.75hr vs 1hr
+                // Strict production separation: 4.25 hours for song, 1.75 hours for artist
+                const songGap = strict ? 15300 : 7200; 
+                const artistGap = strict ? 6300 : 3600;
 
                 const separationPass = (!lastSong || (currentTime - lastSong.time > songGap)) && 
                                        (!lastArtist || (currentTime - lastArtist.time > artistGap));
 
-                const dailyCount = history.filter(h => h.id === song.ID).length;
-                const frequencyPass = dailyCount < 2;
-
-                return separationPass && frequencyPass;
+                return separationPass;
             };
 
             let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
@@ -156,25 +148,24 @@
             if (pool.length > 0) {
                 pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
             } else {
-                // Tier 2: AI Pool with strict rules
+                // Lean on AI Pool to enforce separation without expanding the DB
                 let aiPool = AI_POOL.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
                     pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], type: 'AI'};
                 } else {
-                    // Tier 3: Relax rules for AI Pool (Emergency Recovery)
+                    // Final Recovery Fallback
                     let recoveryPool = AI_POOL.filter(s => checkRules(s, elapsedSec, false));
-                    
                     if (recoveryPool.length > 0) {
                         let recoveryPick = recoveryPool[Math.floor(Math.random() * recoveryPool.length)];
-                        pick = {...recoveryPick, type: 'RECOVERY', Title: recoveryPick.Title + " (Recovery)"};
+                        pick = {...recoveryPick, type: 'RECOVERY'};
                     } else {
-                        // Tier 4: Critical Failure - Pick song played longest ago from AI pool
+                        // Critical logic: Longest-since-played
                         let sortedByLastPlayed = [...AI_POOL].sort((a, b) => {
                             const lastA = history.findLast(h => h.id === a.ID)?.time || -1;
                             const lastB = history.findLast(h => h.id === b.ID)?.time || -1;
                             return lastA - lastB;
                         });
-                        pick = {...sortedByLastPlayed[0], type: 'RECOVERY', Title: sortedByLastPlayed[0].Title + " (Critical)"};
+                        pick = {...sortedByLastPlayed[0], type: 'RECOVERY'};
                     }
                 }
             }
@@ -200,7 +191,7 @@
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
                     <span class="ai-label" style="color:${t.type === 'DB' ? '#aaa' : (t.type === 'AI' ? 'var(--ai-gold)' : 'var(--rhr-red)')}">
-                        ${t.currentDP} • ${t.type === 'RECOVERY' ? 'EMERGENCY RECOVERY' : (t.type === 'AI' ? 'AI FALLBACK' : 'DATABASE')}
+                        ${t.currentDP} • ${t.type === 'RECOVERY' ? 'RECOVERY' : (t.type === 'AI' ? 'AI SEPARATION' : 'STATION DATABASE')}
                     </span>
                 </div>
                 <div class="time-col">${t.timeStr}</div>
@@ -210,7 +201,7 @@
 
     function copyToClipboard() {
         const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        navigator.clipboard.writeText(txt).then(() => alert("Copied to Clipboard!"));
+        navigator.clipboard.writeText(txt).then(() => alert("Log copied."));
     }
 
     function downloadTxt() {
@@ -218,7 +209,7 @@
         const blob = new Blob([txt], { type: 'text/plain' });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "RHR_Station_Log.txt";
+        a.download = "RHR_Log.txt";
         a.click();
     }
 
