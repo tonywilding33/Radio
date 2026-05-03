@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Production Engine v3.2</title>
+    <title>RHR | Production Engine v3.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -27,7 +27,6 @@
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .btn-main { background: var(--rhr-red); color: #fff; }
         .btn-sec { background: #555; color: #fff; }
-        .btn-outline { background: transparent; border: 1px solid #ddd; color: #777; }
 
         #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
         
@@ -35,7 +34,6 @@
         .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
         
         .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
-        .track-row.recovery-fill { background-color: #ffebeb !important; border-left: 4px solid var(--rhr-red); }
         
         .track-info { flex-grow: 1; }
         .t-artist { font-weight: bold; font-size: 0.95rem; }
@@ -72,10 +70,9 @@
         </div>
         <div id="playlist-box"></div>
         <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY TO CLIPBOARD</button>
-        <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
-        <button class="btn btn-outline" onclick="buildNew()">↺ NEW LOG</button>
+        <button class="btn btn-sec" onclick="buildNew()">↺ NEW LOG</button>
     </div>
-    <div class="footer">v3.2 | Balanced AI Injection | Hospital Profile Enforcement</div>
+    <div class="footer">v3.3 | 24-Hour AI Separation | Hospital Profile v2</div>
 </div>
 
 <script>
@@ -84,9 +81,7 @@
     let masterLibrary = [];
     let currentPlaylist = [];
 
-    // AI Pool re-balanced to favor 60s/70s/80s (Mirroring DB stats)
     const AI_POOL = [
-        // 60s/70s (The core)
         { ID: "AI-108", Artist: "The Beatles", Title: "Hey Jude", Dec: 1960 },
         { ID: "AI-112", Artist: "Tom Jones", Title: "It's Not Unusual", Dec: 1960 },
         { ID: "AI-114", Artist: "ABBA", Title: "Dancing Queen", Dec: 1970 },
@@ -95,7 +90,6 @@
         { ID: "AI-101", Artist: "Queen", Title: "Radio Ga Ga", Dec: 1980 },
         { ID: "AI-110", Artist: "Eurythmics", Title: "Sweet Dreams", Dec: 1980 },
         { ID: "AI-109", Artist: "Oasis", Title: "Wonderwall", Dec: 1990 },
-        // Modern (Weighted lower in logic)
         { ID: "AI-103", Artist: "Adele", Title: "Rolling In The Deep", Dec: 2010 },
         { ID: "AI-107", Artist: "George Ezra", Title: "Budapest", Dec: 2010 },
         { ID: "AI-102", Artist: "Ed Sheeran", Title: "Castle On The Hill", Dec: 2010 },
@@ -110,17 +104,15 @@
     };
 
     async function connectAndBuild() {
-        try {
-            const resp = await fetch(_CORE_REF);
-            const csv = await resp.text();
-            Papa.parse(csv, {
-                header: true, dynamicTyping: true, skipEmptyLines: true,
-                complete: function(results) {
-                    masterLibrary = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
-                    runLogic();
-                }
-            });
-        } catch (err) { alert("Data fetch failed."); }
+        const resp = await fetch(_CORE_REF);
+        const csv = await resp.text();
+        Papa.parse(csv, {
+            header: true, dynamicTyping: true, skipEmptyLines: true,
+            complete: function(results) {
+                masterLibrary = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
+                runLogic();
+            }
+        });
     }
 
     function runLogic() {
@@ -136,56 +128,46 @@
                      (currentHour >= 12 && currentHour < 18) ? "Afternoon" : 
                      (currentHour >= 18 && currentHour < 24) ? "Evening" : "Night";
 
-            const checkRules = (song, currentTime, strict = true) => {
+            const checkRules = (song, currentTime, isAI = false) => {
                 const lastSong = history.findLast(h => h.id === song.ID);
                 const lastArtist = history.findLast(h => h.artist === song.Artist);
-                const songGap = strict ? 15300 : 7200; 
-                const artistGap = strict ? 6300 : 3600;
+                
+                // AI songs get a massive 24-hour (86400s) buffer to prevent loops in substitutions
+                // DB songs use standard separation (4.25h for song, 1.75h for artist)
+                const songGap = isAI ? 86400 : 15300; 
+                const artistGap = isAI ? 86400 : 6300;
+
                 return (!lastSong || (currentTime - lastSong.time > songGap)) && 
                        (!lastArtist || (currentTime - lastArtist.time > artistGap));
             };
 
             let pick;
-            // 20% injection probability
             const injectAI = Math.random() < 0.20;
 
             if (injectAI) {
-                // DECADE WEIGHTING: 70% chance to pick Pre-1990 AI track to protect station sound
                 let targetDecadeMax = Math.random() < 0.70 ? 1989 : 2025;
-                let filteredAI = AI_POOL.filter(s => s.Dec <= targetDecadeMax && checkRules(s, elapsedSec));
-                
-                if (filteredAI.length > 0) {
-                    pick = {...filteredAI[Math.floor(Math.random() * filteredAI.length)], type: 'AI'};
-                }
+                let filteredAI = AI_POOL.filter(s => s.Dec <= targetDecadeMax && checkRules(s, elapsedSec, true));
+                if (filteredAI.length > 0) pick = {...filteredAI[Math.floor(Math.random() * filteredAI.length)], type: 'AI'};
             }
 
             if (!pick) {
-                let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
+                let pool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec, false));
                 if (pool.length > 0) {
                     pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
                 } else {
-                    // Fallback uses core AI pool first
-                    let coreAI = AI_POOL.filter(s => s.Dec <= 1989 && checkRules(s, elapsedSec));
-                    let poolToUse = coreAI.length > 0 ? coreAI : AI_POOL.filter(s => checkRules(s, elapsedSec));
-                    
-                    if (poolToUse.length > 0) {
-                        pick = {...poolToUse[Math.floor(Math.random() * poolToUse.length)], type: 'AI'};
-                    } else {
-                        // Emergency Recovery
-                        let recoveryPool = AI_POOL.filter(s => checkRules(s, elapsedSec, false));
-                        pick = recoveryPool.length > 0 ? 
-                               {...recoveryPool[Math.floor(Math.random() * recoveryPool.length)], type: 'RECOVERY'} : 
-                               {...[...AI_POOL].sort((a,b) => (history.findLast(h=>h.id===a.ID)?.time||-1) - (history.findLast(h=>h.id===b.ID)?.time||-1))[0], type: 'RECOVERY'};
-                    }
+                    // Fallback to fresh AI that hasn't been played in 24 hours
+                    let freshAI = AI_POOL.filter(s => checkRules(s, elapsedSec, true));
+                    if (freshAI.length > 0) pick = {...freshAI[Math.floor(Math.random() * freshAI.length)], type: 'AI'};
                 }
             }
 
-            let displayMin = Math.floor((elapsedSec % 3600) / 60);
-            pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
-            pick.currentDP = dp;
-            
-            currentPlaylist.push(pick);
-            history.push({id: pick.ID, artist: pick.Artist, time: elapsedSec});
+            if (pick) {
+                let displayMin = Math.floor((elapsedSec % 3600) / 60);
+                pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
+                pick.currentDP = dp;
+                currentPlaylist.push(pick);
+                history.push({id: pick.ID, artist: pick.Artist, time: elapsedSec});
+            }
             elapsedSec += 240; 
         }
         render();
@@ -196,12 +178,12 @@
         document.getElementById('monitor').style.display = 'block';
         document.getElementById('track-count').innerText = currentPlaylist.length + " TRACKS";
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map((t, i) => `
-            <div class="track-row ${t.type === 'AI' ? 'ai-fill' : (t.type === 'RECOVERY' ? 'recovery-fill' : '')}">
+            <div class="track-row ${t.type === 'AI' ? 'ai-fill' : ''}">
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    <span class="ai-label" style="color:${t.type === 'DB' ? '#aaa' : (t.type === 'AI' ? 'var(--ai-gold)' : 'var(--rhr-red)')}">
-                        ${t.currentDP} • ${t.type === 'RECOVERY' ? 'RECOVERY' : (t.type === 'AI' ? 'AI INJECTION' : 'STATION DATABASE')}
+                    <span class="ai-label" style="color:${t.type === 'DB' ? '#aaa' : 'var(--ai-gold)'}">
+                        ${t.currentDP} • ${t.type === 'AI' ? 'AI INJECTION (24H GAP)' : 'STATION DATABASE'}
                     </span>
                 </div>
                 <div class="time-col">${t.timeStr}</div>
@@ -212,15 +194,6 @@
     function copyToClipboard() {
         const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
         navigator.clipboard.writeText(txt).then(() => alert("Log copied."));
-    }
-
-    function downloadTxt() {
-        const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        const blob = new Blob([txt], { type: 'text/plain' });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "RHR_Log.txt";
-        a.click();
     }
 
     function buildNew() {
