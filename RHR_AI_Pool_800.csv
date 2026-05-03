@@ -1,0 +1,801 @@
+ID,Artist,Title
+AI-001,The Beatles,Hey Jude
+AI-002,The Beatles,Let It Be
+AI-003,The Beatles,Come Together
+AI-004,The Beatles,Yesterday
+AI-005,The Beatles,Help!
+AI-006,The Beatles,A Hard Day's Night
+AI-007,The Beatles,Something
+AI-008,The Beatles,Strawberry Fields Forever
+AI-009,Queen,Bohemian Rhapsody
+AI-010,Queen,Under Pressure
+AI-011,Queen,Don't Stop Me Now
+AI-012,Queen,We Are The Champions
+AI-013,Queen,I Want To Break Free
+AI-014,Queen,Radio Ga Ga
+AI-015,Queen,A Kind Of Magic
+AI-016,Queen,Crazy Little Thing Called Love
+AI-017,Elton John,Rocket Man
+AI-018,Elton John,Your Song
+AI-019,Elton John,Tiny Dancer
+AI-020,Elton John,I'm Still Standing
+AI-021,Elton John,Candle In The Wind
+AI-022,Elton John,Goodbye Yellow Brick Road
+AI-023,Elton John,Don't Go Breaking My Heart
+AI-024,Elton John,Sacrifice
+AI-025,David Bowie,Starman
+AI-026,David Bowie,Heroes
+AI-027,David Bowie,Life On Mars?
+AI-028,David Bowie,Space Oddity
+AI-029,David Bowie,Let's Dance
+AI-030,David Bowie,Changes
+AI-031,David Bowie,Ziggy Stardust
+AI-032,David Bowie,Rebel Rebel
+AI-033,Fleetwood Mac,Dreams
+AI-034,Fleetwood Mac,Go Your Own Way
+AI-035,Fleetwood Mac,The Chain
+AI-036,Fleetwood Mac,Don't Stop
+AI-037,Fleetwood Mac,Everywhere
+AI-038,Fleetwood Mac,Little Lies
+AI-039,Fleetwood Mac,Rhiannon
+AI-040,Fleetwood Mac,Gypsy
+AI-041,ABBA,Dancing Queen
+AI-042,ABBA,Mamma Mia
+AI-043,ABBA,Take A Chance On Me
+AI-044,ABBA,Waterloo
+AI-045,ABBA,The Winner Takes It All
+AI-046,ABBA,SOS
+AI-047,ABBA,Fernando
+AI-048,ABBA,Gimme! Gimme! Gimme!
+AI-049,Rolling Stones,Satisfaction
+AI-050,Rolling Stones,Paint It Black
+AI-051,Rolling Stones,Start Me Up
+AI-052,Rolling Stones,Honky Tonk Women
+AI-053,Rolling Stones,Angie
+AI-054,Rolling Stones,Brown Sugar
+AI-055,Rolling Stones,Gimme Shelter
+AI-056,Rolling Stones,Wild Horses
+AI-057,Coldplay,Yellow
+AI-058,Coldplay,Fix You
+AI-059,Coldplay,Viva La Vida
+AI-060,Coldplay,Paradise
+AI-061,Coldplay,Clocks
+AI-062,Coldplay,A Sky Full Of Stars
+AI-063,Coldplay,Adventure Of A Lifetime
+AI-064,Coldplay,The Scientist
+AI-065,Ed Sheeran,Thinking Out Loud
+AI-066,Ed Sheeran,Shape Of You
+AI-067,Ed Sheeran,Perfect
+AI-068,Ed Sheeran,Castle On The Hill
+AI-069,Ed Sheeran,The A Team
+AI-070,Ed Sheeran,Photograph
+AI-071,Ed Sheeran,Bad Habits
+AI-072,Ed Sheeran,Shivers
+AI-073,Adele,Hello
+AI-074,Adele,Someone Like You
+AI-075,Adele,Rolling In The Deep
+AI-076,Adele,Make You Feel My Love
+AI-077,Adele,Skyfall
+AI-078,Adele,Send My Love
+AI-079,Adele,Chasing Pavements
+AI-080,Adele,When We Were Young
+AI-081,George Michael,Careless Whisper
+AI-082,George Michael,Faith
+AI-083,George Michael,Father Figure
+AI-084,George Michael,Freedom! '90
+AI-085,George Michael,Jesus To A Child
+AI-086,George Michael,Outside
+AI-087,George Michael,Fastlove
+AI-088,George Michael,Amazing
+AI-089,Wham!,Wake Me Up Before You Go-Go
+AI-090,Wham!,Freedom
+AI-091,Wham!,I'm Your Man
+AI-092,Wham!,Everything She Wants
+AI-093,Wham!,The Edge Of Heaven
+AI-094,Wham!,Club Tropicana
+AI-095,Wham!,Last Christmas
+AI-096,Wham!,Bad Boys
+AI-097,Robbie Williams,Angels
+AI-098,Robbie Williams,Millennium
+AI-099,Robbie Williams,Rock DJ
+AI-100,Robbie Williams,She's The One
+AI-101,Robbie Williams,Let Me Entertain You
+AI-102,Robbie Williams,Feel
+AI-103,Robbie Williams,Candy
+AI-104,Robbie Williams,Supreme
+AI-105,Tom Jones,Delilah
+AI-106,Tom Jones,It's Not Unusual
+AI-107,Tom Jones,Green Green Grass Of Home
+AI-108,Tom Jones,She's A Lady
+AI-109,Tom Jones,Sex Bomb
+AI-110,Tom Jones,Kiss
+AI-111,Tom Jones,What's New Pussycat?
+AI-112,Tom Jones,Mama Told Me Not To Come
+AI-113,Shirley Bassey,Goldfinger
+AI-114,Shirley Bassey,Diamonds Are Forever
+AI-115,Shirley Bassey,Big Spender
+AI-116,Shirley Bassey,Never Never Never
+AI-117,Shirley Bassey,This Is My Life
+AI-118,Shirley Bassey,I Am What I Am
+AI-119,Shirley Bassey,The Lady Is A Tramp
+AI-120,Shirley Bassey,Moonraker
+AI-121,Cilla Black,You're My World
+AI-122,Cilla Black,Alfie
+AI-123,Cilla Black,Anyone Who Had A Heart
+AI-124,Cilla Black,Step Inside Love
+AI-125,Cilla Black,Surround Yourself With Sorrow
+AI-126,Cilla Black,Something Tells Me
+AI-127,Cilla Black,Love's Just A Broken Heart
+AI-128,Cilla Black,Sing A Rainbow
+AI-129,The Kinks,You Really Got Me
+AI-130,The Kinks,Waterloo Sunset
+AI-131,The Kinks,Lola
+AI-132,The Kinks,Sunny Afternoon
+AI-133,The Kinks,All Day And All Of The Night
+AI-134,The Kinks,Dedicated Follower Of Fashion
+AI-135,The Kinks,Tired Of Waiting For You
+AI-136,The Kinks,Days
+AI-137,Duran Duran,Rio
+AI-138,Duran Duran,Hungry Like The Wolf
+AI-139,Duran Duran,Save A Prayer
+AI-140,Duran Duran,The Reflex
+AI-141,Duran Duran,A View To A Kill
+AI-142,Duran Duran,Ordinary World
+AI-143,Duran Duran,Girls On Film
+AI-144,Duran Duran,Is There Something I Should Know?
+AI-145,Spandau Ballet,Gold
+AI-146,Spandau Ballet,True
+AI-147,Spandau Ballet,Through The Barricades
+AI-148,Spandau Ballet,Only When You Leave
+AI-149,Spandau Ballet,To Cut A Long Story Short
+AI-150,Spandau Ballet,Chant No. 1
+AI-151,Spandau Ballet,I'll Fly For You
+AI-152,Spandau Ballet,Lifeline
+AI-153,Eurythmics,Sweet Dreams
+AI-154,Eurythmics,There Must Be An Angel
+AI-155,Eurythmics,Here Comes The Rain Again
+AI-156,Eurythmics,Who's That Girl?
+AI-157,Eurythmics,Thorn In My Side
+AI-158,Eurythmics,Love Is A Stranger
+AI-159,Eurythmics,Missionary Man
+AI-160,Eurythmics,It's Alright
+AI-161,Pet Shop Boys,West End Girls
+AI-162,Pet Shop Boys,It's A Sin
+AI-163,Pet Shop Boys,Always On My Mind
+AI-164,Pet Shop Boys,Go West
+AI-165,Pet Shop Boys,What Have I Done To Deserve This?
+AI-166,Pet Shop Boys,Suburbia
+AI-167,Pet Shop Boys,Rent
+AI-168,Pet Shop Boys,Left To My Own Devices
+AI-169,The Police,Every Breath You Take
+AI-170,The Police,Roxanne
+AI-171,The Police,Message In A Bottle
+AI-172,The Police,Don't Stand So Close To Me
+AI-173,The Police,Every Little Thing She Does Is Magic
+AI-174,The Police,Walking On The Moon
+AI-175,The Police,King Of Pain
+AI-176,The Police,De Do Do Do
+AI-177,Genesis,Invisible Touch
+AI-178,Genesis,Land Of Confusion
+AI-179,Genesis,I Can't Dance
+AI-180,Genesis,That's All
+AI-181,Genesis,Mama
+AI-182,Genesis,Follow You Follow Me
+AI-183,Genesis,Hold On My Heart
+AI-184,Genesis,No Son Of Mine
+AI-185,Phil Collins,In The Air Tonight
+AI-186,Phil Collins,Against All Odds
+AI-187,Phil Collins,You Can't Hurry Love
+AI-188,Phil Collins,Another Day In Paradise
+AI-189,Phil Collins,Sussudio
+AI-190,Phil Collins,Two Hearts
+AI-191,Phil Collins,One More Night
+AI-192,Phil Collins,Groovy Kind Of Love
+AI-193,Annie Lennox,Walking On Broken Glass
+AI-194,Annie Lennox,Why
+AI-195,Annie Lennox,No More 'I Love You's'
+AI-196,Annie Lennox,Little Bird
+AI-197,Annie Lennox,Precious
+AI-198,Annie Lennox,Shining Light
+AI-199,Annie Lennox,Keep Along
+AI-200,Annie Lennox,Train In Vain
+AI-201,Madness,Our House
+AI-202,Madness,It Must Be Love
+AI-203,Madness,Baggy Trousers
+AI-204,Madness,House Of Fun
+AI-205,Madness,Driving In My Car
+AI-206,Madness,Wings Of A Dove
+AI-207,Madness,The Sun And The Rain
+AI-208,Madness,One Step Beyond
+AI-209,The Jam,Going Underground
+AI-210,The Jam,Town Called Malice
+AI-211,The Jam,The Eton Rifles
+AI-212,The Jam,Start!
+AI-213,The Jam,That's Entertainment
+AI-214,The Jam,Beat Surrender
+AI-215,The Jam,Down In The Tube Station At Midnight
+AI-216,The Jam,In The City
+AI-217,The Hollies,The Air That I Breathe
+AI-218,The Hollies,He Ain't Heavy He's My Brother
+AI-219,The Hollies,Bus Stop
+AI-220,The Hollies,Carrie Anne
+AI-221,The Hollies,Long Cool Woman
+AI-222,The Hollies,I'm Alive
+AI-223,The Hollies,Just One Look
+AI-224,The Hollies,On A Carousel
+AI-225,Simply Red,Holding Back The Years
+AI-226,Simply Red,If You Don't Know Me By Now
+AI-227,Simply Red,Stars
+AI-228,Simply Red,Fairground
+AI-229,Simply Red,Money's Too Tight To Mention
+AI-230,Simply Red,Sunrise
+AI-231,Simply Red,The Right Thing
+AI-232,Simply Red,For Your Babies
+AI-233,Oasis,Wonderwall
+AI-234,Oasis,Don't Look Back In Anger
+AI-235,Oasis,Live Forever
+AI-236,Oasis,Stop Crying Your Heart Out
+AI-237,Oasis,Champagne Supernova
+AI-238,Oasis,The Importance Of Being Idle
+AI-239,Oasis,Stand By Me
+AI-240,Oasis,Little By Little
+AI-241,Take That,Back For Good
+AI-242,Take That,Rule The World
+AI-243,Take That,Patience
+AI-244,Take That,Never Forget
+AI-245,Take That,Shine
+AI-246,Take That,Greatest Day
+AI-247,Take That,The Flood
+AI-248,Take That,Pray
+AI-249,Rod Stewart,Maggie May
+AI-250,Rod Stewart,Sailing
+AI-251,Rod Stewart,Da Ya Think I'm Sexy?
+AI-252,Rod Stewart,You're In My Heart
+AI-253,Rod Stewart,Baby Jane
+AI-254,Rod Stewart,The First Cut Is The Deepest
+AI-255,Rod Stewart,I Don't Want To Talk About It
+AI-256,Rod Stewart,Young Turks
+AI-257,Cliff Richard,The Young Ones
+AI-258,Cliff Richard,Summer Holiday
+AI-259,Cliff Richard,Living Doll
+AI-260,Cliff Richard,We Don't Talk Anymore
+AI-261,Cliff Richard,Devil Woman
+AI-262,Cliff Richard,Congratulations
+AI-263,Cliff Richard,Wired For Sound
+AI-264,Cliff Richard,Move It
+AI-265,Dusty Springfield,Son Of A Preacher Man
+AI-266,Dusty Springfield,I Only Want To Be With You
+AI-267,Dusty Springfield,You Don't Have To Say You Love Me
+AI-268,Dusty Springfield,The Look Of Love
+AI-269,Dusty Springfield,I Just Don't Know What To Do With Myself
+AI-270,Dusty Springfield,Wishin' And Hopin'
+AI-271,Dusty Springfield,Goin' Back
+AI-272,Dusty Springfield,In Private
+AI-273,The Shadows,Apache
+AI-274,The Shadows,Wonderful Land
+AI-275,The Shadows,Kon-Tiki
+AI-276,The Shadows,Dance On!
+AI-277,The Shadows,Foot Tapper
+AI-278,The Shadows,Atlantis
+AI-279,The Shadows,The Frightened City
+AI-280,The Shadows,Theme For Young Lovers
+AI-281,Status Quo,Rockin' All Over The World
+AI-282,Status Quo,Down Down
+AI-283,Status Quo,Pictures Of Matchstick Men
+AI-284,Status Quo,Whatever You Want
+AI-285,Status Quo,In The Army Now
+AI-286,Status Quo,Caroline
+AI-287,Status Quo,Rain
+AI-288,Status Quo,The Wanderer
+AI-289,Bee Gees,Stayin' Alive
+AI-290,Bee Gees,Night Fever
+AI-291,Bee Gees,How Deep Is Your Love
+AI-292,Bee Gees,Massachusetts
+AI-293,Bee Gees,Words
+AI-294,Bee Gees,Tragedy
+AI-295,Bee Gees,You Win Again
+AI-296,Bee Gees,Jive Talkin'
+AI-297,Kylie Minogue,Can't Get You Out Of My Head
+AI-298,Kylie Minogue,I Should Be So Lucky
+AI-299,Kylie Minogue,Better The Devil You Know
+AI-300,Kylie Minogue,Spinning Around
+AI-301,Kylie Minogue,All The Lovers
+AI-302,Kylie Minogue,Love At First Sight
+AI-303,Kylie Minogue,Confide In Me
+AI-304,Kylie Minogue,The Loco-Motion
+AI-305,George Ezra,Shotgun
+AI-306,George Ezra,Budapest
+AI-307,George Ezra,Paradise
+AI-308,George Ezra,Blame It On Me
+AI-309,George Ezra,Listen To The Man
+AI-310,George Ezra,Cassy O'
+AI-311,George Ezra,Hold My Girl
+AI-312,George Ezra,Green Green Grass
+AI-313,Sam Smith,Stay With Me
+AI-314,Sam Smith,I'm Not The Only One
+AI-315,Sam Smith,Writing's On The Wall
+AI-316,Sam Smith,Money On My Mind
+AI-317,Sam Smith,Too Good At Goodbyes
+AI-318,Sam Smith,Diamonds
+AI-319,Sam Smith,Like I Can
+AI-320,Sam Smith,Latch
+AI-321,Amy Winehouse,Rehab
+AI-322,Amy Winehouse,Back To Black
+AI-323,Amy Winehouse,Valerie
+AI-324,Amy Winehouse,Love Is A Losing Game
+AI-325,Amy Winehouse,Tears Dry On Their Own
+AI-326,Amy Winehouse,You Know I'm No Good
+AI-327,Amy Winehouse,Our Day Will Come
+AI-328,Amy Winehouse,Cupid
+AI-329,Texas,I Don't Want A Lover
+AI-330,Texas,Say What You Want
+AI-331,Texas,Black Eyed Boy
+AI-332,Texas,Summer Son
+AI-333,Texas,Inner Smile
+AI-334,Texas,Halo
+AI-335,Texas,In Our Lifetime
+AI-336,Texas,Sleep
+AI-337,The Beautiful South,A Little Time
+AI-338,The Beautiful South,Rotterdam
+AI-339,The Beautiful South,Perfect 10
+AI-340,The Beautiful South,Don't Marry Her
+AI-341,The Beautiful South,Song For Whoever
+AI-342,The Beautiful South,Old Red Eyes Is Back
+AI-343,The Beautiful South,You Keep It All In
+AI-344,The Beautiful South,Prettiest Eyes
+AI-345,Paul McCartney,Maybe I'm Amazed
+AI-346,Paul McCartney,Band On The Run
+AI-347,Paul McCartney,Live And Let Die
+AI-348,Paul McCartney,Jet
+AI-349,Paul McCartney,Silly Love Songs
+AI-350,Paul McCartney,Let 'Em In
+AI-351,Paul McCartney,Mull Of Kintyre
+AI-352,Paul McCartney,Coming Up
+AI-353,Kate Bush,Wuthering Heights
+AI-354,Kate Bush,Running Up That Hill
+AI-355,Kate Bush,Babooshka
+AI-356,Kate Bush,Cloudbusting
+AI-357,Kate Bush,The Man With The Child In His Eyes
+AI-358,Kate Bush,Hounds Of Love
+AI-359,Kate Bush,Army Dreamers
+AI-360,Kate Bush,Wow
+AI-361,Electric Light Orchestra,Mr. Blue Sky
+AI-362,Electric Light Orchestra,Sweet Talkin' Woman
+AI-363,Electric Light Orchestra,Livin' Thing
+AI-364,Electric Light Orchestra,Don't Bring Me Down
+AI-365,Electric Light Orchestra,Telephone Line
+AI-366,Electric Light Orchestra,Evil Woman
+AI-367,Electric Light Orchestra,Wild West Hero
+AI-368,Electric Light Orchestra,All Over The World
+AI-369,Tina Turner,The Best
+AI-370,Tina Turner,What's Love Got To Do With It
+AI-371,Tina Turner,Private Dancer
+AI-372,Tina Turner,Steamy Windows
+AI-373,Tina Turner,Let's Stay Together
+AI-374,Tina Turner,I Don't Wanna Fight
+AI-375,Tina Turner,River Deep Mountain High
+AI-376,Tina Turner,GoldenEye
+AI-377,Whitney Houston,I Wanna Dance With Somebody
+AI-378,Whitney Houston,Saving All My Love For You
+AI-379,Whitney Houston,How Will I Know
+AI-380,Whitney Houston,I Will Always Love You
+AI-381,Whitney Houston,One Moment In Time
+AI-382,Whitney Houston,Greatest Love Of All
+AI-383,Whitney Houston,I'm Every Woman
+AI-384,Whitney Houston,My Love Is Your Love
+AI-385,Lionel Richie,Hello
+AI-386,Lionel Richie,All Night Long
+AI-387,Lionel Richie,Dancing On The Ceiling
+AI-388,Lionel Richie,Say You Say Me
+AI-389,Lionel Richie,Penny Lover
+AI-390,Lionel Richie,Stuck On You
+AI-391,Lionel Richie,Three Times A Lady
+AI-392,Lionel Richie,Easy
+AI-393,Stevie Wonder,Superstition
+AI-394,Stevie Wonder,I Just Called To Say I Love You
+AI-395,Stevie Wonder,Isn't She Lovely
+AI-396,Stevie Wonder,Sir Duke
+AI-397,Stevie Wonder,You Are The Sunshine Of My Life
+AI-398,Stevie Wonder,Master Blaster
+AI-399,Stevie Wonder,Part-Time Lover
+AI-400,Stevie Wonder,Happy Birthday
+AI-401,The Drifters,Under The Boardwalk
+AI-402,The Drifters,Save The Last Dance For Me
+AI-403,The Drifters,Up On The Roof
+AI-404,The Drifters,Saturday Night At The Movies
+AI-405,The Drifters,Come On Over To My Place
+AI-406,The Drifters,Kissin' In The Back Row Of The Movies
+AI-407,The Drifters,You're More Than A Number In My Little Red Book
+AI-408,The Drifters,There Goes My First Love
+AI-409,The Supremes,Where Did Our Love Go
+AI-410,The Supremes,Baby Love
+AI-411,The Supremes,Stop! In The Name Of Love
+AI-412,The Supremes,You Can't Hurry Love
+AI-413,The Supremes,You Keep Me Hangin' On
+AI-414,The Supremes,The Happening
+AI-415,The Supremes,Reflections
+AI-416,The Supremes,Stoned Love
+AI-417,The Four Tops,Reach Out I'll Be There
+AI-418,The Four Tops,I Can't Help Myself
+AI-419,The Four Tops,Standing In The Shadows Of Love
+AI-420,The Four Tops,Bernadette
+AI-421,The Four Tops,Walk Away Renee
+AI-422,The Four Tops,If I Were A Carpenter
+AI-423,The Four Tops,Loco In Acapulco
+AI-424,The Four Tops,Simple Game
+AI-425,Marvin Gaye,I Heard It Through The Grapevine
+AI-426,Marvin Gaye,What's Going On
+AI-427,Marvin Gaye,Sexual Healing
+AI-428,Marvin Gaye,Let's Get It On
+AI-429,Marvin Gaye,Got To Give It Up
+AI-430,Marvin Gaye,How Sweet It Is
+AI-431,Marvin Gaye,Abraham Martin And John
+AI-432,Marvin Gaye,It Takes Two
+AI-433,Diana Ross,I'm Coming Out
+AI-434,Diana Ross,Upside Down
+AI-435,Diana Ross,Endless Love
+AI-436,Diana Ross,Chain Reaction
+AI-437,Diana Ross,When You Tell Me That You Love Me
+AI-438,Diana Ross,Theme From Mahogany
+AI-439,Diana Ross,Ain't No Mountain High Enough
+AI-440,Diana Ross,Touch Me In The Morning
+AI-441,The Carpenters,(They Long To Be) Close To You
+AI-442,The Carpenters,We've Only Just Begun
+AI-443,The Carpenters,Rainy Days And Mondays
+AI-444,The Carpenters,Top Of The World
+AI-445,The Carpenters,Yesterday Once More
+AI-446,The Carpenters,Please Mr. Postman
+AI-447,The Carpenters,Goodbye To Love
+AI-448,The Carpenters,Sing
+AI-449,Neil Diamond,Sweet Caroline
+AI-450,Neil Diamond,Cracklin' Rosie
+AI-451,Neil Diamond,I'm A Believer
+AI-452,Neil Diamond,Love On The Rocks
+AI-453,Neil Diamond,Hello Again
+AI-454,Neil Diamond,September Morn
+AI-455,Neil Diamond,Forever In Blue Jeans
+AI-456,Neil Diamond,Song Sung Blue
+AI-457,Simon & Garfunkel,Bridge Over Troubled Water
+AI-458,Simon & Garfunkel,Mrs. Robinson
+AI-459,Simon & Garfunkel,The Sound Of Silence
+AI-460,Simon & Garfunkel,Cecilia
+AI-461,Simon & Garfunkel,The Boxer
+AI-462,Simon & Garfunkel,Homeward Bound
+AI-463,Simon & Garfunkel,I Am A Rock
+AI-464,Simon & Garfunkel,Scarborough Fair
+AI-465,The Beach Boys,Good Vibrations
+AI-466,The Beach Boys,God Only Knows
+AI-467,The Beach Boys,Wouldn't It Be Nice
+AI-468,The Beach Boys,California Girls
+AI-469,The Beach Boys,Surfin' USA
+AI-470,The Beach Boys,Barbara Ann
+AI-471,The Beach Boys,Sloop John B
+AI-472,The Beach Boys,Kokomo
+AI-473,Elvis Presley,Suspicious Minds
+AI-474,Elvis Presley,Can't Help Falling In Love
+AI-475,Elvis Presley,The Wonder Of You
+AI-476,Elvis Presley,It's Now Or Never
+AI-477,Elvis Presley,In The Ghetto
+AI-478,Elvis Presley,Always On My Mind
+AI-479,Elvis Presley,Return To Sender
+AI-480,Elvis Presley,Wooden Heart
+AI-481,Michael Jackson,Billie Jean
+AI-482,Michael Jackson,Thriller
+AI-483,Michael Jackson,Beat It
+AI-484,Michael Jackson,Man In The Mirror
+AI-485,Michael Jackson,Black Or White
+AI-486,Michael Jackson,You Are Not Alone
+AI-487,Michael Jackson,Rock With You
+AI-488,Michael Jackson,The Way You Make Me Feel
+AI-489,Billy Joel,Piano Man
+AI-490,Billy Joel,Uptown Girl
+AI-491,Billy Joel,Tell Her About It
+AI-492,Billy Joel,An Innocent Man
+AI-493,Billy Joel,Just The Way You Are
+AI-494,Billy Joel,The Longest Time
+AI-495,Billy Joel,She's Always A Woman
+AI-496,Billy Joel,River Of Dreams
+AI-497,Barry White,You're The First The Last My Everything
+AI-498,Barry White,Can't Get Enough Of Your Love Babe
+AI-499,Barry White,Just The Way You Are
+AI-500,Barry White,Let The Music Play
+AI-501,Barry White,It's Ecstasy When You Lay Down Next To Me
+AI-502,Barry White,You See The Trouble With Me
+AI-503,Barry White,I'm Gonna Love You Just A Little More Baby
+AI-504,Barry White,Never Never Gonna Give Ya Up
+AI-505,Donna Summer,I Feel Love
+AI-506,Donna Summer,Hot Stuff
+AI-507,Donna Summer,Bad Girls
+AI-508,Donna Summer,Love To Love You Baby
+AI-509,Donna Summer,State Of Independence
+AI-510,Donna Summer,On The Radio
+AI-511,Donna Summer,No More Tears (Enough Is Enough)
+AI-512,Donna Summer,She Works Hard For The Money
+AI-513,Chicago,If You Leave Me Now
+AI-514,Chicago,Hard To Say I'm Sorry
+AI-515,Chicago,You're The Inspiration
+AI-516,Chicago,25 Or 6 To 4
+AI-517,Chicago,Saturday In The Park
+AI-518,Chicago,Hard Habit To Break
+AI-519,Chicago,Look Away
+AI-520,Chicago,Baby What A Big Surprise
+AI-521,The Monkees,I'm A Believer
+AI-522,The Monkees,Daydream Believer
+AI-523,The Monkees,Last Train To Clarksville
+AI-524,The Monkees,A Little Bit Me A Little Bit You
+AI-525,The Monkees,Pleasant Valley Sunday
+AI-526,The Monkees,Valleri
+AI-527,The Monkees,Listen To The Band
+AI-528,The Monkees,Randy Scouse Git
+AI-529,Roy Orbison,Oh Pretty Woman
+AI-530,Roy Orbison,Only The Lonely
+AI-531,Roy Orbison,Crying
+AI-532,Roy Orbison,In Dreams
+AI-533,Roy Orbison,It's Over
+AI-534,Roy Orbison,You Got It
+AI-535,Roy Orbison,Dream Baby
+AI-536,Roy Orbison,Penny Arcade
+AI-537,Buddy Holly,That'll Be The Day
+AI-538,Buddy Holly,Peggy Sue
+AI-539,Buddy Holly,Oh Boy!
+AI-540,Buddy Holly,Rave On
+AI-541,Buddy Holly,Everyday
+AI-542,Buddy Holly,Maybe Baby
+AI-543,Buddy Holly,Heartbeat
+AI-544,Buddy Holly,True Love Ways
+AI-545,Frank Sinatra,My Way
+AI-546,Frank Sinatra,Fly Me To The Moon
+AI-547,Frank Sinatra,Strangers In The Night
+AI-548,Frank Sinatra,New York New York
+AI-549,Frank Sinatra,I've Got You Under My Skin
+AI-550,Frank Sinatra,That's Life
+AI-551,Frank Sinatra,Summer Wind
+AI-552,Frank Sinatra,You Make Me Feel So Young
+AI-553,Nat King Cole,Unforgettable
+AI-554,Nat King Cole,L-O-V-E
+AI-555,Nat King Cole,When I Fall In Love
+AI-556,Nat King Cole,Smile
+AI-557,Nat King Cole,Mona Lisa
+AI-558,Nat King Cole,Stardust
+AI-559,Nat King Cole,Nature Boy
+AI-560,Nat King Cole,Quizas Quizas Quizas
+AI-561,Dean Martin,That's Amore
+AI-562,Dean Martin,Volare
+AI-563,Dean Martin,Memories Are Made Of This
+AI-564,Dean Martin,Little Ole Wine Drinker Me
+AI-565,Dean Martin,Everybody Loves Somebody
+AI-566,Dean Martin,Gentle On My Mind
+AI-567,Dean Martin,You're Nobody Til Somebody Loves You
+AI-568,Dean Martin,Sway
+AI-569,Petula Clark,Downtown
+AI-570,Petula Clark,I Know A Place
+AI-571,Petula Clark,Don't Sleep In The Subway
+AI-572,Petula Clark,This Is My Song
+AI-573,Petula Clark,Sailor
+AI-574,Petula Clark,My Love
+AI-575,Petula Clark,The Other Man's Grass Is Always Greener
+AI-576,Petula Clark,A Sign Of The Times
+AI-577,Lulu,Shout
+AI-578,Lulu,To Sir With Love
+AI-579,Lulu,The Boat That I Row
+AI-580,Lulu,Me The Peaceful Heart
+AI-581,Lulu,I'm A Tiger
+AI-582,Lulu,Boom Bang-A-Bang
+AI-583,Lulu,The Man Who Sold The World
+AI-584,Lulu,Relight My Fire
+AI-585,Sandie Shaw,(There's) Always Something There To Remind Me
+AI-586,Sandie Shaw,Long Live Love
+AI-587,Sandie Shaw,Puppet On A String
+AI-588,Sandie Shaw,Girl Don't Come
+AI-589,Sandie Shaw,I'll Stop At Nothing
+AI-590,Sandie Shaw,Message Understood
+AI-591,Sandie Shaw,Tomorrow
+AI-592,Sandie Shaw,Monsieur Dupont
+AI-593,Gene Pitney,Twenty Four Hours From Tulsa
+AI-594,Gene Pitney,Something's Gotten Hold Of My Heart
+AI-595,Gene Pitney,I'm Gonna Be Strong
+AI-596,Gene Pitney,Looking Through The Eyes Of Love
+AI-597,Gene Pitney,Backstage
+AI-598,Gene Pitney,The Man Who Shot Liberty Valance
+AI-599,Gene Pitney,Town Without Pity
+AI-600,Gene Pitney,Only Love Can Break A Heart
+AI-601,Vera Lynn,We'll Meet Again
+AI-602,Vera Lynn,The White Cliffs Of Dover
+AI-603,Vera Lynn,A Nightingale Sang In Berkeley Square
+AI-604,Vera Lynn,There'll Always Be An England
+AI-605,Vera Lynn,Wishing (Will Make It So)
+AI-606,Vera Lynn,When The Lights Go On Again
+AI-607,Vera Lynn,The Anniversary Waltz
+AI-608,Vera Lynn,As Time Goes By
+AI-609,The Seekers,I'll Never Find Another You
+AI-610,The Seekers,The Carnival Is Over
+AI-611,The Seekers,A World Of Our Own
+AI-612,The Seekers,Morningtown Ride
+AI-613,The Seekers,Georgy Girl
+AI-614,The Seekers,Someday One Day
+AI-615,The Seekers,Island Of Dreams
+AI-616,The Seekers,Walk With Me
+AI-617,Ken Dodd,Happiness
+AI-618,Ken Dodd,Tears
+AI-619,Ken Dodd,Love Is Like A Violin
+AI-620,Ken Dodd,Promises
+AI-621,Ken Dodd,The River
+AI-622,Ken Dodd,Eight By Ten
+AI-623,Ken Dodd,Brokenhearted
+AI-624,Ken Dodd,The Road You Leave Behind
+AI-625,Andy Williams,Moon River
+AI-626,Andy Williams,Can't Get Used To Losing You
+AI-627,Andy Williams,Music To Watch Girls By
+AI-628,Andy Williams,Can't Take My Eyes Off You
+AI-629,Andy Williams,Happy Heart
+AI-630,Andy Williams,The Impossible Dream
+AI-631,Andy Williams,Solitaire
+AI-632,Andy Williams,Almost There
+AI-633,Perry Como,Magic Moments
+AI-634,Perry Como,Catch A Falling Star
+AI-635,Perry Como,And I Love You So
+AI-636,Perry Como,It's Impossible
+AI-637,Perry Como,Don't Let The Stars Get In Your Eyes
+AI-638,Perry Como,Papa Loves Mambo
+AI-639,Perry Como,Hot Diggity
+AI-640,Perry Como,Seattle
+AI-641,Matt Monro,Portrait Of My Love
+AI-642,Matt Monro,My Kind Of Girl
+AI-643,Matt Monro,Softly As I Leave You
+AI-644,Matt Monro,From Russia With Love
+AI-645,Matt Monro,Walk Away
+AI-646,Matt Monro,Yesterday
+AI-647,Matt Monro,Born Free
+AI-648,Matt Monro,This Is The Life
+AI-649,Al Martino,Spanish Eyes
+AI-650,Al Martino,Here In My Heart
+AI-651,Al Martino,Blueberry Hill
+AI-652,Al Martino,I Love You Because
+AI-653,Al Martino,I Love You More And More Every Day
+AI-654,Al Martino,Mary In The Morning
+AI-655,Al Martino,To The Door Of The Sun
+AI-656,Al Martino,Wanted
+AI-657,Engelbert Humperdinck,Release Me
+AI-658,Engelbert Humperdinck,The Last Waltz
+AI-659,Engelbert Humperdinck,There Goes My Everything
+AI-660,Engelbert Humperdinck,Am I That Easy To Forget
+AI-661,Engelbert Humperdinck,A Man Without Love
+AI-662,Engelbert Humperdinck,Les Bicyclettes De Belsize
+AI-663,Engelbert Humperdinck,The Way It Used To Be
+AI-664,Engelbert Humperdinck,Winter World Of Love
+AI-665,Val Doonican,Walk Tall
+AI-666,Val Doonican,The Special Years
+AI-667,Val Doonican,Elusive Butterfly
+AI-668,Val Doonican,What Would I Be
+AI-669,Val Doonican,If The Whole World Stopped Loving
+AI-670,Val Doonican,Memories Are Made Of This
+AI-671,Val Doonican,Morning
+AI-672,Val Doonican,The Sun Always Shines When You're Young
+AI-673,Des O'Connor,I Pretend
+AI-674,Des O'Connor,1-2-3 O'Leary
+AI-675,Des O'Connor,Dick-A-Dum-Dum
+AI-676,Des O'Connor,Loneliness
+AI-677,Des O'Connor,The Tips Of My Fingers
+AI-678,Des O'Connor,One Two Three
+AI-679,Des O'Connor,Skye Boat Song
+AI-680,Des O'Connor,The Sunflower
+AI-681,The Bachelors,I Believe
+AI-682,The Bachelors,Charmaine
+AI-683,The Bachelors,Diane
+AI-684,The Bachelors,I'll See You In My Dreams
+AI-685,The Bachelors,No Arms Can Ever Hold You
+AI-686,The Bachelors,Marie
+AI-687,The Bachelors,The Sound Of Silence
+AI-688,The Bachelors,Love Me With All Your Heart
+AI-689,Herman's Hermits,I'm Into Something Good
+AI-690,Herman's Hermits,Mrs. Brown You've Got A Lovely Daughter
+AI-691,Herman's Hermits,Silhouettes
+AI-692,Herman's Hermits,Wonderful World
+AI-693,Herman's Hermits,There's A Kind Of Hush
+AI-694,Herman's Hermits,No Milk Today
+AI-695,Herman's Hermits,Sunshine Girl
+AI-696,Herman's Hermits,My Sentimental Friend
+AI-697,Gerry & The Pacemakers,You'll Never Walk Alone
+AI-698,Gerry & The Pacemakers,I Like It
+AI-699,Gerry & The Pacemakers,How Do You Do It?
+AI-700,Gerry & The Pacemakers,Ferry Cross The Mersey
+AI-701,Gerry & The Pacemakers,Don't Let The Sun Catch You Crying
+AI-702,Gerry & The Pacemakers,I'm The One
+AI-703,Gerry & The Pacemakers,Walk Hand In Hand
+AI-704,Gerry & The Pacemakers,Pretend
+AI-705,The Searchers,Needles And Pins
+AI-706,The Searchers,Sugar And Spice
+AI-707,The Searchers,Sweets For My Sweet
+AI-708,The Searchers,Don't Throw Your Love Away
+AI-709,The Searchers,When You Walk In The Room
+AI-710,The Searchers,Goodbye My Love
+AI-711,The Searchers,What Have They Done To The Rain
+AI-712,The Searchers,Take It Or Leave It
+AI-713,Freddie & The Dreamers,You Were Made For Me
+AI-714,Freddie & The Dreamers,I'm Telling You Now
+AI-715,Freddie & The Dreamers,I Understand
+AI-716,Freddie & The Dreamers,If You Gotta Make A Fool Of Somebody
+AI-717,Freddie & The Dreamers,Over You
+AI-718,Freddie & The Dreamers,A Little You
+AI-719,Freddie & The Dreamers,Thou Shalt Not Steal
+AI-720,Freddie & The Dreamers,Short Shorts
+AI-721,The Dave Clark Five,Glad All Over
+AI-722,The Dave Clark Five,Bits And Pieces
+AI-723,The Dave Clark Five,Can't You See That She's Mine
+AI-724,The Dave Clark Five,Because
+AI-725,The Dave Clark Five,Catch Us If You Can
+AI-726,The Dave Clark Five,Over And Over
+AI-727,The Dave Clark Five,Everybody Knows
+AI-728,The Dave Clark Five,Red Balloon
+AI-729,The Tremeloes,Silence Is Golden
+AI-730,The Tremeloes,Even The Bad Times Are Good
+AI-731,The Tremeloes,Here Comes My Baby
+AI-732,The Tremeloes,Suddenly You Love Me
+AI-733,The Tremeloes,My Little Lady
+AI-734,The Tremeloes,(Call Me) Number One
+AI-735,The Tremeloes,Me And My Life
+AI-736,The Tremeloes,Hello World
+AI-737,Brian Poole & The Tremeloes,Do You Love Me
+AI-738,Brian Poole & The Tremeloes,Twist And Shout
+AI-739,Brian Poole & The Tremeloes,Candy Man
+AI-740,Brian Poole & The Tremeloes,Someone Someone
+AI-741,Brian Poole & The Tremeloes,I Can Dance
+AI-742,Brian Poole & The Tremeloes,Three Bells
+AI-743,Brian Poole & The Tremeloes,Keep On Dancing
+AI-744,Brian Poole & The Tremeloes,I Wish I Could Shimmy Like My Sister Kate
+AI-745,Wayne Fontana & The Mindbenders,The Game Of Love
+AI-746,Wayne Fontana & The Mindbenders,Um Um Um Um Um Um
+AI-747,Wayne Fontana & The Mindbenders,Stop Look And Listen
+AI-748,Wayne Fontana & The Mindbenders,Pamela Pamela
+AI-749,Wayne Fontana & The Mindbenders,Groovy Kind Of Love
+AI-750,Wayne Fontana & The Mindbenders,A Little Bit Of Soap
+AI-751,Wayne Fontana & The Mindbenders,Schoolgirl
+AI-752,Wayne Fontana & The Mindbenders,It's Getting Harder All The Time
+AI-753,Georgie Fame,Yeh Yeh
+AI-754,Georgie Fame,Get Away
+AI-755,Georgie Fame,The Ballad Of Bonnie And Clyde
+AI-756,Georgie Fame,Sunny
+AI-757,Georgie Fame,Sitting In The Park
+AI-758,Georgie Fame,Rosetta
+AI-759,Georgie Fame,Peaceful
+AI-760,Georgie Fame,Because I Love You
+AI-761,Manfred Mann,Do Wah Diddy Diddy
+AI-762,Manfred Mann,Pretty Flamingo
+AI-763,Manfred Mann,Sha La La
+AI-764,Manfred Mann,5-4-3-2-1
+AI-765,Manfred Mann,Ha! Ha! Said The Clown
+AI-766,Manfred Mann,Mighty Quinn
+AI-767,Manfred Mann,My Name Is Jack
+AI-768,Manfred Mann,Fox On The Run
+AI-769,The Troggs,Wild Thing
+AI-770,The Troggs,With A Girl Like You
+AI-771,The Troggs,I Can't Control Myself
+AI-772,The Troggs,Any Way That You Want Me
+AI-773,The Troggs,Love Is All Around
+AI-774,The Troggs,Night Of The Long Grass
+AI-775,The Troggs,Give It To Me
+AI-776,The Troggs,Little Girl
+AI-777,The Animals,The House Of The Rising Sun
+AI-778,The Animals,We Gotta Get Out Of This Place
+AI-779,The Animals,It's My Life
+AI-780,The Animals,Don't Let Me Be Misunderstood
+AI-781,The Animals,Bring It On Home To Me
+AI-782,The Animals,Don't Bring Me Down
+AI-783,The Animals,See See Rider
+AI-784,The Animals,San Franciscan Nights
+AI-785,The Yardbirds,For Your Love
+AI-786,The Yardbirds,Heart Full Of Soul
+AI-787,The Yardbirds,Evil Hearted You
+AI-788,The Yardbirds,Shapes Of Things
+AI-789,The Yardbirds,Over Under Sideways Down
+AI-790,The Yardbirds,Happenings Ten Years Time Ago
+AI-791,The Yardbirds,Little Games
+AI-792,The Yardbirds,Goodnight Sweet Josephine
+AI-793,Spencer Davis Group,Keep On Running
+AI-794,Spencer Davis Group,Somebody Help Me
+AI-795,Spencer Davis Group,Gimme Some Lovin'
+AI-796,Spencer Davis Group,I'm A Man
+AI-797,Spencer Davis Group,Every Little Bit Hurts
+AI-798,Spencer Davis Group,When I Come Home
+AI-799,Spencer Davis Group,This Hammer
+AI-800,Spencer Davis Group,Strong Love
