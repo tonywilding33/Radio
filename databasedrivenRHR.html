@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHR | Virtual Producer v1.1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { 
+            --rhr-red: #e31e24; 
+            --rhr-pink-fill: #fde2e2;
+            --rhr-pink-line: #f1a9a9;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
+        .wrapper { width: 100%; max-width: 500px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        
+        .logo-container { text-align: center; margin-bottom: 10px; }
+        .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
+
+        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
+        select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; appearance: none; }
+        
+        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; }
+        .btn-main { background: var(--rhr-red); color: #fff; }
+        .btn-main:active { opacity: 0.8; }
+        
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; }
+        .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; font-size: 0.9rem; }
+        .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
+        
+        .track-info { flex-grow: 1; padding-right: 10px; }
+        .t-artist { font-weight: bold; color: #222; }
+        .t-title { color: #666; font-size: 0.85rem; }
+        .time-col { font-weight: bold; color: var(--rhr-red); font-family: "Courier New", Courier, monospace; min-width: 45px; text-align: right; }
+        
+        .stat-bar { background: #eee; padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; text-align: center; margin-bottom: 10px; color: #666; text-transform: uppercase; }
+        .footer { text-align: center; font-size: 0.6rem; color: #aaa; margin-top: 15px; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="card">
+        <div class="logo-container">
+            <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+                <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
+                <path d="M80 125C80 125 15 88 15 45C15 22 32 10 50 10C62 10 74 18 80 30C86 18 98 10 110 10C128 10 145 22 145 45C145 88 80 125 80 125Z" fill="none" stroke="var(--rhr-pink-line)" stroke-width="2" />
+                <path d="M80 115C80 115 25 82 25 45C25 28 38 20 50 20C60 20 72 25 80 35C88 25 100 20 110 20C122 20 135 28 135 45C135 82 80 115 80 115Z" fill="none" stroke="var(--rhr-pink-line)" stroke-width="1.5" />
+                <text x="50%" y="65%" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="48" fill="var(--rhr-red)" font-weight="900">RHR</text>
+            </svg>
+        </div>
+        <div class="station-name">Rugby Hospital Radio</div>
+
+        <div id="setup-view">
+            <label>Start Hour</label><select id="start-hour"></select>
+            <label>Duration</label><select id="duration"></select>
+            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
+        </div>
+
+        <div id="monitor" style="display:none;">
+            <div class="stat-bar" id="stat-view"></div>
+            <div id="playlist-box"></div>
+            <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG</button>
+            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ NEW SHIFT</button>
+        </div>
+    </div>
+    <div class="footer">ENGINE V3.9.5 | INDIVIDUAL HOUR SELECTION</div>
+</div>
+
+<script>
+    const _MAIN_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
+    const _AI_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/RHR_AI_Pool_800_Clean.csv'; 
+
+    let masterLibrary = [];
+    let aiLibrary = [];
+    let currentPlaylist = [];
+
+    window.onload = function() {
+        const hBox = document.getElementById('start-hour');
+        for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
+        
+        // REVERTED: Now shows every hour from 1 to 24
+        const dBox = document.getElementById('duration');
+        for(let i=1; i<=24; i++) {
+            dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i * 60));
+        }
+    };
+
+    function cleanArtist(name) {
+        if (!name) return "";
+        let n = String(name).trim();
+        if (n.toLowerCase().startsWith("the ")) n = n.slice(4);
+        if (n.toLowerCase().endsWith(" the")) n = n.slice(0, -4);
+        return n.trim();
+    }
+
+    async function connectAndBuild() {
+        try {
+            const [mainResp, aiResp] = await Promise.all([fetch(_MAIN_REF), fetch(_AI_REF)]);
+            if (!mainResp.ok || !aiResp.ok) throw new Error("Database fetch failed");
+
+            const mainCsv = await mainResp.text();
+            const aiCsv = await aiResp.text();
+
+            Papa.parse(mainCsv, {
+                header: true, dynamicTyping: true, skipEmptyLines: true,
+                complete: function(mResults) {
+                    masterLibrary = mResults.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
+                    Papa.parse(aiCsv, {
+                        header: true, dynamicTyping: true, skipEmptyLines: true,
+                        complete: function(aResults) {
+                            aiLibrary = aResults.data.filter(r => r.Artist && r.Title);
+                            runLogic();
+                        }
+                    });
+                }
+            });
+        } catch (err) { alert("Error: Check your GitHub for 'RHR_AI_Pool_800_Clean.csv'."); }
+    }
+
+    function runLogic() {
+        const totalMinutes = parseInt(document.getElementById('duration').value);
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        currentPlaylist = [];
+        let history = []; 
+        let elapsedSec = 0;
+
+        while (elapsedSec < (totalMinutes * 60)) {
+            let currentHour = (startHour + Math.floor(elapsedSec / 3600)) % 24;
+            let dp = (currentHour >= 6 && currentHour < 12) ? "Morning" : (currentHour >= 12 && currentHour < 18) ? "Afternoon" : (currentHour >= 18 && currentHour < 24) ? "Evening" : "Night";
+
+            const checkRules = (song, currentTime) => {
+                const lastS = history.findLast(h => h.id === (song.ID || song.Title));
+                const lastA = history.findLast(h => h.artist === song.Artist);
+                return (!lastS || (currentTime - lastS.time > 43200)) && (!lastA || (currentTime - lastA.time > 10800));
+            };
+
+            let pick = null;
+            if (Math.random() < 0.22 && aiLibrary.length > 0) { 
+                let aiPool = aiLibrary.filter(s => checkRules(s, elapsedSec));
+                if (aiPool.length > 0) pick = {...aiPool[Math.floor(Math.random() * aiPool.length)]};
+            }
+
+            if (!pick) {
+                let dbPool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
+                if (dbPool.length > 0) pick = {...dbPool[Math.floor(Math.random() * dbPool.length)]};
+                else {
+                    let fallback = aiLibrary.filter(s => checkRules(s, elapsedSec));
+                    if (fallback.length > 0) pick = {...fallback[Math.floor(Math.random() * fallback.length)]};
+                }
+            }
+
+            if(pick) {
+                let displayMin = Math.floor((elapsedSec % 3600) / 60);
+                pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
+                pick.displayArtist = cleanArtist(pick.Artist);
+                currentPlaylist.push(pick);
+                history.push({id: (pick.ID || pick.Title), artist: pick.Artist, time: elapsedSec});
+            }
+            elapsedSec += 240; 
+        }
+        render();
+    }
+
+    function render() {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        document.getElementById('stat-view').innerText = `Scheduled Log | ${currentPlaylist.length} Tracks`;
+        document.getElementById('playlist-box').innerHTML = currentPlaylist.map(t => `
+            <div class="track-row">
+                <div class="track-info">
+                    <div class="t-artist">${t.displayArtist}</div>
+                    <div class="t-title">${t.Title}</div>
+                </div>
+                <div class="time-col">${t.timeStr}</div>
+            </div>
+        `).join('');
+    }
+
+    function copyToClipboard() {
+        const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title}`).join('\n');
+        navigator.clipboard.writeText(txt).then(() => alert("Log copied!"));
+    }
+</script>
+</body>
+</html>
