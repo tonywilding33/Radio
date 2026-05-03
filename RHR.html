@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Production Engine v3.8</title>
+    <title>RHR | Dual-Engine Production v3.9</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -16,17 +16,22 @@
         body { font-family: -apple-system, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 500px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        
         .logo-container { text-align: center; margin-bottom: 10px; }
         .rhr-logo-svg { width: 140px; height: auto; display: block; margin: 0 auto; }
         .station-name { color: var(--rhr-red); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
+
         label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
         select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; }
+        
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .btn-main { background: var(--rhr-red); color: #fff; }
+        
         #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; }
         .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; font-size: 0.9rem; }
         .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
         .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
+        
         .track-info { flex-grow: 1; }
         .t-artist { font-weight: bold; }
         .t-title { color: #666; font-size: 0.8rem; }
@@ -47,6 +52,7 @@
             </svg>
         </div>
         <div class="station-name">Rugby Hospital Radio</div>
+        
         <label>Start Hour</label><select id="start-hour"></select>
         <label>Duration (Hours)</label><select id="duration"></select>
         <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
@@ -59,41 +65,19 @@
         </div>
         <div id="playlist-box"></div>
         <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG</button>
-        <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET</button>
+        <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET ENGINE</button>
     </div>
-    <div class="footer">v3.8 | Balanced 20% Inject | 600 Track Virtual Crate</div>
+    <div class="footer">v3.9 | Dual-Stream Architecture | 800-Song AI Pool Support</div>
 </div>
 
 <script>
-    const _CORE_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
-    
-    // Expanded Pool to ensure 20% injection doesn't hit duplicate walls
-    const AI_CRATE_600 = [
-        { Artist: "The Beatles", Title: "Penny Lane" }, { Artist: "The Beatles", Title: "Eleanor Rigby" },
-        { Artist: "Petula Clark", Title: "Sailor" }, { Artist: "Petula Clark", Title: "Downtown" },
-        { Artist: "The Searchers", Title: "Needles and Pins" }, { Artist: "The Searchers", Title: "Sugar and Spice" },
-        { Artist: "Tom Jones", Title: "Green Green Grass of Home" }, { Artist: "Tom Jones", Title: "It's Not Unusual" },
-        { Artist: "Shirley Bassey", Title: "Goldfinger" }, { Artist: "Shirley Bassey", Title: "Diamonds Are Forever" },
-        { Artist: "Cilla Black", Title: "You're My World" }, { Artist: "Cilla Black", Title: "Alfie" },
-        { Artist: "The Kinks", Title: "Waterloo Sunset" }, { Artist: "The Kinks", Title: "Lola" },
-        { Artist: "The Tremeloes", Title: "Silence Is Golden" }, { Artist: "The Tremeloes", Title: "Even the Bad Times Are Good" },
-        { Artist: "Elton John", Title: "Rocket Man" }, { Artist: "Elton John", Title: "Your Song" },
-        { Artist: "Queen", Title: "Somebody to Love" }, { Artist: "Queen", Title: "Killer Queen" },
-        { Artist: "David Bowie", Title: "Space Oddity" }, { Artist: "David Bowie", Title: "Life on Mars?" },
-        { Artist: "Kate Bush", Title: "Wuthering Heights" }, { Artist: "Kate Bush", Title: "Running Up That Hill" },
-        { Artist: "Annie Lennox", Title: "Walking on Broken Glass" }, { Artist: "Phil Collins", Title: "Against All Odds" },
-        { Artist: "Wham!", Title: "Freedom" }, { Artist: "George Michael", Title: "Careless Whisper" },
-        { Artist: "Robbie Williams", Title: "Angels" }, { Artist: "Robbie Williams", Title: "Millennium" },
-        { Artist: "Coldplay", Title: "Yellow" }, { Artist: "Coldplay", Title: "The Scientist" },
-        { Artist: "Adele", Title: "Rolling in the Deep" }, { Artist: "Adele", Title: "Someone Like You" },
-        { Artist: "Ed Sheeran", Title: "Perfect" }, { Artist: "Ed Sheeran", Title: "Bad Habits" },
-        { Artist: "George Ezra", Title: "Shotgun" }, { Artist: "George Ezra", Title: "Budapest" },
-        { Artist: "Harry Styles", Title: "As It Was" }, { Artist: "Harry Styles", Title: "Adore You" },
-        { Artist: "Duran Duran", Title: "Rio" }, { Artist: "Spandau Ballet", Title: "Gold" },
-        { Artist: "Eurythmics", Title: "Sweet Dreams" }, { Artist: "Soft Cell", Title: "Tainted Love" },
-        { Artist: "The Human League", Title: "Don't You Want Me" }, { Artist: "Madness", Title: "Our House" },
-        { Artist: "Dexys Midnight Runners", Title: "Come On Eileen" }, { Artist: "The Jam", Title: "Town Called Malice" }
-    ].map((s, i) => ({ ...s, ID: `AI-600-${i}` }));
+    // --- DATABASE LINKS ---
+    const _MAIN_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
+    const _AI_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/RHR_AI_Pool_800.csv'; 
+
+    let masterLibrary = [];
+    let aiLibrary = [];
+    let currentPlaylist = [];
 
     window.onload = function() {
         const hBox = document.getElementById('start-hour');
@@ -103,18 +87,32 @@
     };
 
     async function connectAndBuild() {
-        const resp = await fetch(_CORE_REF);
-        const csv = await resp.text();
-        Papa.parse(csv, {
-            header: true, dynamicTyping: true, skipEmptyLines: true,
-            complete: function(results) {
-                const lib = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
-                runLogic(lib);
-            }
-        });
+        try {
+            // Simultaneous Fetch
+            const [mainResp, aiResp] = await Promise.all([fetch(_MAIN_REF), fetch(_AI_REF)]);
+            const mainCsv = await mainResp.text();
+            const aiCsv = await aiResp.text();
+
+            Papa.parse(mainCsv, {
+                header: true, dynamicTyping: true, skipEmptyLines: true,
+                complete: function(mResults) {
+                    masterLibrary = mResults.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
+                    
+                    Papa.parse(aiCsv, {
+                        header: true, dynamicTyping: true, skipEmptyLines: true,
+                        complete: function(aResults) {
+                            aiLibrary = aResults.data.filter(r => r.Artist && r.Title);
+                            runLogic();
+                        }
+                    });
+                }
+            });
+        } catch (err) {
+            alert("Error connecting to GitHub databases. Ensure file names are correct.");
+        }
     }
 
-    function runLogic(masterLibrary) {
+    function runLogic() {
         const totalMinutes = parseInt(document.getElementById('duration').value);
         const startHour = parseInt(document.getElementById('start-hour').value);
         currentPlaylist = [];
@@ -127,33 +125,33 @@
             let dp = (currentHour >= 6 && currentHour < 12) ? "Morning" : (currentHour >= 12 && currentHour < 18) ? "Afternoon" : (currentHour >= 18 && currentHour < 24) ? "Evening" : "Night";
 
             const checkRules = (song, currentTime) => {
-                const lastS = history.findLast(h => h.id === song.ID);
+                const lastS = history.findLast(h => h.id === (song.ID || song.Title));
                 const lastA = history.findLast(h => h.artist === song.Artist);
-                // Separation: 12 hours for same song, 3 hours for same artist
+                // Separation: 12hrs same song, 3hrs same artist
                 return (!lastS || (currentTime - lastS.time > 43200)) && (!lastA || (currentTime - lastA.time > 10800));
             };
 
             let pick = null;
 
-            // Forced 20% attempt
-            if (Math.random() < 0.22) { 
-                let aiPool = AI_CRATE_600.filter(s => checkRules(s, elapsedSec));
+            // Forced 22% AI Injection Attempt
+            if (Math.random() < 0.22 && aiLibrary.length > 0) { 
+                let aiPool = aiLibrary.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
                     pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], type: 'AI'};
                     aiCount++;
                 }
             }
 
-            // Database pick if no AI pick was made
+            // Database pick if no AI pick or roll failed
             if (!pick) {
                 let dbPool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
                 if (dbPool.length > 0) {
                     pick = {...dbPool[Math.floor(Math.random() * dbPool.length)], type: 'DB'};
                 } else {
-                    // Critical fallback to AI pool if DB is empty for that hour
-                    let fallbackPool = AI_CRATE_600.filter(s => checkRules(s, elapsedSec));
-                    if (fallbackPool.length > 0) {
-                        pick = {...fallbackPool[Math.floor(Math.random() * fallbackPool.length)], type: 'AI'};
+                    // Emergency Recovery: Use AI Pool if DB is empty
+                    let fallback = aiLibrary.filter(s => checkRules(s, elapsedSec));
+                    if (fallback.length > 0) {
+                        pick = {...fallback[Math.floor(Math.random() * fallback.length)], type: 'AI'};
                         aiCount++;
                     }
                 }
@@ -163,9 +161,9 @@
                 let displayMin = Math.floor((elapsedSec % 3600) / 60);
                 pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
                 currentPlaylist.push(pick);
-                history.push({id: pick.ID, artist: pick.Artist, time: elapsedSec});
+                history.push({id: (pick.ID || pick.Title), artist: pick.Artist, time: elapsedSec});
             }
-            elapsedSec += 240; // 4 mins per track avg
+            elapsedSec += 240; 
         }
         render(aiCount);
     }
@@ -179,7 +177,7 @@
                 <div class="track-info">
                     <div class="t-artist">${t.Artist}</div>
                     <div class="t-title">${t.Title}</div>
-                    ${t.type === 'AI' ? '<span class="ai-tag">AI DISCOVERY</span>' : ''}
+                    ${t.type === 'AI' ? '<span class="ai-tag">VIRTUAL CRATE INJECTION</span>' : ''}
                 </div>
                 <div class="time-col">${t.timeStr}</div>
             </div>
@@ -188,7 +186,7 @@
 
     function copyToClipboard() {
         const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.Artist} - ${t.Title}`).join('\n');
-        navigator.clipboard.writeText(txt).then(() => alert("Log copied."));
+        navigator.clipboard.writeText(txt).then(() => alert("Broadcast log copied!"));
     }
 </script>
 </body>
