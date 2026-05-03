@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.0</title>
+    <title>RHR | Virtual Producer v1.0.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -30,9 +30,15 @@
         .btn-outline { background: transparent; border: 1px solid #ddd; color: #777; }
 
         #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
-        .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; }
+        
+        /* Zebra Striping */
+        .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; }
+        .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
+        
+        /* Overrides for AI and Recovery */
         .track-row.ai-fill { background-color: var(--ai-bg) !important; border-left: 4px solid var(--ai-gold); }
         .track-row.recovery-fill { background-color: #ffebeb !important; border-left: 4px solid var(--rhr-red); }
+        
         .track-info { flex-grow: 1; }
         .t-artist { font-weight: bold; font-size: 0.95rem; }
         .t-title { color: #666; font-size: 0.85rem; }
@@ -71,7 +77,7 @@
         <button class="btn btn-sec" onclick="downloadTxt()">💾 DOWNLOAD .TXT</button>
         <button class="btn btn-outline" onclick="buildNew()">↺ NEW LOG</button>
     </div>
-    <div class="footer">v3.0 | Full Database Production | Separation Enforced</div>
+    <div class="footer">v3.0.1 | Full Production | Zebra Styling Applied</div>
 </div>
 
 <script>
@@ -107,7 +113,6 @@
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
-                    // FULL DATABASE - NO SLICING
                     masterLibrary = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
                     runLogic();
                 }
@@ -132,7 +137,6 @@
                 const lastSong = history.findLast(h => h.id === song.ID);
                 const lastArtist = history.findLast(h => h.artist === song.Artist);
                 
-                // Strict production separation: 4.25 hours for song, 1.75 hours for artist
                 const songGap = strict ? 15300 : 7200; 
                 const artistGap = strict ? 6300 : 3600;
 
@@ -148,18 +152,15 @@
             if (pool.length > 0) {
                 pick = {...pool[Math.floor(Math.random() * pool.length)], type: 'DB'};
             } else {
-                // Lean on AI Pool to enforce separation without expanding the DB
                 let aiPool = AI_POOL.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
                     pick = {...aiPool[Math.floor(Math.random() * aiPool.length)], type: 'AI'};
                 } else {
-                    // Final Recovery Fallback
                     let recoveryPool = AI_POOL.filter(s => checkRules(s, elapsedSec, false));
                     if (recoveryPool.length > 0) {
                         let recoveryPick = recoveryPool[Math.floor(Math.random() * recoveryPool.length)];
                         pick = {...recoveryPick, type: 'RECOVERY'};
                     } else {
-                        // Critical logic: Longest-since-played
                         let sortedByLastPlayed = [...AI_POOL].sort((a, b) => {
                             const lastA = history.findLast(h => h.id === a.ID)?.time || -1;
                             const lastB = history.findLast(h => h.id === b.ID)?.time || -1;
