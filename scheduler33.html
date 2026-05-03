@@ -1,9 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>Hospital Radio | Playlist Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .wrapper { width: 100%; max-width: 550px; padding: 20px; }
+        .setup-card { background: var(--card); padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4); border: 1px solid #334155; }
+        h1 { font-size: 1.6rem; margin: 0 0 25px 0; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+        .field { margin-bottom: 20px; }
+        label { display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
+        select { width: 100%; background: #0f172a; color: white; border: 1px solid #475569; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+        .btn-start { width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; border-radius: 8px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        #monitor { display: none; background: var(--card); padding: 25px; border-radius: 16px; border: 1px solid #334155; }
+        .status-header { font-weight: 800; color: var(--accent); font-size: 1.1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .playlist-container { max-height: 500px; overflow-y: auto; margin-top: 15px; border-top: 1px solid #334155; border-bottom: 1px solid #334155; margin-bottom: 20px; padding: 5px; }
+        .track-row { padding: 10px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
+        .num-col { color: var(--accent); font-weight: 800; font-size: 0.85rem; min-width: 30px; opacity: 0.7; }
+        .track-info { flex-grow: 1; }
+        .t-artist { color: var(--accent); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .t-title { font-size: 1rem; font-weight: 600; color: #fff; }
+        .time-col { color: #94a3b8; font-family: monospace; font-size: 0.9rem; min-width: 55px; text-align: right; font-weight: 600; }
+        .btn-download { width: 100%; background: var(--success); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 10px; }
+        .btn-back { width: 100%; background: transparent; color: #94a3b8; border: 1px solid #475569; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .credit-footer { text-align: center; color: #f8fafc; font-size: 0.65rem; margin-top: 25px; text-transform: uppercase; letter-spacing: 2px; border-top: 1px solid #334155; padding-top: 15px; font-weight: 700; opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div id="setup-view" class="setup-card">
+        <h1>SHOW TIME</h1>
+        <div class="field">
+            <label>Start Hour</label>
+            <select id="start-hour"></select>
+        </div>
+        <div class="field">
+            <label>Session Duration</label>
+            <select id="duration"></select>
+        </div>
+        <button class="btn-start" onclick="connectAndBuild()">GENERATE PLAYLIST</button>
+        <div class="credit-footer">Developed by Tony Wilding</div>
+    </div>
+
+    <div id="monitor">
+        <div class="status-header">
+            <span>STATION LOG</span>
+            <span id="track-count" style="font-size: 0.6rem; letter-spacing: 1px;"></span>
+        </div>
+        <div id="playlist-box" class="playlist-container"></div>
+        <button class="btn-download" onclick="downloadTxt()">Download Playlist (txt)</button>
+        <button class="btn-back" onclick="resetView()">← SCHEDULE MORE</button>
+        <div class="credit-footer">Developed by Tony Wilding</div>
+    </div>
+</div>
+
 <script>
     const CSV_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/HR3328152B.csv';
     let masterLibrary = [];
     let currentPlaylist = [];
-    const SONG_SEP_SEC = 15300; // 4 Hours 15 Minutes
-    const ARTIST_SEP_SEC = 6300; // 1 Hour 45 Minutes
 
     window.onload = function() {
         const hourBox = document.getElementById('start-hour');
@@ -51,8 +109,7 @@
         const startHour = parseInt(document.getElementById('start-hour').value);
         const now = new Date();
         const isDecember = now.getMonth() === 11;
-
-        // Load Persistent History from previous days
+        
         let persistentHistory = JSON.parse(localStorage.getItem('radio_history') || "{}");
         let sessionStartTime = now.getTime();
 
@@ -72,51 +129,64 @@
             const isOpener = currentPlaylist.length === 0;
             const isCloser = (totalSec + (trackAverageSec * 2)) >= targetSec;
 
-            let pool = masterLibrary.filter(s => {
+            // PRE-FILTER: Basic rules that never change (December, Daypart)
+            let basePool = masterLibrary.filter(s => {
                 const genreClean = String(s.Genre).trim().toUpperCase();
                 if (!isDecember && genreClean.includes("CHRISTMAS")) return false;
-
-                // Check Current Session Separation
-                const lastS_Session = sessionHistory.findLast(h => h.id === s.ID);
-                const lastA_Session = sessionHistory.findLast(h => h.artist === s.Artist);
-                
-                // Check Cross-Day/Persistent Separation
-                const lastPlayedTimestamp = persistentHistory[s.ID] || 0;
-                const msSinceLastPlayed = sessionStartTime + (totalSec * 1000) - lastPlayedTimestamp;
-                const crossDayOk = msSinceLastPlayed > (SONG_SEP_SEC * 1000);
-
-                const separated = (!lastS_Session || (totalSec - lastS_Session.time > SONG_SEP_SEC)) && 
-                                  (!lastA_Session || (totalSec - lastA_Session.time > ARTIST_SEP_SEC)) &&
-                                  crossDayOk;
-                
-                const genreOk = !genreHistory.includes(genreClean);
-                
-                let energyOk = true;
-                if (isOpener) energyOk = (s.Energy >= 4);
-                else if (isCloser) energyOk = (s.Energy === 5);
-                else if ((currentPlaylist.length + 1) % 3 === 0) energyOk = (s.Energy >= 4);
-
-                return (s.Daypart === dayPart) && separated && genreOk && energyOk;
+                return (s.Daypart === dayPart);
             });
+
+            // TIERED FILTERING: Try the strict rules first, relax if empty
+            let rules = [
+                { songSep: 15300, artistSep: 6300, energy: true, genre: true }, // Strict (4h 15m)
+                { songSep: 7200,  artistSep: 3600, energy: true, genre: true }, // Relaxed (2h)
+                { songSep: 3600,  artistSep: 1800, energy: false, genre: false }, // Minimal (1h)
+                { songSep: 0,     artistSep: 0,    energy: false, genre: false }  // Emergency
+            ];
+
+            let pool = [];
+            for (let rule of rules) {
+                pool = basePool.filter(s => {
+                    const lastS_Session = sessionHistory.findLast(h => h.id === s.ID);
+                    const lastA_Session = sessionHistory.findLast(h => h.artist === s.Artist);
+                    const lastPlayedTS = persistentHistory[s.ID] || 0;
+                    const msSinceLast = sessionStartTime + (totalSec * 1000) - lastPlayedTS;
+
+                    const sepOk = (!lastS_Session || (totalSec - lastS_Session.time > rule.songSep)) && 
+                                  (!lastA_Session || (totalSec - lastA_Session.time > rule.artistSep)) &&
+                                  (msSinceLast > rule.songSep * 1000);
+                    
+                    const genreOk = rule.genre ? !genreHistory.includes(String(s.Genre).trim().toUpperCase()) : true;
+                    
+                    let energyOk = true;
+                    if (rule.energy) {
+                        if (isOpener) energyOk = (s.Energy >= 4);
+                        else if (isCloser) energyOk = (s.Energy === 5);
+                        else if ((currentPlaylist.length + 1) % 3 === 0) energyOk = (s.Energy >= 4);
+                    }
+
+                    return sepOk && genreOk && energyOk;
+                });
+
+                if (pool.length > 0) break; // Found tracks, stop relaxing rules
+            }
 
             if (pool.length === 0) break; 
             
             let pick = {...pool[Math.floor(Math.random() * pool.length)]};
             pick.startTime = formatTime(totalSec, startHour);
-            
-            // Record timestamp for cross-day memory (Start of show + track offset)
             pick.timestamp = sessionStartTime + (totalSec * 1000);
             
             currentPlaylist.push(pick);
             sessionHistory.push({ id: pick.ID, artist: pick.Artist, time: totalSec });
             genreHistory.push(String(pick.Genre).trim().toUpperCase());
-            
             if (genreHistory.length > 2) genreHistory.shift();
+            
             totalSec += trackAverageSec; 
             currentVirtualHour = (startHour + Math.floor(totalSec / 3600)) % 24;
         }
 
-        // Save current playlist choices to persistent history for tomorrow
+        // Save selection to memory
         currentPlaylist.forEach(track => {
             persistentHistory[track.ID] = track.timestamp;
         });
@@ -156,3 +226,5 @@
         a.click();
     }
 </script>
+</body>
+</html>
