@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Dual-Engine Production v3.9</title>
+    <title>RHR | Dual-Engine Production v3.9.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -17,9 +17,10 @@
         .wrapper { width: 100%; max-width: 500px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         
+        /* Persistent Logo Styling */
         .logo-container { text-align: center; margin-bottom: 10px; }
-        .rhr-logo-svg { width: 140px; height: auto; display: block; margin: 0 auto; }
-        .station-name { color: var(--rhr-red); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
+        .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
 
         label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
         select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; }
@@ -36,13 +37,16 @@
         .t-artist { font-weight: bold; }
         .t-title { color: #666; font-size: 0.8rem; }
         .time-col { font-weight: bold; color: var(--rhr-red); font-family: monospace; }
-        .ai-tag { font-size: 0.6rem; font-weight: 800; color: var(--ai-gold); display: block; }
+        .ai-tag { font-size: 0.6rem; font-weight: 800; color: var(--ai-gold); display: block; margin-top: 2px; }
         .footer { text-align: center; font-size: 0.6rem; color: #aaa; margin-top: 15px; }
+        
+        .stat-bar { background: #eee; padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; text-align: center; margin-bottom: 10px; color: #666; }
     </style>
 </head>
 <body>
 <div class="wrapper">
-    <div id="setup-view" class="card">
+    <div class="card">
+        <!-- Persistent Header Content -->
         <div class="logo-container">
             <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
                 <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
@@ -52,22 +56,23 @@
             </svg>
         </div>
         <div class="station-name">Rugby Hospital Radio</div>
-        
-        <label>Start Hour</label><select id="start-hour"></select>
-        <label>Duration (Hours)</label><select id="duration"></select>
-        <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
-    </div>
 
-    <div id="monitor" style="display:none;" class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:900; color:var(--rhr-red)">STATION LOG</span>
-            <span id="stat-view" style="font-size:0.7rem; font-weight:bold;"></span>
+        <!-- View 1: Input -->
+        <div id="setup-view">
+            <label>Start Hour</label><select id="start-hour"></select>
+            <label>Duration (Hours)</label><select id="duration"></select>
+            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
         </div>
-        <div id="playlist-box"></div>
-        <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG</button>
-        <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET ENGINE</button>
+
+        <!-- View 2: Result -->
+        <div id="monitor" style="display:none;">
+            <div class="stat-bar" id="stat-view"></div>
+            <div id="playlist-box"></div>
+            <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG</button>
+            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET ENGINE</button>
+        </div>
     </div>
-    <div class="footer">v3.9 | Dual-Stream Architecture | 800-Song AI Pool Support</div>
+    <div class="footer">v3.9.1 | Persistent Branding | 800-Song AI Library Support</div>
 </div>
 
 <script>
@@ -88,7 +93,6 @@
 
     async function connectAndBuild() {
         try {
-            // Simultaneous Fetch
             const [mainResp, aiResp] = await Promise.all([fetch(_MAIN_REF), fetch(_AI_REF)]);
             const mainCsv = await mainResp.text();
             const aiCsv = await aiResp.text();
@@ -97,7 +101,6 @@
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(mResults) {
                     masterLibrary = mResults.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
-                    
                     Papa.parse(aiCsv, {
                         header: true, dynamicTyping: true, skipEmptyLines: true,
                         complete: function(aResults) {
@@ -107,9 +110,7 @@
                     });
                 }
             });
-        } catch (err) {
-            alert("Error connecting to GitHub databases. Ensure file names are correct.");
-        }
+        } catch (err) { alert("Link Error: Check your GitHub file names."); }
     }
 
     function runLogic() {
@@ -127,13 +128,10 @@
             const checkRules = (song, currentTime) => {
                 const lastS = history.findLast(h => h.id === (song.ID || song.Title));
                 const lastA = history.findLast(h => h.artist === song.Artist);
-                // Separation: 12hrs same song, 3hrs same artist
                 return (!lastS || (currentTime - lastS.time > 43200)) && (!lastA || (currentTime - lastA.time > 10800));
             };
 
             let pick = null;
-
-            // Forced 22% AI Injection Attempt
             if (Math.random() < 0.22 && aiLibrary.length > 0) { 
                 let aiPool = aiLibrary.filter(s => checkRules(s, elapsedSec));
                 if (aiPool.length > 0) {
@@ -142,13 +140,11 @@
                 }
             }
 
-            // Database pick if no AI pick or roll failed
             if (!pick) {
                 let dbPool = masterLibrary.filter(s => s.Daypart === dp && checkRules(s, elapsedSec));
                 if (dbPool.length > 0) {
                     pick = {...dbPool[Math.floor(Math.random() * dbPool.length)], type: 'DB'};
                 } else {
-                    // Emergency Recovery: Use AI Pool if DB is empty
                     let fallback = aiLibrary.filter(s => checkRules(s, elapsedSec));
                     if (fallback.length > 0) {
                         pick = {...fallback[Math.floor(Math.random() * fallback.length)], type: 'AI'};
@@ -171,7 +167,7 @@
     function render(aiCount) {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('stat-view').innerText = `${currentPlaylist.length} TRACKS | ${((aiCount/currentPlaylist.length)*100).toFixed(0)}% AI POOL`;
+        document.getElementById('stat-view').innerText = `TOTAL: ${currentPlaylist.length} TRACKS | INJECTION: ${((aiCount/currentPlaylist.length)*100).toFixed(0)}% AI POOL`;
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map(t => `
             <div class="track-row ${t.type === 'AI' ? 'ai-fill' : ''}">
                 <div class="track-info">
