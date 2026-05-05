@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.2</title>
+    <title>RHR | Virtual Producer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -37,7 +37,9 @@
         .t-loc-raw { font-weight: bold; color: var(--rhr-red); margin-left: 5px; }
         
         .time-col { font-weight: bold; color: #444; font-family: "Courier New", Courier, monospace; min-width: 45px; text-align: right; }
-        .stat-bar { background: #eee; padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; text-align: center; margin-bottom: 10px; color: #666; text-transform: uppercase; }
+        
+        .btn-group { display: flex; gap: 10px; }
+        .btn-group .btn { flex: 1; }
     </style>
 </head>
 <body>
@@ -63,9 +65,11 @@
         </div>
 
         <div id="monitor" style="display:none;">
-            <div class="stat-bar" id="stat-view"></div>
             <div id="playlist-box"></div>
-            <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY BROADCAST LOG</button>
+            <div class="btn-group">
+                <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG</button>
+                <button class="btn btn-main" style="background:#2ecc71" onclick="downloadLog()">💾 DOWNLOAD .TXT</button>
+            </div>
             <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET</button>
         </div>
     </div>
@@ -73,26 +77,19 @@
 
 <script>
     const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
-
     let masterLibrary = [];
     let hourlyPlaylist = {}; 
-
-    const WEIGHTS = {
-        DAY: { 5: 35, 4: 30, 3: 20, 2: 10, 1: 5 },
-        NIGHT: { 1: 35, 2: 30, 3: 20, 4: 10, 5: 5 }
-    };
+    const WEIGHTS = { DAY: { 5: 35, 4: 30, 3: 20, 2: 10, 1: 5 }, NIGHT: { 1: 35, 2: 30, 3: 20, 4: 10, 5: 5 } };
 
     window.onload = function() {
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
-        
         const dBox = document.getElementById('shift-duration');
         for(let i=1; i<=24; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
     };
 
     function cleanArtist(name) {
-        if (!name) return "";
-        let n = String(name).trim();
+        let n = String(name || '').trim();
         if (n.toLowerCase().startsWith("the ")) n = n.slice(4);
         return n.trim();
     }
@@ -101,7 +98,6 @@
         try {
             const resp = await fetch(_MASTER_REF);
             const csv = await resp.text();
-
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
@@ -109,7 +105,6 @@
                         const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
                         return r.Artist && r.Title && isEnabled && (r['Location 1'] || r['Location 2']);
                     });
-                    if (masterLibrary.length === 0) { alert("Database Error."); return; }
                     runLogic();
                 }
             });
@@ -137,37 +132,30 @@
                     cumulative += weight;
                     if (roll <= cumulative) { targetEnergy = parseInt(level); break; }
                 }
-
                 const checkRules = (song) => {
                     const lastA = history.findLast(hi => hi.artist === song.Artist);
                     return !lastA || (Date.now() - lastA.timestamp > 7200000); 
                 };
-
                 let picks = masterLibrary.filter(s => parseInt(s.Energy) === targetEnergy && checkRules(s));
                 if (picks.length === 0) picks = masterLibrary.filter(s => checkRules(s));
-
                 if (picks.length > 0) {
                     let p = {...picks[Math.floor(Math.random() * picks.length)]};
-                    let m = Math.floor(elapsedInHour / 60);
-                    
-                    p.timeStr = currentHour.toString().padStart(2,'0') + ":" + m.toString().padStart(2,'0');
+                    p.timeStr = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsedInHour / 60).toString().padStart(2,'0');
                     p.displayArtist = cleanArtist(p.Artist);
                     p.locNum = String(p['Location 1'] || '').trim();
-                    
                     hourTracks.push(p);
                     history.push({artist: p.Artist, timestamp: Date.now()});
                     elapsedInHour += 240; 
-                } else { break; }
+                } else break;
             }
             hourlyPlaylist[currentHour] = hourTracks;
         }
-        render(duration);
+        render();
     }
 
-    function render(duration) {
+    function render() {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        
         let html = "";
         for (let hour in hourlyPlaylist) {
             html += `<div class="hour-header">HOUR ${hour.padStart(2, '0')}:00</div>`;
@@ -182,16 +170,29 @@
             `).join('');
         }
         document.getElementById('playlist-box').innerHTML = html;
-        document.getElementById('stat-view').innerText = `${duration} Hour Schedule[cite: 5]`;
     }
 
-    function copyToClipboard() {
+    function generateLogText() {
         let txt = "RHR BROADCAST LOG\n\n";
         for (let hour in hourlyPlaylist) {
             txt += `--- HOUR ${hour.padStart(2, '0')}:00 ---\n`;
             txt += hourlyPlaylist[hour].map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title} | ${t.locNum}`).join('\n') + "\n\n";
         }
-        navigator.clipboard.writeText(txt).then(() => alert("Log Copied!"));
+        return txt;
+    }
+
+    function copyToClipboard() {
+        navigator.clipboard.writeText(generateLogText()).then(() => alert("Log Copied!"));
+    }
+
+    function downloadLog() {
+        const blob = new Blob([generateLogText()], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `RHR_Log_${new Date().toISOString().slice(0,10)}.txt`;
+        a.click();
+        window.URL.revokeObjectURL(url);
     }
 </script>
 </body>
