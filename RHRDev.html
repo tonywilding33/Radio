@@ -105,7 +105,7 @@
     // 4-TIMEFRAME WEIGHTS
     const WEIGHTS = { 
         WAKEUP:   { 5: 15, 4: 25, 3: 40, 2: 15, 1: 5  }, // 07:00 - 10:00
-        COREDAY:  { 5: 30, 4: 30, 3: 22, 2: 12, 1: 6  }, // 10:00 - 17:00 (Updated per request)
+        COREDAY:  { 5: 30, 4: 30, 3: 22, 2: 12, 1: 6  }, // 10:00 - 17:00
         WINDDOWN: { 5: 5,  4: 15, 3: 45, 2: 25, 1: 10 }, // 17:00 - 22:00
         SLEEP:    { 5: 2,  4: 8,  3: 15, 2: 35, 1: 40 }  // 22:00 - 07:00
     };
@@ -142,6 +142,14 @@
         } catch (err) { alert("Connection Error."); }
     }
 
+    // Helper to get timeframe and label based on hour
+    function getTimeframeInfo(hour) {
+        if (hour >= 7 && hour < 10) return { key: 'WAKEUP', label: 'WAKE-UP' };
+        if (hour >= 10 && hour < 17) return { key: 'COREDAY', label: 'CORE DAY' };
+        if (hour >= 17 && hour < 22) return { key: 'WINDDOWN', label: 'WIND-DOWN' };
+        return { key: 'SLEEP', label: 'SLEEP/OVERNIGHT' };
+    }
+
     function runLogic() {
         const startHour = parseInt(document.getElementById('start-hour').value);
         const duration = parseInt(document.getElementById('shift-duration').value);
@@ -153,24 +161,22 @@
             let hourTracks = [];
             let elapsedInHour = 0;
             
-            // Timeframe Selector Logic
-            let activeWeights;
-            let partLabel;
-            if (currentHour >= 7 && currentHour < 10) {
-                activeWeights = WEIGHTS.WAKEUP;
-                partLabel = "WAKE-UP";
-            } else if (currentHour >= 10 && currentHour < 17) {
-                activeWeights = WEIGHTS.COREDAY;
-                partLabel = "CORE DAY";
-            } else if (currentHour >= 17 && currentHour < 22) {
-                activeWeights = WEIGHTS.WINDDOWN;
-                partLabel = "WIND-DOWN";
-            } else {
-                activeWeights = WEIGHTS.SLEEP;
-                partLabel = "SLEEP/OVERNIGHT";
-            }
+            const currentTF = getTimeframeInfo(currentHour);
+            const prevTF = getTimeframeInfo((currentHour - 1 + 24) % 24);
 
             while (elapsedInHour < 3600) {
+                let activeWeights;
+                
+                // GENTLE START: Blend weights for the first 15 mins (900s) of a new daypart
+                if (elapsedInHour < 900 && currentTF.key !== prevTF.key) {
+                    activeWeights = {};
+                    for (let i = 1; i <= 5; i++) {
+                        activeWeights[i] = (WEIGHTS[currentTF.key][i] + WEIGHTS[prevTF.key][i]) / 2;
+                    }
+                } else {
+                    activeWeights = WEIGHTS[currentTF.key];
+                }
+
                 let roll = Math.random() * 100;
                 let targetEnergy = 3;
                 let cumulative = 0;
@@ -191,7 +197,7 @@
                     let p = {...picks[Math.floor(Math.random() * picks.length)]};
                     p.timeStr = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsedInHour / 60).toString().padStart(2,'0');
                     p.displayArtist = cleanArtist(p.Artist);
-                    p.dayPart = partLabel;
+                    p.dayPart = currentTF.label;
                     
                     let mediaID = String(p['Location 1'] || '').trim();
                     let isOnPC = String(p['Location 2'] || '').trim().toLowerCase() === 'y';
