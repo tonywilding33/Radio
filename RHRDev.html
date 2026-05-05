@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v2.10</title>
+    <title>RHR | Virtual Producer v2.11</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -47,7 +47,7 @@
 
         .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; background: #fff; }
         .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
-        .track-row:hover { background-color: #f1f1f1; }
+        .track-row:hover { background-color: #f11f1f1; }
         
         .track-info { flex-grow: 1; padding-right: 10px; }
         .t-artist { font-weight: bold; color: #222; text-transform: uppercase; }
@@ -102,12 +102,11 @@
     let masterLibrary = [];
     let hourlyPlaylist = {}; 
     
-    // 4-TIMEFRAME WEIGHTS
     const WEIGHTS = { 
-        WAKEUP:   { 5: 15, 4: 25, 3: 40, 2: 15, 1: 5  }, // 07:00 - 10:00
-        COREDAY:  { 5: 30, 4: 30, 3: 22, 2: 12, 1: 6  }, // 10:00 - 17:00
-        WINDDOWN: { 5: 5,  4: 15, 3: 45, 2: 25, 1: 10 }, // 17:00 - 22:00
-        SLEEP:    { 5: 2,  4: 8,  3: 15, 2: 35, 1: 40 }  // 22:00 - 07:00
+        WAKEUP:   { 5: 15, 4: 25, 3: 40, 2: 15, 1: 5  }, 
+        COREDAY:  { 5: 30, 4: 30, 3: 22, 2: 12, 1: 6  }, 
+        WINDDOWN: { 5: 5,  4: 15, 3: 45, 2: 25, 1: 10 }, 
+        SLEEP:    { 5: 2,  4: 8,  3: 15, 2: 35, 1: 40 }  
     };
 
     window.onload = function() {
@@ -127,6 +126,8 @@
         try {
             const resp = await fetch(_MASTER_REF);
             const csv = await resp.text();
+            const isDecember = new Date().getMonth() === 11;
+
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
@@ -134,6 +135,12 @@
                         const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
                         const loc1 = String(r['Location 1'] || '').trim();
                         const loc2 = String(r['Location 2'] || '').trim().toLowerCase() === 'y';
+                        const title = String(r.Title || '').toLowerCase();
+                        const isXmas = title.includes('christmas') || title.includes('xmas');
+
+                        // Filtering: If not December, strictly exclude Xmas songs
+                        if (!isDecember && isXmas) return false;
+
                         return r.Artist && r.Title && isEnabled && (loc1 !== '' || loc2);
                     });
                     runLogic();
@@ -142,7 +149,6 @@
         } catch (err) { alert("Connection Error."); }
     }
 
-    // Helper to get timeframe and label based on hour
     function getTimeframeInfo(hour) {
         if (hour >= 7 && hour < 10) return { key: 'WAKEUP', label: 'WAKE-UP' };
         if (hour >= 10 && hour < 17) return { key: 'COREDAY', label: 'CORE DAY' };
@@ -153,6 +159,7 @@
     function runLogic() {
         const startHour = parseInt(document.getElementById('start-hour').value);
         const duration = parseInt(document.getElementById('shift-duration').value);
+        const isDecember = new Date().getMonth() === 11;
         hourlyPlaylist = {};
         let history = []; 
 
@@ -166,8 +173,6 @@
 
             while (elapsedInHour < 3600) {
                 let activeWeights;
-                
-                // GENTLE START: Blend weights for the first 15 mins (900s) of a new daypart
                 if (elapsedInHour < 900 && currentTF.key !== prevTF.key) {
                     activeWeights = {};
                     for (let i = 1; i <= 5; i++) {
@@ -176,6 +181,9 @@
                 } else {
                     activeWeights = WEIGHTS[currentTF.key];
                 }
+
+                // 33% chance to force an Xmas song if in December
+                let forceXmas = isDecember && (Math.random() < 0.33);
 
                 let roll = Math.random() * 100;
                 let targetEnergy = 3;
@@ -187,11 +195,20 @@
 
                 const checkRules = (song) => {
                     const lastA = history.findLast(hi => hi.artist === song.Artist);
+                    const title = String(song.Title).toLowerCase();
+                    const isXmas = title.includes('christmas') || title.includes('xmas');
+                    
+                    if (forceXmas && !isXmas) return false;
                     return !lastA || (Date.now() - lastA.timestamp > 7200000); 
                 };
 
                 let picks = masterLibrary.filter(s => parseInt(s.Energy) === targetEnergy && checkRules(s));
+                
+                // Fallbacks
                 if (picks.length === 0) picks = masterLibrary.filter(s => checkRules(s));
+                if (picks.length === 0 && forceXmas) {
+                    picks = masterLibrary.filter(s => !String(s.Title).toLowerCase().includes('christmas') && !String(s.Title).toLowerCase().includes('xmas'));
+                }
                 
                 if (picks.length > 0) {
                     let p = {...picks[Math.floor(Math.random() * picks.length)]};
@@ -238,7 +255,7 @@
     }
 
     function generateLogText() {
-        let txt = "RHR BROADCAST LOG\nGenerated by RHR Virtual Producer v2.0\n" + "=".repeat(40) + "\n";
+        let txt = "RHR BROADCAST LOG\nGenerated by RHR Virtual Producer v2.10\n" + "=".repeat(40) + "\n";
         const hours = Object.keys(hourlyPlaylist);
         hours.forEach(hour => {
             const part = hourlyPlaylist[hour][0]?.dayPart || "CLOCK";
