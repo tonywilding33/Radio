@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer</title>
+    <title>RHR | Virtual Producer V1.44</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -91,9 +91,14 @@
         for(let i=1; i<=24; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
     };
 
+    /**
+     * Strips "The " from the beginning of artist names.
+     */
     function cleanArtist(name) {
         let n = String(name || '').trim();
-        if (n.toLowerCase().startsWith("the ")) n = n.slice(4);
+        if (n.toLowerCase().startsWith("the ")) {
+            n = n.slice(4);
+        }
         return n.trim();
     }
 
@@ -104,14 +109,18 @@
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
+                    // Logic check: Enabled must be 'Y' and location must exist
                     masterLibrary = results.data.filter(r => {
                         const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
-                        return r.Artist && r.Title && isEnabled && (r['Location 1'] || r['Location 2']);
+                        const loc1 = String(r['Location 1'] || '').trim();
+                        const loc2 = String(r['Location 2'] || '').trim().toLowerCase();
+                        const hasLocation = (loc1 !== '' || loc2 === 'y');
+                        return r.Artist && r.Title && isEnabled && hasLocation;
                     });
                     runLogic();
                 }
             });
-        } catch (err) { alert("Connection Error."); }
+        } catch (err) { alert("Connection Error. Check master file availability."); }
     }
 
     function runLogic() {
@@ -135,25 +144,29 @@
                     cumulative += weight;
                     if (roll <= cumulative) { targetEnergy = parseInt(level); break; }
                 }
+
+                // 2-hour artist separation rule
                 const checkRules = (song) => {
                     const lastA = history.findLast(hi => hi.artist === song.Artist);
                     return !lastA || (Date.now() - lastA.timestamp > 7200000); 
                 };
+
                 let picks = masterLibrary.filter(s => parseInt(s.Energy) === targetEnergy && checkRules(s));
                 if (picks.length === 0) picks = masterLibrary.filter(s => checkRules(s));
+                
                 if (picks.length > 0) {
                     let p = {...picks[Math.floor(Math.random() * picks.length)]};
                     p.timeStr = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsedInHour / 60).toString().padStart(2,'0');
                     p.displayArtist = cleanArtist(p.Artist);
                     
-                    // Maintain Media ID (Location 1) and append PC if Location 2 is 'y'
+                    // Format Media ID + PC status
                     let mediaID = String(p['Location 1'] || '').trim();
                     let isOnPC = String(p['Location 2'] || '').trim().toLowerCase() === 'y';
                     p.locCombined = mediaID + (isOnPC ? (mediaID ? " PC" : "PC") : "");
                     
                     hourTracks.push(p);
                     history.push({artist: p.Artist, timestamp: Date.now()});
-                    elapsedInHour += 240; 
+                    elapsedInHour += 240; // 4 min average
                 } else break;
             }
             hourlyPlaylist[currentHour] = hourTracks;
