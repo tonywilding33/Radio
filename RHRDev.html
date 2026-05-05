@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.8</title>
+    <title>RHR | Virtual Producer v1.9</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -39,12 +39,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         .hour-marker::after { content: "START OF CLOCK"; font-size: 0.6rem; opacity: 0.7; }
 
-        .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; }
-        .track-row:nth-child(even) { background-color: #fafafa; }
-        .track-row:hover { background-color: var(--rhr-pink-fill); }
+        .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; background: #fff; }
+        /* Fixed Zebra Striping for track rows only */
+        .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
+        .track-row:hover { background-color: #f1f1f1; }
         
         .track-info { flex-grow: 1; padding-right: 10px; }
         .t-artist { font-weight: bold; color: #222; text-transform: uppercase; }
