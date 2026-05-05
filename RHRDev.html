@@ -26,15 +26,15 @@
         .btn-main { background: var(--rhr-red); color: #fff; }
         .btn-main:active { opacity: 0.8; }
         
-        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; }
-        .track-row { display: flex; padding: 12px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; font-size: 0.9rem; }
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 500px; overflow-y: auto; margin: 15px 0; padding: 5px; }
+        .hour-header { background: #444; color: #fff; padding: 8px; font-size: 0.8rem; font-weight: bold; border-radius: 4px; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; }
+        .track-row { display: flex; padding: 10px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; font-size: 0.85rem; }
         .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
         
         .track-info { flex-grow: 1; padding-right: 10px; }
         .t-artist { font-weight: bold; color: #222; }
-        .t-title { color: #666; font-size: 0.85rem; }
-        /* Style for the raw location number after the title */
-        .t-loc-raw { font-weight: bold; color: #444; margin-left: 5px; border-left: 1px solid #ccc; padding-left: 8px; }
+        .t-title { color: #555; font-size: 0.8rem; }
+        .t-loc-raw { font-weight: bold; color: var(--rhr-red); margin-left: 5px; }
         
         .time-col { font-weight: bold; color: #444; font-family: "Courier New", Courier, monospace; min-width: 45px; text-align: right; }
         
@@ -58,25 +58,24 @@
 
         <div id="setup-view">
             <label>Start Hour</label><select id="start-hour"></select>
-            <label>Duration</label><select id="duration"></select>
-            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE BROADCAST LOG</button>
+            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE 24-HOUR BROADCAST LOG</button>
         </div>
 
         <div id="monitor" style="display:none;">
             <div class="stat-bar" id="stat-view"></div>
             <div id="playlist-box"></div>
-            <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY BROADCAST LOG</button>
-            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ NEW SHIFT</button>
+            <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY FULL 24H LOG</button>
+            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET</button>
         </div>
     </div>
-    <div class="footer">ENGINE V4.2 | OPTIMIZED LOGIC</div>
+    <div class="footer">ENGINE V4.3 | HOURLY LOGIC | RHRDEV(2).HTML[cite: 5]</div>
 </div>
 
 <script>
     const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
 
     let masterLibrary = [];
-    let currentPlaylist = [];
+    let hourlyPlaylist = {}; // Structured by hour
 
     const WEIGHTS = {
         DAY: { 5: 35, 4: 30, 3: 20, 2: 10, 1: 5 },
@@ -86,11 +85,6 @@
     window.onload = function() {
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
-        
-        const dBox = document.getElementById('duration');
-        for(let i=1; i<=12; i++) {
-            dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i * 60));
-        }
     };
 
     function cleanArtist(name) {
@@ -110,66 +104,65 @@
                 complete: function(results) {
                     masterLibrary = results.data.filter(r => {
                         const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
-                        const hasLoc = String(r['Location 1'] || '').trim() !== '' || String(r['Location 2'] || '').trim() !== '';
-                        return r.Artist && r.Title && isEnabled && hasLoc;
+                        return r.Artist && r.Title && isEnabled && (r['Location 1'] || r['Location 2']);
                     });
                     
                     if (masterLibrary.length === 0) {
-                        alert("Database check: No valid songs found.");
+                        alert("Database error.");
                         return;
                     }
                     runLogic();
                 }
             });
-        } catch (err) { alert("Error connecting to database."); }
+        } catch (err) { alert("Connection Error."); }
     }
 
     function runLogic() {
-        const totalMinutes = parseInt(document.getElementById('duration').value);
         const startHour = parseInt(document.getElementById('start-hour').value);
-        currentPlaylist = [];
+        hourlyPlaylist = {};
         let history = []; 
-        let elapsedSec = 0;
 
-        while (elapsedSec < (totalMinutes * 60)) {
-            let currentHour = (startHour + Math.floor(elapsedSec / 3600)) % 24;
+        for (let h = 0; h < 24; h++) {
+            let currentHour = (startHour + h) % 24;
+            let hourTracks = [];
+            let elapsedInHour = 0;
             const isDay = (currentHour >= 7 && currentHour < 23);
             const activeWeights = isDay ? WEIGHTS.DAY : WEIGHTS.NIGHT;
 
-            let roll = Math.random() * 100;
-            let targetEnergy = 3;
-            let cumulative = 0;
-            for (let [level, weight] of Object.entries(activeWeights)) {
-                cumulative += weight;
-                if (roll <= cumulative) {
-                    targetEnergy = parseInt(level);
-                    break;
+            while (elapsedInHour < 3600) {
+                let roll = Math.random() * 100;
+                let targetEnergy = 3;
+                let cumulative = 0;
+                for (let [level, weight] of Object.entries(activeWeights)) {
+                    cumulative += weight;
+                    if (roll <= cumulative) { targetEnergy = parseInt(level); break; }
+                }
+
+                const checkRules = (song) => {
+                    const lastA = history.findLast(hi => hi.artist === song.Artist);
+                    // 2 hour gap for artists
+                    return !lastA || (Date.now() - lastA.timestamp > 7200000); 
+                };
+
+                let picks = masterLibrary.filter(s => parseInt(s.Energy) === targetEnergy && checkRules(s));
+                if (picks.length === 0) picks = masterLibrary.filter(s => checkRules(s));
+
+                if (picks.length > 0) {
+                    let p = {...picks[Math.floor(Math.random() * picks.length)]};
+                    let m = Math.floor(elapsedInHour / 60);
+                    
+                    p.timeStr = currentHour.toString().padStart(2,'0') + ":" + m.toString().padStart(2,'0');
+                    p.displayArtist = cleanArtist(p.Artist);
+                    p.locNum = String(p['Location 1'] || '').trim();
+                    
+                    hourTracks.push(p);
+                    history.push({artist: p.Artist, timestamp: Date.now()});
+                    elapsedInHour += 240; // Average song length
+                } else {
+                    elapsedInHour += 3600; // Break loop if empty
                 }
             }
-
-            const checkRules = (song, currentTime) => {
-                const lastA = history.findLast(h => h.artist === song.Artist);
-                return !lastA || (currentTime - lastA.time > 7200); 
-            };
-
-            let potentialPicks = masterLibrary.filter(s => parseInt(s.Energy) === targetEnergy && checkRules(s, elapsedSec));
-
-            if (potentialPicks.length === 0) {
-                potentialPicks = masterLibrary.filter(s => checkRules(s, elapsedSec));
-            }
-
-            if (potentialPicks.length > 0) {
-                let pick = {...potentialPicks[Math.floor(Math.random() * potentialPicks.length)]};
-                let displayMin = Math.floor((elapsedSec % 3600) / 60);
-                
-                pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
-                pick.displayArtist = cleanArtist(pick.Artist);
-                pick.locNum = String(pick['Location 1'] || '').trim();
-                
-                currentPlaylist.push(pick);
-                history.push({artist: pick.Artist, time: elapsedSec});
-            }
-            elapsedSec += 240; 
+            hourlyPlaylist[currentHour] = hourTracks;
         }
         render();
     }
@@ -177,22 +170,31 @@
     function render() {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('stat-view').innerText = `Broadcast Log | ${currentPlaylist.length} Tracks Scheduled`;
-        document.getElementById('playlist-box').innerHTML = currentPlaylist.map(t => `
-            <div class="track-row">
-                <div class="track-info">
-                    <div class="t-artist">${t.displayArtist}</div>
-                    <div class="t-title">${t.Title} <span class="t-loc-raw">${t.locNum}</span></div>
+        
+        let html = "";
+        for (let hour in hourlyPlaylist) {
+            html += `<div class="hour-header">HOUR ${hour.padStart(2, '0')}:00</div>`;
+            html += hourlyPlaylist[hour].map(t => `
+                <div class="track-row">
+                    <div class="track-info">
+                        <div class="t-artist">${t.displayArtist}</div>
+                        <div class="t-title">${t.Title} <span class="t-loc-raw">${t.locNum}</span></div>
+                    </div>
+                    <div class="time-col">${t.timeStr}</div>
                 </div>
-                <div class="time-col">${t.timeStr}</div>
-            </div>
-        `).join('');
+            `).join('');
+        }
+        document.getElementById('playlist-box').innerHTML = html;
+        document.getElementById('stat-view').innerText = "Full 24-Hour Schedule Generated[cite: 5]";
     }
 
     function copyToClipboard() {
-        // Formatted so location number comes after the title[cite: 5]
-        const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title} | ${t.locNum}`).join('\n');
-        navigator.clipboard.writeText(txt).then(() => alert("Log Copied!"));
+        let txt = "RHR BROADCAST LOG - 24 HOUR GENERATION\n\n";
+        for (let hour in hourlyPlaylist) {
+            txt += `--- HOUR ${hour.padStart(2, '0')}:00 ---\n`;
+            txt += hourlyPlaylist[hour].map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title} | ${t.locNum}`).join('\n') + "\n\n";
+        }
+        navigator.clipboard.writeText(txt).then(() => alert("24-Hour Log Copied!"));
     }
 </script>
 </body>
