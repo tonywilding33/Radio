@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.5</title>
+    <title>RHR | Virtual Producer v1.6</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
             --rhr-red: #e31e24; 
             --rhr-pink-fill: #fde2e2;
             --rhr-pink-line: #f1a9a9;
+            --rhr-dark: #2c3e50;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 500px; }
@@ -26,22 +27,36 @@
         .btn-main { background: var(--rhr-red); color: #fff; }
         .btn-main:active { opacity: 0.8; }
         
-        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 500px; overflow-y: auto; margin: 15px 0; padding: 5px; }
-        .track-row { display: flex; padding: 10px; border-bottom: 1px solid #f9f9f9; align-items: center; background-color: #fff; font-size: 0.85rem; }
-        .track-row:nth-child(even) { background-color: var(--rhr-pink-fill); }
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 550px; overflow-y: auto; margin: 15px 0; padding: 0; background: #fff; }
+        
+        .hour-marker { 
+            background: var(--rhr-dark); 
+            color: #fff; 
+            padding: 8px 15px; 
+            font-size: 0.9rem; 
+            font-weight: bold; 
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .hour-marker::after { content: "START OF CLOCK"; font-size: 0.6rem; opacity: 0.7; }
+
+        .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; }
+        .track-row:nth-child(even) { background-color: #fafafa; }
+        .track-row:hover { background-color: var(--rhr-pink-fill); }
         
         .track-info { flex-grow: 1; padding-right: 10px; }
-        .t-artist { font-weight: bold; color: #222; }
-        .t-title { color: #555; font-size: 0.8rem; }
-        .t-loc-raw { font-weight: bold; color: var(--rhr-red); margin-left: 5px; }
+        .t-artist { font-weight: bold; color: #222; text-transform: uppercase; }
+        .t-title { color: #555; font-size: 0.8rem; margin-top: 2px; }
+        .t-loc-raw { font-weight: bold; color: var(--rhr-red); margin-left: 8px; font-family: monospace; }
         
-        .time-col { font-weight: bold; color: #444; font-family: "Courier New", Courier, monospace; min-width: 45px; text-align: right; }
+        .time-col { font-weight: bold; color: var(--rhr-dark); font-family: "Courier New", Courier, monospace; min-width: 45px; text-align: right; }
         
         .btn-group { display: flex; gap: 10px; }
         .btn-group .btn { flex: 1; }
         
         .dev-footer { text-align: center; font-size: 0.65rem; color: #999; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        .hour-header { background: #444; color: #fff; padding: 5px 10px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; margin: 10px 0 5px; }
     </style>
 </head>
 <body>
@@ -108,8 +123,8 @@
                     masterLibrary = results.data.filter(r => {
                         const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
                         const loc1 = String(r['Location 1'] || '').trim();
-                        const loc2 = String(r['Location 2'] || '').trim().toLowerCase();
-                        return r.Artist && r.Title && isEnabled && (loc1 !== '' || loc2 === 'y');
+                        const loc2 = String(r['Location 2'] || '').trim().toLowerCase() === 'y';
+                        return r.Artist && r.Title && isEnabled && (loc1 !== '' || loc2);
                     });
                     runLogic();
                 }
@@ -170,8 +185,10 @@
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
         let html = "";
-        for (let hour in hourlyPlaylist) {
-            html += `<div class="hour-header">HOUR START: ${hour.padStart(2,'0')}:00</div>`;
+        
+        const hours = Object.keys(hourlyPlaylist);
+        hours.forEach(hour => {
+            html += `<div class="hour-marker">${hour.padStart(2,'0')}:00</div>`;
             html += hourlyPlaylist[hour].map(t => `
                 <div class="track-row">
                     <div class="track-info">
@@ -181,23 +198,25 @@
                     <div class="time-col">${t.timeStr}</div>
                 </div>
             `).join('');
-        }
+        });
+        
         document.getElementById('playlist-box').innerHTML = html;
     }
 
     function generateLogText() {
-        let txt = "RHR BROADCAST LOG\nGenerated by Tony Wilding\n" + "=".repeat(30) + "\n\n";
-        for (let hour in hourlyPlaylist) {
-            txt += `\n[ START OF HOUR: ${hour.padStart(2,'0')}:00 ]\n`;
-            txt += "-".repeat(30) + "\n";
-            txt += hourlyPlaylist[hour].map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title} [${t.locCombined}]`).join('\n') + "\n";
-            txt += "-".repeat(30) + "\n";
-        }
+        let txt = "RHR BROADCAST LOG\nGenerated by RHR Virtual Producer\n" + "=".repeat(40) + "\n";
+        const hours = Object.keys(hourlyPlaylist);
+        hours.forEach(hour => {
+            txt += `\n[ ${hour.padStart(2,'0')}:00 CLOCK ]\n`;
+            txt += "-".repeat(40) + "\n";
+            txt += hourlyPlaylist[hour].map(t => `${t.timeStr} | ${t.displayArtist.padEnd(20)} | ${t.Title.padEnd(25)} | ${t.locCombined}`).join('\n') + "\n";
+            txt += "-".repeat(40) + "\n";
+        });
         return txt;
     }
 
     function copyToClipboard() {
-        navigator.clipboard.writeText(generateLogText()).then(() => alert("Log Copied!"));
+        navigator.clipboard.writeText(generateLogText()).then(() => alert("Broadcast Log Copied to Clipboard!"));
     }
 
     function downloadLog() {
