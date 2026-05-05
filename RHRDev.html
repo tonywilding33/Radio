@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.2</title>
+    <title>RHR | Virtual Producer v1.3.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -33,7 +33,7 @@
         .track-info { flex-grow: 1; padding-right: 10px; }
         .t-artist { font-weight: bold; color: #222; }
         .t-title { color: #666; font-size: 0.85rem; }
-        .time-col { font-weight: bold; color: var(--rhr-red); font-family: "Courier New", Courier, monospace; min-width: 45px; text-align: right; }
+        .time-col { font-weight: bold; color: #444; font-family: "Courier New", Courier, monospace; min-width: 45px; text-align: right; }
         
         .stat-bar { background: #eee; padding: 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; text-align: center; margin-bottom: 10px; color: #666; text-transform: uppercase; }
         .footer { text-align: center; font-size: 0.6rem; color: #aaa; margin-top: 15px; letter-spacing: 1px; }
@@ -62,19 +62,17 @@
         <div id="monitor" style="display:none;">
             <div class="stat-bar" id="stat-view"></div>
             <div id="playlist-box"></div>
-            <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY LOG</button>
+            <button class="btn btn-main" onclick="copyToClipboard()">📋 COPY BROADCAST LOG</button>
             <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ NEW SHIFT</button>
         </div>
     </div>
-    <div class="footer">ENGINE V4.1 | ENERGY-DRIVE LOGIC</div>
+    <div class="footer">ENGINE V4.2 | OPTIMIZED LOGIC</div>
 </div>
 
 <script>
-    const _MAIN_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/Rugby_Hospital_Radio_Unique_Balanced.csv';
-    const _AI_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/RHR_AI_Pool_800_Clean.csv'; 
+    const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
 
     let masterLibrary = [];
-    let aiLibrary = [];
     let currentPlaylist = [];
 
     const WEIGHTS = {
@@ -87,7 +85,7 @@
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
         
         const dBox = document.getElementById('duration');
-        for(let i=1; i<=24; i++) {
+        for(let i=1; i<=12; i++) {
             dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i * 60));
         }
     };
@@ -101,21 +99,24 @@
 
     async function connectAndBuild() {
         try {
-            const [mainResp, aiResp] = await Promise.all([fetch(_MAIN_REF), fetch(_AI_REF)]);
-            const mainCsv = await mainResp.text();
-            const aiCsv = await aiResp.text();
+            const resp = await fetch(_MASTER_REF);
+            const csv = await resp.text();
 
-            Papa.parse(mainCsv, {
+            Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
-                complete: function(mResults) {
-                    masterLibrary = mResults.data.filter(r => r.Artist && r.Title && String(r.Enabled).trim().toUpperCase() === 'Y');
-                    Papa.parse(aiCsv, {
-                        header: true, dynamicTyping: true, skipEmptyLines: true,
-                        complete: function(aResults) {
-                            aiLibrary = aResults.data.filter(r => r.Artist && r.Title);
-                            runLogic();
-                        }
+                complete: function(results) {
+                    // FILTER: Enabled must be 'Y' AND Location 1 or 2 must have data
+                    masterLibrary = results.data.filter(r => {
+                        const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
+                        const hasLoc = String(r['Location 1'] || '').trim() !== '' || String(r['Location 2'] || '').trim() !== '';
+                        return r.Artist && r.Title && isEnabled && hasLoc;
                     });
+                    
+                    if (masterLibrary.length === 0) {
+                        alert("Database check: No valid songs found.");
+                        return;
+                    }
+                    runLogic();
                 }
             });
         } catch (err) { alert("Error connecting to database."); }
@@ -145,31 +146,25 @@
             }
 
             const checkRules = (song, currentTime) => {
-                const lastS = history.findLast(h => h.id === (song.ID || song.Title));
                 const lastA = history.findLast(h => h.artist === song.Artist);
-                return (!lastS || (currentTime - lastS.time > 43200)) && (!lastA || (currentTime - lastA.time > 10800));
+                return !lastA || (currentTime - lastA.time > 7200); 
             };
 
-            let pick = null;
             let potentialPicks = masterLibrary.filter(s => parseInt(s.Energy) === targetEnergy && checkRules(s, elapsedSec));
 
             if (potentialPicks.length === 0) {
-                potentialPicks = masterLibrary.filter(s => Math.abs(parseInt(s.Energy) - targetEnergy) <= 1 && checkRules(s, elapsedSec));
+                potentialPicks = masterLibrary.filter(s => checkRules(s, elapsedSec));
             }
 
             if (potentialPicks.length > 0) {
-                pick = {...potentialPicks[Math.floor(Math.random() * potentialPicks.length)]};
-            } else if (aiLibrary.length > 0) {
-                let fallback = aiLibrary.filter(s => checkRules(s, elapsedSec));
-                if (fallback.length > 0) pick = {...fallback[Math.floor(Math.random() * fallback.length)]};
-            }
-
-            if(pick) {
+                let pick = {...potentialPicks[Math.floor(Math.random() * potentialPicks.length)]};
                 let displayMin = Math.floor((elapsedSec % 3600) / 60);
+                
                 pick.timeStr = currentHour.toString().padStart(2,'0') + ":" + displayMin.toString().padStart(2,'0');
                 pick.displayArtist = cleanArtist(pick.Artist);
+                
                 currentPlaylist.push(pick);
-                history.push({id: (pick.ID || pick.Title), artist: pick.Artist, time: elapsedSec});
+                history.push({artist: pick.Artist, time: elapsedSec});
             }
             elapsedSec += 240; 
         }
@@ -179,7 +174,7 @@
     function render() {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('stat-view').innerText = `Scheduled Log | ${currentPlaylist.length} Tracks`;
+        document.getElementById('stat-view').innerText = `Broadcast Log | ${currentPlaylist.length} Tracks Scheduled`;
         document.getElementById('playlist-box').innerHTML = currentPlaylist.map(t => `
             <div class="track-row">
                 <div class="track-info">
@@ -193,7 +188,7 @@
 
     function copyToClipboard() {
         const txt = currentPlaylist.map(t => `${t.timeStr} | ${t.displayArtist} - ${t.Title}`).join('\n');
-        navigator.clipboard.writeText(txt).then(() => alert("Log copied!"));
+        navigator.clipboard.writeText(txt).then(() => alert("Log Copied!"));
     }
 </script>
 </body>
