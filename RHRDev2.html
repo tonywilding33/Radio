@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v2.17</title>
+    <title>RHR | RR Reader Producer v2.17</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-dark: #2c3e50; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 500px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px;}
@@ -27,9 +27,9 @@
 
 <div class="wrapper">
     <div class="card">
-        <div class="logo-container" style="text-align:center;"><h1 style="color:var(--rhr-red); margin:0;">RHR</h1></div>
+        <div style="text-align:center;"><h1 style="color:var(--rhr-red); margin:0;">RHR</h1></div>
         <div class="station-name">Rugby Hospital Radio</div>
-        <div id="sync-status" class="sync-status">INITIALIZING...</div>
+        <div id="sync-status" class="sync-status">CONNECTING TO RR READER...</div>
 
         <div id="setup-view">
             <label>Start Hour</label>
@@ -43,63 +43,56 @@
             <div id="playlist-box"></div>
             <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET / NEW LOG</button>
         </div>
-        <div class="dev-footer">v2.17 | Database: rhr_master.csv</div>
+        <div class="dev-footer">v2.17 | Form: RR Reader</div>
     </div>
 </div>
 
 <script>
-    // --- SETTINGS ---
+    // --- CLOUD SETTINGS ---
     const GOOGLE_READ_URL = "https://script.google.com/macros/s/AKfycbzuqGGbU60k0xUchgmWuhe7_krlnAJlOTZCYPGLdwR3aI4d8xdmbX1R3ZOncVPAHCLIQg/exec";
     const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog"; 
-    const MASTER_CSV_URL = "https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv";
+    const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
 
-    // Entry IDs (Must match your Google Form exactly)
-    const E_ARTIST = "entry.1096403488";
-    const E_TITLE = "entry.1682859365";
-    const E_TIME = "entry.2099191890";
+    // Form Field IDs
+    const ENTRY_ARTIST = "1096403488";
+    const ENTRY_TITLE = "1682859365";
+    const ENTRY_TIME = "2099191890";
 
     let masterLibrary = [];
     let globalHistory = [];
 
     window.onload = async function() {
-        // Build Dropdowns
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
         const dBox = document.getElementById('shift-duration');
         for(let i=1; i<=12; i++) dBox.add(new Option(i + " Hours", i));
 
-        // Connect to Google Sheet History
         try {
             const resp = await fetch(GOOGLE_READ_URL);
-            globalHistory = await resp.json();
-            document.getElementById('sync-status').innerText = `CLOUD SYNC ACTIVE: ${globalHistory.length} TRACKS FOUND`;
-            document.getElementById('sync-status').style.color = "green";
+            const data = await resp.json();
+            globalHistory = data.map(item => ({
+                artist: item.artist,
+                title: item.title,
+                timestamp: new Date(item.timestamp).getTime()
+            }));
+            document.getElementById('sync-status').innerText = `RR READER SYNCED: ${globalHistory.length} TRACKS`;
         } catch (e) {
-            document.getElementById('sync-status').innerText = "OFFLINE MODE: LOCAL RULES ONLY";
+            document.getElementById('sync-status').innerText = "OFFLINE MODE";
         }
     };
 
     async function connectAndBuild() {
         try {
-            const resp = await fetch(MASTER_CSV_URL);
-            if (!resp.ok) throw new Error("CSV Not Found");
+            const resp = await fetch(_MASTER_REF);
             const csv = await resp.text();
-            
             Papa.parse(csv, {
-                header: true,
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: function(results) {
-                    masterLibrary = results.data.filter(r => r.Artist && r.Title && String(r.Enabled).toUpperCase() === 'Y');
-                    if(masterLibrary.length === 0) {
-                        alert("Error: No enabled songs found in rhr_master.csv");
-                        return;
-                    }
+                    masterLibrary = results.data.filter(r => String(r.Enabled || '').trim().toUpperCase() === 'Y');
                     runLogic();
                 }
             });
-        } catch (err) { 
-            alert("Could not connect to GitHub. Please check if rhr_master.csv is public and the link is correct."); 
-        }
+        } catch (err) { alert("Could not connect to Master Library."); }
     }
 
     function runLogic() {
@@ -115,24 +108,25 @@
                 let picks = masterLibrary.filter(s => {
                     const match = sessionHistory.findLast(hi => hi.title === s.Title && hi.artist === s.Artist);
                     if (match) {
-                        const diff = Date.now() - new Date(match.timestamp).getTime();
-                        if (diff < 15300000) return false; // 4h 15m rule
+                        const diff = Date.now() - match.timestamp;
+                        if (diff < 15300000) return false; // 4h 15m Repetition
                     }
                     return true;
                 });
 
-                let p = picks.length > 0 ? picks[Math.floor(Math.random() * picks.length)] : masterLibrary[Math.floor(Math.random() * masterLibrary.length)];
-                
-                let time = curHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed/60).toString().padStart(2,'0');
-                playlist.push({...p, timeStr: time});
-                sessionHistory.push({artist: p.Artist, title: p.Title, timestamp: new Date().toISOString()});
-                elapsed += 240; // 4 mins
+                if (picks.length > 0) {
+                    let p = picks[Math.floor(Math.random() * picks.length)];
+                    let time = curHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed/60).toString().padStart(2,'0');
+                    playlist.push({...p, timeStr: time});
+                    sessionHistory.push({artist: p.Artist, title: p.Title, timestamp: Date.now()});
+                    elapsed += 240; 
+                } else break;
             }
         }
-        renderAndSync(playlist);
+        render(playlist);
     }
 
-    function renderAndSync(playlist) {
+    function render(playlist) {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
         document.getElementById('playlist-box').innerHTML = playlist.map(t => `
@@ -142,9 +136,9 @@
             </div>
         `).join('');
 
-        // SILENT PUSH TO GOOGLE
+        // SILENT PUSH TO RR READER FORM
         playlist.forEach(track => {
-            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?${E_ARTIST}=${encodeURIComponent(track.Artist)}&${E_TITLE}=${encodeURIComponent(track.Title)}&${E_TIME}=${encodeURIComponent(track.timeStr)}&submit=Submit`;
+            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?entry.${ENTRY_ARTIST}=${encodeURIComponent(track.Artist)}&entry.${ENTRY_TITLE}=${encodeURIComponent(track.Title)}&entry.${ENTRY_TIME}=${encodeURIComponent(track.timeStr)}&submit=Submit`;
             fetch(formUrl, { mode: 'no-cors' });
         });
     }
