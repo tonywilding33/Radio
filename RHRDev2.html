@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v2.24</title>
+    <title>RHR | Virtual Producer v1.2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -97,7 +97,6 @@
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
-                    // FILTER: Must be Enabled AND have at least one Location entry
                     masterLibrary = results.data.filter(r => {
                         const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
                         const hasLoc1 = String(r['Location 1'] || '').trim().length > 0;
@@ -134,12 +133,19 @@
                     const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
                     const now = Date.now();
 
-                    if (songMatch && (now - songMatch.time < 15300000)) return false; 
+                    // Rule: Song Separation - 4 hours 30 minutes (16,200,000 ms)
+                    if (songMatch && (now - songMatch.time < 16200000)) return false; 
+                    
+                    // Rule: Artist Separation - 2 hours 15 minutes (Standard)
                     if (artistMatch && (now - artistMatch.time < 8100000)) return false;
                     
+                    // Rule: Mirror Separation - 35 minutes (2,100,000 ms) 
+                    // Prevents playing within 35 mins of yesterday's slot (24h +/- 35m)
                     if (songMatch) {
                         const diff = now - songMatch.time;
-                        if (diff >= 79200000 && diff <= 93600000) return false;
+                        const dayMs = 86400000;
+                        const mirrorWindow = 2100000; 
+                        if (diff >= (dayMs - mirrorWindow) && diff <= (dayMs + mirrorWindow)) return false;
                     }
 
                     return targets.includes(parseInt(s.Energy));
@@ -149,7 +155,7 @@
                     picks = masterLibrary.filter(s => {
                         const songMatch = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                         const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
-                        return !(songMatch && (Date.now() - songMatch.time < 15300000)) && 
+                        return !(songMatch && (Date.now() - songMatch.time < 16200000)) && 
                                !(artistMatch && (Date.now() - artistMatch.time < 8100000));
                     });
                 }
@@ -158,14 +164,11 @@
                     let p = picks[Math.floor(Math.random() * picks.length)];
                     let time = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed / 60).toString().padStart(2,'0');
                     
-                    // Construct Location String
                     let loc1 = String(p['Location 1'] || '').trim();
                     let loc2 = String(p['Location 2'] || '').trim();
                     let finalLoc = loc1;
                     if (loc2.toUpperCase() === 'Y' || loc2.toUpperCase() === 'PC') {
                         finalLoc += (finalLoc ? " PC" : "PC");
-                    } else if (loc2.length > 0 && loc2.toUpperCase() !== 'N') {
-                        finalLoc += (finalLoc ? " " : "") + loc2;
                     }
 
                     hourTracks.push({ ...p, timeStr: time, locFinal: finalLoc });
