@@ -53,7 +53,7 @@
         <div id="setup-view">
             <label>Start Hour</label>
             <select id="start-hour"></select>
-            <label>Duration (Cap: 3 Hours)</label>
+            <label>Duration</label>
             <select id="shift-duration"></select>
             <button class="btn btn-main" id="gen-btn" onclick="initConnect()">GENERATE BROADCAST LOG</button>
         </div>
@@ -81,8 +81,10 @@
     window.onload = async function() {
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
+        
         const dBox = document.getElementById('shift-duration');
         for(let i=1; i<=3; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
+        
         await loadGlobalHistory();
     };
 
@@ -94,14 +96,13 @@
             sessionHistory = historyData.map(item => ({
                 Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
             }));
-        } catch (err) { console.warn("Sync failed. Starting fresh."); }
+        } catch (err) { console.warn("Starting fresh session."); }
     }
 
     async function initConnect() {
-        document.getElementById('gen-btn').innerText = "DOWNLOADING DATABASE...";
+        document.getElementById('gen-btn').innerText = "CONNECTING...";
         document.getElementById('gen-btn').disabled = true;
 
-        // FIXED: Using Papa.parse with download: true handles the fetch and CORS automatically
         Papa.parse(MASTER_DB, {
             download: true,
             header: true,
@@ -109,19 +110,19 @@
             skipEmptyLines: true,
             complete: function(results) {
                 masterLibrary = results.data.filter(r => {
-                    return r.Artist && r.Title && String(r.Enabled || '').trim().toUpperCase() === 'Y';
+                    return r.Artist && r.Title && String(r.Enabled || '').trim().toUpperCase() === 'Y' && 
+                           (String(r['Location 1'] || '').trim().length > 0 || String(r['Location 2'] || '').trim().length > 0);
                 });
                 
                 if (masterLibrary.length === 0) {
-                    alert("Error: Database is empty or incorrectly formatted.");
-                    document.getElementById('gen-btn').innerText = "GENERATE BROADCAST LOG";
+                    alert("Database empty or check CSV formatting.");
                     document.getElementById('gen-btn').disabled = false;
                     return;
                 }
                 buildLog();
             },
             error: function() {
-                alert("Could not connect to database.");
+                alert("Database Error.");
                 document.getElementById('gen-btn').disabled = false;
             }
         });
@@ -157,26 +158,33 @@
                     return targets.includes(parseInt(s.Energy));
                 });
 
-                if (picks.length === 0) picks = masterLibrary; // Fallback
+                if (picks.length === 0) {
+                    picks = masterLibrary.filter(s => {
+                        const sm = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
+                        const am = sessionHistory.findLast(hi => hi.Artist === s.Artist);
+                        return !(sm && (Date.now() - sm.time < 16200000)) && !(am && (Date.now() - am.time < 8100000));
+                    });
+                }
 
-                let p = picks[Math.floor(Math.random() * picks.length)];
-                let time = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed / 60).toString().padStart(2,'0');
-                let loc = (String(p['Location 1'] || '') + " " + (String(p['Location 2'] || '').toUpperCase() === 'PC' ? 'PC' : '')).trim();
-                
-                hourTracks.push({ ...p, timeStr: time, locFinal: loc });
-                tracksToSave.push({ artist: p.Artist, title: p.Title });
-                sessionHistory.push({ Artist: p.Artist, Title: p.Title, time: Date.now() });
-                elapsed += 240; 
+                if (picks.length > 0) {
+                    let p = picks[Math.floor(Math.random() * picks.length)];
+                    let time = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed / 60).toString().padStart(2,'0');
+                    let loc = (String(p['Location 1'] || '').trim() + " " + (String(p['Location 2'] || '').toUpperCase() === 'PC' ? 'PC' : '')).trim();
+                    
+                    hourTracks.push({ ...p, timeStr: time, locFinal: loc });
+                    tracksToSave.push({ artist: p.Artist, title: p.Title });
+                    sessionHistory.push({ Artist: p.Artist, Title: p.Title, time: Date.now() });
+                    elapsed += 240; 
+                } else break;
             }
             playlistData[currentHour] = hourTracks;
         }
 
-        // FIXED: POST as text/plain to avoid CORS pre-flight blocks
         fetch(GLOBAL_HISTORY_API, { 
             method: 'POST', 
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(tracksToSave) 
-        }).catch(e => console.warn("History save failed."));
+        }).catch(e => console.warn("Cloud Sync Error"));
 
         renderUI();
     }
