@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.2</title>
+    <title>RHR | Virtual Producer v1.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
@@ -66,9 +66,7 @@
 
 <script>
     const MASTER_DB = "https://raw.githubusercontent.com/tonywilding33/Radio/refs/heads/main/rhr_master.csv";
-    
-    // Your specific Google Web App URL
-    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycbz_RkwWB8_Ceo7-P09qf6TfpOU5AtL6dGo__8XM4gHf2HQdqmbPPdufWLqtOz8RSusIkw/exec"; 
+    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycbxk7BCIeL2CZyIQklrmTBOcZ4jHBqnoDPx53THcu70vAi3w65kSsHqn7dtBQuelpXN3Hg/exec";
     
     let masterLibrary = [];
     let playlistData = {};
@@ -89,7 +87,7 @@
             sessionHistory = historyData.map(item => ({
                 Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
             }));
-        } catch (err) { console.warn("History Sync Failed."); }
+        } catch (err) { console.warn("Sync: Reading empty history or connection pending."); }
     }
 
     async function initConnect() {
@@ -106,7 +104,7 @@
                     buildLog();
                 }
             });
-        } catch (err) { alert("Database Error."); }
+        } catch (err) { alert("Database Connection Failed."); }
     }
 
     function getEnergyTargets(hour) {
@@ -134,11 +132,13 @@
                     const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
                     const now = Date.now();
                     
+                    // Rules: 4.5h Song Separation, 2.15h Artist Separation
                     if (songMatch && (now - songMatch.time < 16200000)) return false; 
                     if (artistMatch && (now - artistMatch.time < 8100000)) return false;
                     
+                    // 24-hour Mirror Protection (+/- 35 mins)
                     if (songMatch) {
-                        const diff = now - songMatch.time;
+                        const diff = Math.abs(now - songMatch.time);
                         if (diff >= 84300000 && diff <= 88500000) return false;
                     }
                     return targets.includes(parseInt(s.Energy));
@@ -165,7 +165,7 @@
             playlistData[currentHour] = hourTracks;
         }
 
-        // AUTO-SAVE TO GOOGLE SHEET
+        // SAVE TO GOOGLE SHEET & TRIGGER 24H AUTO-CLEAN
         fetch(GLOBAL_HISTORY_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(tracksToSave) });
         renderUI();
     }
@@ -198,7 +198,7 @@
         return txt;
     }
 
-    function copyLog() { navigator.clipboard.writeText(getRawText()).then(() => alert("Log Copied!")); }
+    function copyLog() { navigator.clipboard.writeText(getRawText()).then(() => alert("Log Copied to Clipboard!")); }
     function downloadLog() {
         const blob = new Blob([getRawText()], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
