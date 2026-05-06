@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.3-LT</title>
+    <title>RHR | Virtual Producer v1.1-STABLE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background: #f4f4f4; padding: 10px; display: flex; justify-content: center; 
-            user-select: none; -webkit-user-select: none;
+            user-select: none; /* Prevents text highlighting */
+            -webkit-user-select: none;
         }
         .wrapper { width: 100%; max-width: 500px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); position: relative; }
@@ -36,11 +37,11 @@
         .ver-tag { position: absolute; bottom: 5px; right: 10px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false;"> <!-- Right click disabled here -->
 
 <div class="wrapper">
     <div class="card">
-        <div class="ver-tag">LOADED: v1.3-LT</div>
+        <div class="ver-tag">LOADED: v1.3-STABLE</div>
         <div class="logo-container">
             <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
                 <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
@@ -82,6 +83,7 @@
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
         const dBox = document.getElementById('shift-duration');
+        // CHANGED: Limited to 3 hours max
         for(let i=1; i<=3; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
         await loadGlobalHistory();
     };
@@ -89,40 +91,31 @@
     async function loadGlobalHistory() {
         try {
             const resp = await fetch(GLOBAL_HISTORY_API + "?cb=" + Date.now());
-            if (!resp.ok) throw new Error();
             const historyData = await resp.json();
             sessionHistory = historyData.map(item => ({
                 Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
             }));
-        } catch (err) { console.warn("History Sync Offline."); }
+            console.log("History Sync Success.");
+        } catch (err) { console.warn("Starting fresh session."); }
     }
 
     async function initConnect() {
         document.getElementById('gen-btn').innerText = "CONNECTING...";
         document.getElementById('gen-btn').disabled = true;
-
-        Papa.parse(MASTER_DB, {
-            download: true,
-            header: true,
-            dynamicTyping: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                // STRICT FILTERING: Enabled = Y AND (Location 1 OR Location 2 has content)
-                masterLibrary = results.data.filter(r => {
-                    const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
-                    const hasLoc1 = String(r['Location 1'] || '').trim().length > 0;
-                    const hasLoc2 = String(r['Location 2'] || '').trim().length > 0;
-                    return isEnabled && (hasLoc1 || hasLoc2);
-                });
-                
-                if (masterLibrary.length === 0) {
-                    alert("No valid tracks found (Check Enabled/Location columns).");
-                    document.getElementById('gen-btn').disabled = false;
-                    return;
+        try {
+            const resp = await fetch(MASTER_DB);
+            const csv = await resp.text();
+            Papa.parse(csv, {
+                header: true, dynamicTyping: true, skipEmptyLines: true,
+                complete: function(results) {
+                    masterLibrary = results.data.filter(r => {
+                        return String(r.Enabled || '').trim().toUpperCase() === 'Y' && 
+                               (String(r['Location 1'] || '').trim().length > 0 || String(r['Location 2'] || '').trim().length > 0);
+                    });
+                    buildLog();
                 }
-                buildLog();
-            }
-        });
+            });
+        } catch (err) { alert("Database Error."); document.getElementById('gen-btn').disabled = false; }
     }
 
     function getEnergyTargets(hour) {
@@ -145,7 +138,6 @@
             const targets = getEnergyTargets(currentHour);
 
             while (elapsed < 3600) {
-                // Initial selection based on energy and separation rules
                 let picks = masterLibrary.filter(s => {
                     const songMatch = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                     const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
@@ -153,10 +145,14 @@
                     
                     if (songMatch && (now - songMatch.time < 16200000)) return false; 
                     if (artistMatch && (now - artistMatch.time < 8100000)) return false;
+                    
+                    if (songMatch) {
+                        const diff = Math.abs(now - songMatch.time);
+                        if (diff >= 84300000 && diff <= 88500000) return false;
+                    }
                     return targets.includes(parseInt(s.Energy));
                 });
 
-                // STRICT FALLBACK: If no energy match, still ONLY use valid tracks from masterLibrary
                 if (picks.length === 0) {
                     picks = masterLibrary.filter(s => {
                         const sm = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
@@ -168,14 +164,9 @@
                 if (picks.length > 0) {
                     let p = picks[Math.floor(Math.random() * picks.length)];
                     let time = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed / 60).toString().padStart(2,'0');
-                    
-                    // Format Location Output
-                    let loc1 = String(p['Location 1'] || '').trim();
-                    let loc2 = String(p['Location 2'] || '').trim();
-                    let finalLoc = (loc1 + (loc2.toUpperCase() === 'PC' ? ' PC' : '')).trim();
-                    
+                    let finalLoc = (String(p['Location 1'] || '').trim() + " " + (String(p['Location 2'] || '').toUpperCase() === 'PC' ? 'PC' : '')).trim();
                     hourTracks.push({ ...p, timeStr: time, locFinal: finalLoc });
-                    tracksToSave.push({ artist: p.Artist, title: p.Title });
+                    tracksToSave.push({ Artist: p.Artist, Title: p.Title });
                     sessionHistory.push({ Artist: p.Artist, Title: p.Title, time: Date.now() });
                     elapsed += 240; 
                 } else break;
@@ -183,12 +174,7 @@
             playlistData[currentHour] = hourTracks;
         }
 
-        fetch(GLOBAL_HISTORY_API, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(tracksToSave) 
-        }).catch(e => console.warn("Cloud History Error"));
-
+        fetch(GLOBAL_HISTORY_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(tracksToSave) });
         renderUI();
     }
 
@@ -223,8 +209,9 @@
     function copyLog() { navigator.clipboard.writeText(getRawText()).then(() => alert("Log Copied!")); }
     function downloadLog() {
         const blob = new Blob([getRawText()], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        a.href = url;
         a.download = `RHR_Log_${new Date().toISOString().slice(0,10)}.txt`;
         a.click();
     }
