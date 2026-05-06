@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | RR Reader Producer v2.17</title>
+    <title>RHR | RHR Reader v2.17</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-dark: #2c3e50; }
@@ -20,7 +20,6 @@
         .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
         .t-artist { font-weight: bold; text-transform: uppercase; }
         .time-col { font-family: monospace; font-weight: bold; color: var(--rhr-dark); }
-        .dev-footer { text-align: center; font-size: 0.65rem; color: #999; margin-top: 20px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -29,31 +28,30 @@
     <div class="card">
         <div style="text-align:center;"><h1 style="color:var(--rhr-red); margin:0;">RHR</h1></div>
         <div class="station-name">Rugby Hospital Radio</div>
-        <div id="sync-status" class="sync-status">CONNECTING TO RR READER...</div>
+        <div id="sync-status" class="sync-status">CONNECTING TO RHR READER...</div>
 
         <div id="setup-view">
             <label>Start Hour</label>
             <select id="start-hour"></select>
             <label>Duration</label>
             <select id="shift-duration"></select>
-            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE & SYNC LOG</button>
+            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE & SYNC TO RHR READER</button>
         </div>
 
         <div id="monitor" style="display:none;">
             <div id="playlist-box"></div>
             <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET / NEW LOG</button>
         </div>
-        <div class="dev-footer">v2.17 | Form: RR Reader</div>
     </div>
 </div>
 
 <script>
-    // --- CLOUD SETTINGS ---
+    // --- CLOUD CONFIG ---
     const GOOGLE_READ_URL = "https://script.google.com/macros/s/AKfycbzuqGGbU60k0xUchgmWuhe7_krlnAJlOTZCYPGLdwR3aI4d8xdmbX1R3ZOncVPAHCLIQg/exec";
     const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog"; 
     const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
 
-    // Form Field IDs
+    // RHR Reader Entry IDs
     const ENTRY_ARTIST = "1096403488";
     const ENTRY_TITLE = "1682859365";
     const ENTRY_TIME = "2099191890";
@@ -62,11 +60,13 @@
     let globalHistory = [];
 
     window.onload = async function() {
+        // Init dropdowns
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
         const dBox = document.getElementById('shift-duration');
         for(let i=1; i<=12; i++) dBox.add(new Option(i + " Hours", i));
 
+        // Get History
         try {
             const resp = await fetch(GOOGLE_READ_URL);
             const data = await resp.json();
@@ -75,7 +75,7 @@
                 title: item.title,
                 timestamp: new Date(item.timestamp).getTime()
             }));
-            document.getElementById('sync-status').innerText = `RR READER SYNCED: ${globalHistory.length} TRACKS`;
+            document.getElementById('sync-status').innerText = `RHR READER SYNCED: ${globalHistory.length} TRACKS`;
         } catch (e) {
             document.getElementById('sync-status').innerText = "OFFLINE MODE";
         }
@@ -109,7 +109,8 @@
                     const match = sessionHistory.findLast(hi => hi.title === s.Title && hi.artist === s.Artist);
                     if (match) {
                         const diff = Date.now() - match.timestamp;
-                        if (diff < 15300000) return false; // 4h 15m Repetition
+                        // 4h 15m repetition check
+                        if (diff < 15300000) return false; 
                     }
                     return true;
                 });
@@ -119,7 +120,7 @@
                     let time = curHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed/60).toString().padStart(2,'0');
                     playlist.push({...p, timeStr: time});
                     sessionHistory.push({artist: p.Artist, title: p.Title, timestamp: Date.now()});
-                    elapsed += 240; 
+                    elapsed += 240; // 4 min avg
                 } else break;
             }
         }
@@ -136,7 +137,7 @@
             </div>
         `).join('');
 
-        // SILENT PUSH TO RR READER FORM
+        // SILENT PUSH TO RHR READER FORM
         playlist.forEach(track => {
             const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?entry.${ENTRY_ARTIST}=${encodeURIComponent(track.Artist)}&entry.${ENTRY_TITLE}=${encodeURIComponent(track.Title)}&entry.${ENTRY_TIME}=${encodeURIComponent(track.timeStr)}&submit=Submit`;
             fetch(formUrl, { mode: 'no-cors' });
