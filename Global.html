@@ -76,8 +76,8 @@
 </div>
 
 <script>
-    const _0xbf21 = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3Rvbnl3aWxkaW5nMzMvUmFkaW8vbWFpbi9yaHJfbWFzdGVyLmNzdg==";
-    const MASTER_DB = atob(_0xbf21);
+    // Direct Database Link - Pointing to GitHub Raw with modern refs structure
+    const MASTER_DB = "https://raw.githubusercontent.com/tonywilding33/Radio/refs/heads/main/rhr_master.csv";
     
     // Live Global History API
     const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycbxFkuqe61yJGL6D1TXawK18OzHEVk6cQdIOrM1IefEjvcrRU2dKO8PyXl5LomMMSMk2fA/exec";
@@ -92,7 +92,7 @@
         const dBox = document.getElementById('shift-duration');
         for(let i=1; i<=24; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
 
-        // Load history from Google Sheets before generating anything
+        // Initial fetch of historical data
         await loadGlobalHistory();
     };
 
@@ -101,7 +101,6 @@
             const resp = await fetch(GLOBAL_HISTORY_API);
             const historyData = await resp.json();
             
-            // Map the history records to our local format
             const globalRecords = historyData.map(item => ({
                 Artist: item.artist,
                 Title: item.title,
@@ -109,15 +108,16 @@
             }));
 
             sessionHistory = [...globalRecords];
-            console.log("Global Sync: Loaded " + sessionHistory.length + " previous plays.");
+            console.log("Global History Loaded: " + sessionHistory.length + " tracks.");
         } catch (err) {
-            console.warn("Global Sync Failed. Using local session memory only.");
+            console.warn("Global Sync Failed. Using session memory only.");
         }
     }
 
     async function initConnect() {
         try {
             const resp = await fetch(MASTER_DB);
+            if (!resp.ok) throw new Error("File Not Found");
             const csv = await resp.text();
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
@@ -131,7 +131,9 @@
                     buildLog();
                 }
             });
-        } catch (err) { alert("Database Connection Error."); }
+        } catch (err) { 
+            alert("Database Connection Error: Could not find the CSV file on GitHub."); 
+        }
     }
 
     function getEnergyTargets(hour) {
@@ -162,7 +164,7 @@
                     if (songMatch && (now - songMatch.time < 16200000)) return false; 
                     if (artistMatch && (now - artistMatch.time < 8100000)) return false;
                     
-                    // Rule: 35min Mirror Window
+                    // Rule: Mirror Separation (35 mins)
                     if (songMatch) {
                         const diff = now - songMatch.time;
                         const dayMs = 86400000;
@@ -194,7 +196,6 @@
                     }
 
                     hourTracks.push({ ...p, timeStr: time, locFinal: finalLoc });
-                    // Keep track of what we're picking during the generation
                     sessionHistory.push({ Artist: p.Artist, Title: p.Title, time: Date.now() });
                     elapsed += 240; 
                 } else break;
