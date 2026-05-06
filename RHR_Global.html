@@ -79,8 +79,8 @@
     const _0xbf21 = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3Rvbnl3aWxkaW5nMzMvUmFkaW8vbWFpbi9yaHJfbWFzdGVyLmNzdg==";
     const MASTER_DB = atob(_0xbf21);
     
-    // REPLACE WITH YOUR APPS SCRIPT URL
-    const GLOBAL_HISTORY_API = "YOUR_SCRIPT_URL_HERE";
+    // Live Global History API
+    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycbxFkuqe61yJGL6D1TXawK18OzHEVk6cQdIOrM1IefEjvcrRU2dKO8PyXl5LomMMSMk2fA/exec";
     
     let masterLibrary = [];
     let playlistData = {};
@@ -92,7 +92,7 @@
         const dBox = document.getElementById('shift-duration');
         for(let i=1; i<=24; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
 
-        // Pull previous history from Google Sheets immediately
+        // Load history from Google Sheets before generating anything
         await loadGlobalHistory();
     };
 
@@ -101,7 +101,7 @@
             const resp = await fetch(GLOBAL_HISTORY_API);
             const historyData = await resp.json();
             
-            // Convert script data into our internal logic format
+            // Map the history records to our local format
             const globalRecords = historyData.map(item => ({
                 Artist: item.artist,
                 Title: item.title,
@@ -109,9 +109,9 @@
             }));
 
             sessionHistory = [...globalRecords];
-            console.log("Global History Sync Success: " + sessionHistory.length + " tracks loaded.");
+            console.log("Global Sync: Loaded " + sessionHistory.length + " previous plays.");
         } catch (err) {
-            console.warn("Global History Sync Failed. Reverting to local session memory.");
+            console.warn("Global Sync Failed. Using local session memory only.");
         }
     }
 
@@ -158,9 +158,11 @@
                     const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
                     const now = Date.now();
 
+                    // Rules: 4.5h Song Separation, 2.15h Artist Separation
                     if (songMatch && (now - songMatch.time < 16200000)) return false; 
                     if (artistMatch && (now - artistMatch.time < 8100000)) return false;
                     
+                    // Rule: 35min Mirror Window
                     if (songMatch) {
                         const diff = now - songMatch.time;
                         const dayMs = 86400000;
@@ -192,6 +194,7 @@
                     }
 
                     hourTracks.push({ ...p, timeStr: time, locFinal: finalLoc });
+                    // Keep track of what we're picking during the generation
                     sessionHistory.push({ Artist: p.Artist, Title: p.Title, time: Date.now() });
                     elapsed += 240; 
                 } else break;
