@@ -3,16 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.3</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe U<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.3</title>
+    <title>RHR | Virtual Producer v1.3-FINAL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
@@ -58,7 +49,7 @@
             <select id="start-hour"></select>
             <label>Duration</label>
             <select id="shift-duration"></select>
-            <button class="btn btn-main" onclick="initConnect()">GENERATE BROADCAST LOG</button>
+            <button class="btn btn-main" id="gen-btn" onclick="initConnect()">GENERATE BROADCAST LOG</button>
         </div>
 
         <div id="monitor" style="display:none;">
@@ -74,8 +65,8 @@
 </div>
 
 <script>
-    const MASTER_DB = "https://raw.githubusercontent.com/tonywilding33/Radio/refs/heads/main/rhr_master.csv";
-    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycbyEZi5S9gSkYnntbhzWmrpITVjrcU_-zkErM4RA9of9922AXAXr7EYfkBtW25CLHwsC_A/exec";
+    const MASTER_DB = "https://raw.githubusercontent.com/tonywilding33/Radio/refs/heads/main/rhr_master.csv?cb=" + Date.now();
+    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycby9nNWL4qT9ZCzZIUVye3iZ3Eg2wuBZfqIm9TwD1GQaY-qlqPcV2EYXTQaJQjydlTHftg/exec";
     
     let masterLibrary = [];
     let playlistData = {};
@@ -96,10 +87,13 @@
             sessionHistory = historyData.map(item => ({
                 Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
             }));
-        } catch (err) { console.warn("Sync: Reading history..."); }
+            console.log("History Loaded:", sessionHistory.length);
+        } catch (err) { console.warn("Sync: Clean History."); }
     }
 
     async function initConnect() {
+        document.getElementById('gen-btn').innerText = "SYNCING WITH DATABASE...";
+        document.getElementById('gen-btn').disabled = true;
         try {
             const resp = await fetch(MASTER_DB);
             const csv = await resp.text();
@@ -113,7 +107,7 @@
                     buildLog();
                 }
             });
-        } catch (err) { alert("Database Connection Failed."); }
+        } catch (err) { alert("Database Connection Failed."); document.getElementById('gen-btn').disabled = false; }
     }
 
     function getEnergyTargets(hour) {
@@ -172,7 +166,7 @@
             playlistData[currentHour] = hourTracks;
         }
 
-        // POST TRIGGERS THE AUTO-CLEAN ON GOOGLE SIDE
+        // Post to Apps Script (Triggers Auto-Clean + Save)
         fetch(GLOBAL_HISTORY_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(tracksToSave) });
         renderUI();
     }
@@ -206,208 +200,6 @@
     }
 
     function copyLog() { navigator.clipboard.writeText(getRawText()).then(() => alert("Log Copied!")); }
-    function downloadLog() {
-        const blob = new Blob([getRawText()], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `RHR_Log_${new Date().toISOString().slice(0,10)}.txt`;
-        a.click();
-    }
-</script>
-</body>
-</html>I", Roboto, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
-        .wrapper { width: 100%; max-width: 500px; }
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); }
-        .logo-container { text-align: center; margin-bottom: 10px; }
-        .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
-        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
-        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
-        select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; appearance: none; box-sizing: border-box; }
-        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; box-sizing: border-box; }
-        .btn-main { background: var(--rhr-red); color: #fff; }
-        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 500px; overflow-y: auto; margin: 15px 0; background: #fff; }
-        .hour-marker { background: var(--rhr-dark); color: #fff; padding: 8px 15px; font-size: 0.9rem; font-weight: bold; position: sticky; top: 0; z-index: 10; }
-        .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; }
-        .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
-        .track-info { flex-grow: 1; }
-        .t-artist { font-weight: bold; color: #222; text-transform: uppercase; }
-        .t-title { color: #555; font-size: 0.8rem; }
-        .t-loc { font-weight: bold; color: var(--rhr-red); font-family: monospace; margin-left: 5px; }
-        .time-col { font-weight: bold; color: var(--rhr-dark); font-family: monospace; min-width: 50px; text-align: right; }
-        .btn-group { display: flex; gap: 10px; }
-        .btn-group .btn { flex: 1; }
-        .dev-footer { text-align: center; font-size: 0.65rem; color: #999; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
-    </style>
-</head>
-<body>
-
-<div class="wrapper">
-    <div class="card">
-        <div class="logo-container">
-            <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
-                <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
-                <path d="M80 125C80 125 15 88 15 45C15 22 32 10 50 10C62 10 74 18 80 30C86 18 98 10 110 10C128 10 145 22 145 45C145 88 80 125 80 125Z" fill="none" stroke="var(--rhr-pink-line)" stroke-width="2" />
-                <text x="50%" y="65%" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="48" fill="var(--rhr-red)" font-weight="900">RHR</text>
-            </svg>
-        </div>
-        <div class="station-name">Rugby Hospital Radio</div>
-
-        <div id="setup-view">
-            <label>Start Hour</label>
-            <select id="start-hour"></select>
-            <label>Duration</label>
-            <select id="shift-duration"></select>
-            <button class="btn btn-main" onclick="initConnect()">GENERATE BROADCAST LOG</button>
-        </div>
-
-        <div id="monitor" style="display:none;">
-            <div id="playlist-box"></div>
-            <div class="btn-group">
-                <button class="btn btn-main" onclick="copyLog()">📋 COPY LOG</button>
-                <button class="btn btn-main" style="background:#2ecc71" onclick="downloadLog()">💾 DOWNLOAD TXT</button>
-            </div>
-            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET</button>
-        </div>
-        <div class="dev-footer">Developed by Tony Wilding</div>
-    </div>
-</div>
-
-<script>
-    const MASTER_DB = "https://raw.githubusercontent.com/tonywilding33/Radio/refs/heads/main/rhr_master.csv";
-    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycbxk7BCIeL2CZyIQklrmTBOcZ4jHBqnoDPx53THcu70vAi3w65kSsHqn7dtBQuelpXN3Hg/exec";
-    
-    let masterLibrary = [];
-    let playlistData = {};
-    let sessionHistory = [];
-
-    window.onload = async function() {
-        const hBox = document.getElementById('start-hour');
-        for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
-        const dBox = document.getElementById('shift-duration');
-        for(let i=1; i<=24; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
-        await loadGlobalHistory();
-    };
-
-    async function loadGlobalHistory() {
-        try {
-            const resp = await fetch(GLOBAL_HISTORY_API);
-            const historyData = await resp.json();
-            sessionHistory = historyData.map(item => ({
-                Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
-            }));
-        } catch (err) { console.warn("Sync: Reading empty history or connection pending."); }
-    }
-
-    async function initConnect() {
-        try {
-            const resp = await fetch(MASTER_DB);
-            const csv = await resp.text();
-            Papa.parse(csv, {
-                header: true, dynamicTyping: true, skipEmptyLines: true,
-                complete: function(results) {
-                    masterLibrary = results.data.filter(r => {
-                        return String(r.Enabled || '').trim().toUpperCase() === 'Y' && 
-                               (String(r['Location 1'] || '').trim().length > 0 || String(r['Location 2'] || '').trim().length > 0);
-                    });
-                    buildLog();
-                }
-            });
-        } catch (err) { alert("Database Connection Failed."); }
-    }
-
-    function getEnergyTargets(hour) {
-        if (hour >= 7 && hour < 10) return [5, 4]; 
-        if (hour >= 10 && hour < 17) return [5, 4, 3]; 
-        if (hour >= 17 && hour < 22) return [3, 2, 4]; 
-        return [1, 2, 3]; 
-    }
-
-    async function buildLog() {
-        const startHour = parseInt(document.getElementById('start-hour').value);
-        const duration = parseInt(document.getElementById('shift-duration').value);
-        playlistData = {};
-        let tracksToSave = [];
-
-        for (let h = 0; h < duration; h++) {
-            let currentHour = (startHour + h) % 24;
-            let hourTracks = [];
-            let elapsed = 0;
-            const targets = getEnergyTargets(currentHour);
-
-            while (elapsed < 3600) {
-                let picks = masterLibrary.filter(s => {
-                    const songMatch = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
-                    const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
-                    const now = Date.now();
-                    
-                    // Rules: 4.5h Song Separation, 2.15h Artist Separation
-                    if (songMatch && (now - songMatch.time < 16200000)) return false; 
-                    if (artistMatch && (now - artistMatch.time < 8100000)) return false;
-                    
-                    // 24-hour Mirror Protection (+/- 35 mins)
-                    if (songMatch) {
-                        const diff = Math.abs(now - songMatch.time);
-                        if (diff >= 84300000 && diff <= 88500000) return false;
-                    }
-                    return targets.includes(parseInt(s.Energy));
-                });
-
-                if (picks.length === 0) {
-                    picks = masterLibrary.filter(s => {
-                        const sm = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
-                        const am = sessionHistory.findLast(hi => hi.Artist === s.Artist);
-                        return !(sm && (Date.now() - sm.time < 16200000)) && !(am && (Date.now() - am.time < 8100000));
-                    });
-                }
-
-                if (picks.length > 0) {
-                    let p = picks[Math.floor(Math.random() * picks.length)];
-                    let time = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed / 60).toString().padStart(2,'0');
-                    let finalLoc = (String(p['Location 1'] || '').trim() + " " + (String(p['Location 2'] || '').toUpperCase() === 'PC' ? 'PC' : '')).trim();
-                    hourTracks.push({ ...p, timeStr: time, locFinal: finalLoc });
-                    tracksToSave.push({ Artist: p.Artist, Title: p.Title });
-                    sessionHistory.push({ Artist: p.Artist, Title: p.Title, time: Date.now() });
-                    elapsed += 240; 
-                } else break;
-            }
-            playlistData[currentHour] = hourTracks;
-        }
-
-        // SAVE TO GOOGLE SHEET & TRIGGER 24H AUTO-CLEAN
-        fetch(GLOBAL_HISTORY_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(tracksToSave) });
-        renderUI();
-    }
-
-    function renderUI() {
-        document.getElementById('setup-view').style.display = 'none';
-        document.getElementById('monitor').style.display = 'block';
-        let html = "";
-        Object.keys(playlistData).forEach(hour => {
-            html += `<div class="hour-marker">${hour.padStart(2,'0')}:00</div>`;
-            html += playlistData[hour].map(t => `
-                <div class="track-row">
-                    <div class="track-info">
-                        <div class="t-artist">${t.Artist}</div>
-                        <div class="t-title">${t.Title} <span class="t-loc">${t.locFinal}</span></div>
-                    </div>
-                    <div class="time-col">${t.timeStr}</div>
-                </div>
-            `).join('');
-        });
-        document.getElementById('playlist-box').innerHTML = html;
-    }
-
-    function getRawText() {
-        let txt = "RHR BROADCAST LOG\n" + "=".repeat(45) + "\n";
-        Object.keys(playlistData).forEach(hour => {
-            txt += `\n[ ${hour.padStart(2,'0')}:00 ]\n`;
-            txt += playlistData[hour].map(t => `${t.timeStr} | ${t.Artist} - ${t.Title} [${t.locFinal}]`).join('\n') + "\n";
-        });
-        return txt;
-    }
-
-    function copyLog() { navigator.clipboard.writeText(getRawText()).then(() => alert("Log Copied to Clipboard!")); }
     function downloadLog() {
         const blob = new Blob([getRawText()], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
