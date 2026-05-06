@@ -84,14 +84,13 @@
 
     async function loadGlobalHistory() {
         try {
-            // Using a cache-buster on history load as well
             const resp = await fetch(GLOBAL_HISTORY_API + "?cb=" + Date.now());
             const historyData = await resp.json();
             sessionHistory = historyData.map(item => ({
                 Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
             }));
-            console.log("History Loaded:", sessionHistory.length);
-        } catch (err) { console.warn("Sync: Starting with empty history."); }
+            console.log("History Sync Success.");
+        } catch (err) { console.warn("Starting fresh session."); }
     }
 
     async function initConnect() {
@@ -169,7 +168,6 @@
             playlistData[currentHour] = hourTracks;
         }
 
-        // Send to Apps Script for Cleaning + Saving
         fetch(GLOBAL_HISTORY_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(tracksToSave) });
         renderUI();
     }
