@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.3-FINAL</title>
+    <title>RHR | Virtual Producer v1.3-STABLE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 500px; }
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); position: relative; }
         .logo-container { text-align: center; margin-bottom: 10px; }
         .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
         .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
@@ -29,12 +29,14 @@
         .btn-group { display: flex; gap: 10px; }
         .btn-group .btn { flex: 1; }
         .dev-footer { text-align: center; font-size: 0.65rem; color: #999; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .ver-tag { position: absolute; bottom: 5px; right: 10px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
     <div class="card">
+        <div class="ver-tag">LOADED: v1.3-STABLE</div>
         <div class="logo-container">
             <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
                 <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
@@ -66,7 +68,7 @@
 
 <script>
     const MASTER_DB = "https://raw.githubusercontent.com/tonywilding33/Radio/refs/heads/main/rhr_master.csv?cb=" + Date.now();
-    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycby9nNWL4qT9ZCzZIUVye3iZ3Eg2wuBZfqIm9TwD1GQaY-qlqPcV2EYXTQaJQjydlTHftg/exec";
+    const GLOBAL_HISTORY_API = "https://script.google.com/macros/s/AKfycby_iCmiU0m3_STBl6zo-YX3IQtf2xwXc8qz8UsNf0REX3wgz4QDifOe9qWHcD1FNAY2iw/exec";
     
     let masterLibrary = [];
     let playlistData = {};
@@ -82,17 +84,18 @@
 
     async function loadGlobalHistory() {
         try {
-            const resp = await fetch(GLOBAL_HISTORY_API);
+            // Using a cache-buster on history load as well
+            const resp = await fetch(GLOBAL_HISTORY_API + "?cb=" + Date.now());
             const historyData = await resp.json();
             sessionHistory = historyData.map(item => ({
                 Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
             }));
             console.log("History Loaded:", sessionHistory.length);
-        } catch (err) { console.warn("Sync: Clean History."); }
+        } catch (err) { console.warn("Sync: Starting with empty history."); }
     }
 
     async function initConnect() {
-        document.getElementById('gen-btn').innerText = "SYNCING WITH DATABASE...";
+        document.getElementById('gen-btn').innerText = "CONNECTING...";
         document.getElementById('gen-btn').disabled = true;
         try {
             const resp = await fetch(MASTER_DB);
@@ -107,7 +110,7 @@
                     buildLog();
                 }
             });
-        } catch (err) { alert("Database Connection Failed."); document.getElementById('gen-btn').disabled = false; }
+        } catch (err) { alert("Database Error."); document.getElementById('gen-btn').disabled = false; }
     }
 
     function getEnergyTargets(hour) {
@@ -166,7 +169,7 @@
             playlistData[currentHour] = hourTracks;
         }
 
-        // Post to Apps Script (Triggers Auto-Clean + Save)
+        // Send to Apps Script for Cleaning + Saving
         fetch(GLOBAL_HISTORY_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(tracksToSave) });
         renderUI();
     }
