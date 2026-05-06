@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.20</title>
+    <title>RHR | Virtual Producer v2.24</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { 
@@ -97,7 +97,13 @@
             Papa.parse(csv, {
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
-                    masterLibrary = results.data.filter(r => String(r.Enabled || '').trim().toUpperCase() === 'Y');
+                    // FILTER: Must be Enabled AND have at least one Location entry
+                    masterLibrary = results.data.filter(r => {
+                        const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
+                        const hasLoc1 = String(r['Location 1'] || '').trim().length > 0;
+                        const hasLoc2 = String(r['Location 2'] || '').trim().length > 0;
+                        return isEnabled && (hasLoc1 || hasLoc2);
+                    });
                     buildLog();
                 }
             });
@@ -105,10 +111,10 @@
     }
 
     function getEnergyTargets(hour) {
-        if (hour >= 7 && hour < 10) return [5, 4]; // Wakeup
-        if (hour >= 10 && hour < 17) return [5, 4, 3]; // Day
-        if (hour >= 17 && hour < 22) return [3, 2, 4]; // Wind down
-        return [1, 2, 3]; // Overnight
+        if (hour >= 7 && hour < 10) return [5, 4]; 
+        if (hour >= 10 && hour < 17) return [5, 4, 3]; 
+        if (hour >= 17 && hour < 22) return [3, 2, 4]; 
+        return [1, 2, 3]; 
     }
 
     function buildLog() {
@@ -131,17 +137,14 @@
                     if (songMatch && (now - songMatch.time < 15300000)) return false; 
                     if (artistMatch && (now - artistMatch.time < 8100000)) return false;
                     
-                    // Mirror Zone logic
                     if (songMatch) {
                         const diff = now - songMatch.time;
                         if (diff >= 79200000 && diff <= 93600000) return false;
                     }
 
-                    // Energy Weighting - check if song matches current timeframe targets
                     return targets.includes(parseInt(s.Energy));
                 });
 
-                // Fail-safe: If no match found for specific energy, widen to all
                 if (picks.length === 0) {
                     picks = masterLibrary.filter(s => {
                         const songMatch = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
@@ -155,10 +158,17 @@
                     let p = picks[Math.floor(Math.random() * picks.length)];
                     let time = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed / 60).toString().padStart(2,'0');
                     
-                    let loc = String(p['Location 1'] || '').trim();
-                    if (String(p['Location 2']).toLowerCase() === 'y') loc += (loc ? " PC" : "PC");
+                    // Construct Location String
+                    let loc1 = String(p['Location 1'] || '').trim();
+                    let loc2 = String(p['Location 2'] || '').trim();
+                    let finalLoc = loc1;
+                    if (loc2.toUpperCase() === 'Y' || loc2.toUpperCase() === 'PC') {
+                        finalLoc += (finalLoc ? " PC" : "PC");
+                    } else if (loc2.length > 0 && loc2.toUpperCase() !== 'N') {
+                        finalLoc += (finalLoc ? " " : "") + loc2;
+                    }
 
-                    hourTracks.push({ ...p, timeStr: time, locFinal: loc });
+                    hourTracks.push({ ...p, timeStr: time, locFinal: finalLoc });
                     sessionHistory.push({ Artist: p.Artist, Title: p.Title, time: Date.now() });
                     elapsed += 240; 
                 } else break;
