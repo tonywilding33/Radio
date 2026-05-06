@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RHR | Virtual Producer</title>
     <style>
-        /* Prevents text highlighting and cursor cues */
+        /* Prevents text highlighting */
         * {
             margin: 0;
             padding: 0;
@@ -23,7 +23,7 @@
             justify-content: flex-start;
             min-height: 100vh;
             padding-top: 40px;
-            overflow: hidden; /* Keeps the focus on the iframe scroll */
+            overflow: hidden; 
         }
 
         .header-text {
@@ -36,18 +36,20 @@
             color: #e31e24;
             font-size: 1.4rem;
             margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         p {
             color: #555;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         .iframe-container {
             width: 95%;
             max-width: 600px;
-            height: 80vh;
+            height: 85vh;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -66,18 +68,18 @@
 
     <div class="header-text">
         <h1>Welcome to RHR</h1>
-        <p>This intelligent scheduler automates broadcast logs by balancing energy levels and enforcing strict artist rotation rules for patients.</p>
+        <p>A smart scheduler that automatically builds perfectly balanced broadcast logs for our patients.</p>
     </div>
 
     <div class="iframe-container">
-        <!-- Ensure Global.html is in the same directory -->
+        <!-- Loads Global.html in the center -->
         <iframe src="Global.html" title="RHR Virtual Producer"></iframe>
     </div>
 
     <script>
-        // Additional layer to block keyboard shortcuts for 'View Source' (Ctrl+U) and 'Inspect' (F12)
+        // Blocks common keyboard shortcuts for viewing source code
         document.onkeydown = function(e) {
-            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73 || e.shiftKey && e.keyCode === 73)) {
+            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73 || (e.shiftKey && e.keyCode === 73))) {
                 return false;
             }
             if (e.keyCode === 123) {
