@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.3-STABLE</title>
+    <title>RHR | Virtual Producer v1.1-STABLE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #f4f4f4; padding: 10px; display: flex; justify-content: center; 
+            user-select: none; /* Prevents text highlighting */
+            -webkit-user-select: none;
+        }
         .wrapper { width: 100%; max-width: 500px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); position: relative; }
         .logo-container { text-align: center; margin-bottom: 10px; }
@@ -32,7 +37,7 @@
         .ver-tag { position: absolute; bottom: 5px; right: 10px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <!-- Right click disabled here -->
 
 <div class="wrapper">
     <div class="card">
