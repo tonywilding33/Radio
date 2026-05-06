@@ -5,126 +5,148 @@
     <title>RHR Music Scheduler</title>
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --accent: #00ff9d; --text: #e0e0e0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 900px; margin: auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-        .online { background: #1b4d3e; color: var(--accent); }
-        .offline { background: #4d1b1b; color: #ff5555; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .wrapper { max-width: 900px; margin: auto; }
         
-        .input-grid { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 10px; background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #333; }
-        input { background: #2d2d2d; border: 1px solid #444; color: white; padding: 12px; border-radius: 6px; font-size: 1rem; }
-        button { background: var(--accent); color: #121212; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        button:hover { background: #00cc7e; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
+        .status-pill { padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; border: 1px solid transparent; }
+        .online { background: #1b4d3e; color: var(--accent); border-color: var(--accent); }
+        .offline { background: #4d1b1b; color: #ff5555; border-color: #ff5555; }
 
-        .schedule-table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 12px; overflow: hidden; }
-        th { background: #2d2d2d; text-align: left; padding: 15px; font-size: 0.8rem; color: #888; }
-        td { padding: 15px; border-top: 1px solid #333; }
-        .copy-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 5px 10px; font-size: 0.7rem; }
+        .input-panel { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 12px; background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid #333; margin-bottom: 30px; align-items: end; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 0.7rem; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        input { background: #2d2d2d; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; outline: none; }
+        input:focus { border-color: var(--accent); }
+        
+        #log-btn { background: var(--accent); color: #121212; border: none; padding: 11px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; height: 39px; }
+        #log-btn:hover { background: #00cc7e; }
+
+        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; }
+        th { text-align: left; padding: 15px; background: #2a2a2a; color: #888; font-size: 0.75rem; }
+        td { padding: 15px; border-bottom: 1px solid #333; }
+        .artist-name { color: var(--accent); font-weight: bold; }
+        .copy-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
         .copy-btn:hover { background: var(--accent); color: #121212; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="wrapper">
     <header>
         <div>
-            <h1 style="margin:0;">Music Scheduler</h1>
-            <p style="color:#888; margin:5px 0;">Radio Hospital Rotherham</p>
+            <h1 style="margin:0; font-size: 1.6rem; color: var(--accent);">RHR Scheduler</h1>
+            <p style="margin:5px 0; color:#888; font-size: 0.8rem;">Live Playout & Cloud History Sync</p>
         </div>
-        <div id="status" class="status-pill offline">Connecting...</div>
+        <div id="status" class="status-pill offline">SYNCING...</div>
     </header>
 
-    <div class="input-grid">
-        <input type="text" id="artist" placeholder="Artist (e.g. Oasis)" autofocus>
-        <input type="text" id="title" placeholder="Song Title">
-        <input type="time" id="schedTime">
-        <button onclick="addToSchedule()">ADD TO LOG</button>
+    <div class="input-panel">
+        <div class="input-group">
+            <label>UK Artist</label>
+            <input type="text" id="artist" placeholder="e.g. David Bowie" autofocus>
+        </div>
+        <div class="input-group">
+            <label>Song Title</label>
+            <input type="text" id="title" placeholder="e.g. Starman">
+        </div>
+        <div class="input-group">
+            <label>Air Time</label>
+            <input type="time" id="airtime">
+        </div>
+        <button id="log-btn" onclick="submitEntry()">LOG TRACK</button>
     </div>
 
-    <table class="schedule-table">
+    <table>
         <thead>
             <tr>
-                <th>TIME</th>
-                <th>ARTIST</th>
-                <th>TITLE</th>
-                <th>ACTION</th>
+                <th width="15%">AIR TIME</th>
+                <th width="35%">ARTIST</th>
+                <th width="35%">TITLE</th>
+                <th width="15%">ACTION</th>
             </tr>
         </thead>
-        <tbody id="schedule-body">
-            <!-- Data from Google Sheets will load here -->
+        <tbody id="table-body">
+            <!-- Cloud data will appear here -->
         </tbody>
     </table>
 </div>
 
 <script>
+    // --- VERIFIED CONNECTIONS ---
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuqGGbU60k0xUchgmWuhe7_krlnAJlOTZCYPGLdwR3aI4d8xdmbX1R3ZOncVPAHCLIQg/exec";
+    const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog";
     const ENTRY_ARTIST = "entry.1096403488";
     const ENTRY_TITLE = "entry.1682859365";
 
-    // Initialize time input to current time
-    document.getElementById('schedTime').value = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+    // Set default time to current
+    function setClock() {
+        const now = new Date();
+        document.getElementById('airtime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+    }
+    setClock();
 
-    async function refreshHistory() {
+    // 1. Fetch from Google Sheet
+    async function loadHistory() {
         try {
-            const response = await fetch(SCRIPT_URL);
-            const data = await response.json();
-            const body = document.getElementById('schedule-body');
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            const body = document.getElementById('table-body');
             const status = document.getElementById('status');
 
-            if (data.error) throw new Error(data.error);
+            if (data.error) throw new Error();
 
             status.innerText = "Cloud Sync Active";
             status.className = "status-pill online";
 
-            body.innerHTML = '';
-            data.reverse().slice(0, 15).forEach(item => {
-                const row = body.insertRow();
-                row.innerHTML = `
-                    <td style="color:#888">${item.scheduledTime || '---'}</td>
-                    <td style="font-weight:bold">${item.artist}</td>
-                    <td>${item.title}</td>
-                    <td><button class="copy-btn" onclick="copyRow('${item.artist} - ${item.title}')">COPY</button></td>
+            body.innerHTML = "";
+            data.reverse().slice(0, 12).forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color:#888; font-family:monospace;">${row.scheduledTime || '--:--'}</td>
+                    <td class="artist-name">${row.artist}</td>
+                    <td>${row.title}</td>
+                    <td><button class="copy-btn" onclick="copyRow('${row.artist} - ${row.title}')">COPY</button></td>
                 `;
+                body.appendChild(tr);
             });
-        } catch (err) {
-            document.getElementById('status').innerText = "Offline Mode";
+        } catch (e) {
+            document.getElementById('status').innerText = "Sync Error";
             document.getElementById('status').className = "status-pill offline";
         }
     }
 
-    function addToSchedule() {
-        const artist = document.getElementById('artist').value;
-        const title = document.getElementById('title').value;
-        const time = document.getElementById('schedTime').value;
+    // 2. Submit to Google Form
+    function submitEntry() {
+        const art = document.getElementById('artist').value;
+        const tit = document.getElementById('title').value;
+        const tim = document.getElementById('airtime').value;
 
-        if (!artist || !title) return alert("Missing info");
+        if (!art || !tit) return alert("Enter Artist and Title");
 
-        // Send to Google Sheet
-        const formUrl = `https://docs.google.com/forms/d/e/1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog/formResponse?${ENTRY_ARTIST}=${encodeURIComponent(artist)}&${ENTRY_TITLE}=${encodeURIComponent(title)}&submit=Submit`;
+        const postUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?${ENTRY_ARTIST}=${encodeURIComponent(art)}&${ENTRY_TITLE}=${encodeURIComponent(tit)}&submit=Submit`;
         
-        fetch(formUrl, { mode: 'no-cors' });
+        fetch(postUrl, { mode: 'no-cors' });
 
-        // UI Reset
-        document.getElementById('artist').value = '';
-        document.getElementById('title').value = '';
+        document.getElementById('artist').value = "";
+        document.getElementById('title').value = "";
         document.getElementById('artist').focus();
+        setClock();
 
-        // Refresh list after 2 seconds to allow Google to process
-        setTimeout(refreshHistory, 2000);
+        setTimeout(loadHistory, 2000);
     }
 
+    // 3. Copy Helper
     function copyRow(text) {
         navigator.clipboard.writeText(text);
-        // Visual feedback
-        event.target.innerText = "COPIED!";
-        setTimeout(() => event.target.innerText = "COPY", 1000);
+        const btn = event.target;
+        btn.innerText = "COPIED";
+        setTimeout(() => btn.innerText = "COPY", 1000);
     }
 
-    // Initial load
-    refreshHistory();
-    // Auto-refresh every 30 seconds
-    setInterval(refreshHistory, 30000);
+    // Auto-refresh history every 30 seconds
+    setInterval(loadHistory, 30000);
+    loadHistory();
 </script>
 
 </body>
