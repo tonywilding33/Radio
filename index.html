@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer</title>
+    <title>Virtual Producer</title>
     <style>
-        /* Prevents text highlighting */
         * {
             margin: 0;
             padding: 0;
@@ -34,16 +33,16 @@
 
         h1 {
             color: #e31e24;
-            font-size: 1.4rem;
-            margin-bottom: 5px;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         p {
-            color: #555;
+            color: #666;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 400;
         }
 
         .iframe-container {
@@ -67,17 +66,15 @@
 <body oncontextmenu="return false;">
 
     <div class="header-text">
-        <h1>Welcome to RHR</h1>
+        <h1>Welcome</h1>
         <p>A smart scheduler that automatically builds perfectly balanced broadcast logs for our patients.</p>
     </div>
 
     <div class="iframe-container">
-        <!-- Loads Global.html in the center -->
-        <iframe src="Global.html" title="RHR Virtual Producer"></iframe>
+        <iframe src="Global.html" title="Producer Interface"></iframe>
     </div>
 
     <script>
-        // Blocks common keyboard shortcuts for viewing source code
         document.onkeydown = function(e) {
             if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73 || (e.shiftKey && e.keyCode === 73))) {
                 return false;
