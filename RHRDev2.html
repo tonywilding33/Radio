@@ -50,11 +50,13 @@
 
 <script>
     // --- CLOUD CONFIGURATION ---
-    const GOOGLE_READ_URL = "https://script.google.com/macros/s/AKfycbzO8LobmU_i3MclI4xTS-nDAr9G2uxCoq53AVJDCExiodJRWIx9M5OdNzpBPrsYJF5x/exec";
+    // Ensure this URL is your LATEST Deployment URL from Apps Script
+    const GOOGLE_READ_URL = "https://script.google.com/macros/s/AKfycbzuqGGbU60k0xUchgmWuhe7_krlnAJlOTZCYPGLdwR3aI4d8xdmbX1R3ZOncVPAHCLIQg/exec";
+    
     const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog"; 
-    const ENTRY_ARTIST = "1096403488";
-    const ENTRY_TITLE = "1682859365";
-    const ENTRY_TIME = "2099191890";
+    const ENTRY_ARTIST = "1096403488"; // Maps to Col B
+    const ENTRY_TITLE = "1682859365";  // Maps to Col C
+    const ENTRY_TIME = "2099191890";   // Maps to Col D
     const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
 
     let masterLibrary = [];
@@ -69,6 +71,7 @@
         try {
             const resp = await fetch(GOOGLE_READ_URL);
             const data = await resp.json();
+            // This maps Column B to artist and Column C to title
             globalHistory = data.map(item => ({
                 artist: item.artist,
                 title: item.title,
