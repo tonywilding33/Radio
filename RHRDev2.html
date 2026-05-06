@@ -2,146 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | RHR Reader v2.17</title>
+    <title>RHR | Virtual Producer v2.18 (Local)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-dark: #2c3e50; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
+        body { font-family: -apple-system, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
         .wrapper { width: 100%; max-width: 500px; }
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px;}
-        .sync-status { font-size: 0.65rem; text-align: center; color: #888; background: #eee; padding: 5px; border-radius: 4px; margin-bottom: 15px; letter-spacing: 1px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); }
+        .logo { font-size: 3rem; font-weight: 900; color: var(--rhr-red); text-align: center; margin: 0; line-height: 1; }
+        .station-name { color: var(--rhr-dark); font-size: 1rem; font-weight: bold; text-transform: uppercase; text-align: center; margin-bottom: 20px; letter-spacing: 1px;}
         label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; }
         select, .btn { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
         .btn-main { background: var(--rhr-red); color: #fff; font-weight: bold; cursor: pointer; border: none; }
-        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; }
-        .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; background: #fff; justify-content: space-between; }
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 400px; overflow-y: auto; margin: 15px 0; }
+        .track-row { display: flex; padding: 12px; border-bottom: 1px solid #eee; font-size: 0.85rem; justify-content: space-between; align-items: center; }
         .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
-        .t-artist { font-weight: bold; text-transform: uppercase; }
-        .time-col { font-family: monospace; font-weight: bold; color: var(--rhr-dark); }
+        .t-artist { font-weight: bold; }
     </style>
 </head>
 <body>
-
 <div class="wrapper">
     <div class="card">
-        <div style="text-align:center;"><h1 style="color:var(--rhr-red); margin:0;">RHR</h1></div>
+        <p class="logo">RHR</p>
         <div class="station-name">Rugby Hospital Radio</div>
-        <div id="sync-status" class="sync-status">CONNECTING TO RHR READER...</div>
-
         <div id="setup-view">
             <label>Start Hour</label>
             <select id="start-hour"></select>
             <label>Duration</label>
             <select id="shift-duration"></select>
-            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE & SYNC TO RHR READER</button>
+            <button class="btn btn-main" onclick="loadLibrary()">GENERATE PLAYLIST</button>
         </div>
-
         <div id="monitor" style="display:none;">
             <div id="playlist-box"></div>
-            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET / NEW LOG</button>
+            <button class="btn btn-main" style="background:#444" onclick="location.reload()">↺ NEW SESSION</button>
         </div>
     </div>
 </div>
-
 <script>
-    // --- CLOUD CONFIG ---
-    const GOOGLE_READ_URL = "https://script.google.com/macros/s/AKfycbzuqGGbU60k0xUchgmWuhe7_krlnAJlOTZCYPGLdwR3aI4d8xdmbX1R3ZOncVPAHCLIQg/exec";
-    const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog"; 
     const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
-
-    // RHR Reader Entry IDs
-    const ENTRY_ARTIST = "1096403488";
-    const ENTRY_TITLE = "1682859365";
-    const ENTRY_TIME = "2099191890";
-
     let masterLibrary = [];
-    let globalHistory = [];
 
-    window.onload = async function() {
-        // Init dropdowns
+    window.onload = function() {
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
         const dBox = document.getElementById('shift-duration');
         for(let i=1; i<=12; i++) dBox.add(new Option(i + " Hours", i));
-
-        // Get History
-        try {
-            const resp = await fetch(GOOGLE_READ_URL);
-            const data = await resp.json();
-            globalHistory = data.map(item => ({
-                artist: item.artist,
-                title: item.title,
-                timestamp: new Date(item.timestamp).getTime()
-            }));
-            document.getElementById('sync-status').innerText = `RHR READER SYNCED: ${globalHistory.length} TRACKS`;
-        } catch (e) {
-            document.getElementById('sync-status').innerText = "OFFLINE MODE";
-        }
     };
 
-    async function connectAndBuild() {
+    async function loadLibrary() {
         try {
             const resp = await fetch(_MASTER_REF);
             const csv = await resp.text();
             Papa.parse(csv, {
                 header: true, skipEmptyLines: true,
-                complete: function(results) {
+                complete: (results) => {
                     masterLibrary = results.data.filter(r => String(r.Enabled || '').trim().toUpperCase() === 'Y');
-                    runLogic();
+                    generatePlaylist();
                 }
             });
-        } catch (err) { alert("Could not connect to Master Library."); }
+        } catch (err) { alert("Error loading CSV from GitHub."); }
     }
 
-    function runLogic() {
+    function generatePlaylist() {
         const startHour = parseInt(document.getElementById('start-hour').value);
         const duration = parseInt(document.getElementById('shift-duration').value);
         let playlist = [];
-        let sessionHistory = [...globalHistory];
+        let history = []; 
 
         for (let h = 0; h < duration; h++) {
             let curHour = (startHour + h) % 24;
             let elapsed = 0;
             while (elapsed < 3600) {
                 let picks = masterLibrary.filter(s => {
-                    const match = sessionHistory.findLast(hi => hi.title === s.Title && hi.artist === s.Artist);
+                    const match = history.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                     if (match) {
-                        const diff = Date.now() - match.timestamp;
-                        // 4h 15m repetition check
+                        const diff = Date.now() - match.time;
                         if (diff < 15300000) return false; 
                     }
                     return true;
                 });
-
-                if (picks.length > 0) {
-                    let p = picks[Math.floor(Math.random() * picks.length)];
-                    let time = curHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed/60).toString().padStart(2,'0');
-                    playlist.push({...p, timeStr: time});
-                    sessionHistory.push({artist: p.Artist, title: p.Title, timestamp: Date.now()});
-                    elapsed += 240; // 4 min avg
-                } else break;
+                let p = picks.length > 0 ? picks[Math.floor(Math.random() * picks.length)] : masterLibrary[Math.floor(Math.random() * masterLibrary.length)];
+                let time = curHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed/60).toString().padStart(2,'0');
+                playlist.push({...p, timeStr: time});
+                history.push({...p, time: Date.now()});
+                elapsed += 240; 
             }
         }
         render(playlist);
     }
 
-    function render(playlist) {
+    function render(list) {
         document.getElementById('setup-view').style.display = 'none';
         document.getElementById('monitor').style.display = 'block';
-        document.getElementById('playlist-box').innerHTML = playlist.map(t => `
+        document.getElementById('playlist-box').innerHTML = list.map(t => `
             <div class="track-row">
                 <span><span class="t-artist">${t.Artist}</span> - ${t.Title}</span>
-                <span class="time-col">${t.timeStr}</span>
+                <span style="font-family:monospace"><b>${t.timeStr}</b></span>
             </div>
         `).join('');
-
-        // SILENT PUSH TO RHR READER FORM
-        playlist.forEach(track => {
-            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?entry.${ENTRY_ARTIST}=${encodeURIComponent(track.Artist)}&entry.${ENTRY_TITLE}=${encodeURIComponent(track.Title)}&entry.${ENTRY_TIME}=${encodeURIComponent(track.timeStr)}&submit=Submit`;
-            fetch(formUrl, { mode: 'no-cors' });
-        });
     }
 </script>
 </body>
