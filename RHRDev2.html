@@ -2,152 +2,148 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RHR Music Scheduler</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHR | Virtual Producer v2.17</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --accent: #00ff9d; --text: #e0e0e0; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .wrapper { max-width: 900px; margin: auto; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
-        .status-pill { padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; border: 1px solid transparent; }
-        .online { background: #1b4d3e; color: var(--accent); border-color: var(--accent); }
-        .offline { background: #4d1b1b; color: #ff5555; border-color: #ff5555; }
-
-        .input-panel { display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 12px; background: var(--card); padding: 20px; border-radius: 10px; border: 1px solid #333; margin-bottom: 30px; align-items: end; }
-        .input-group { display: flex; flex-direction: column; }
-        label { font-size: 0.7rem; color: #888; margin-bottom: 5px; text-transform: uppercase; }
-        input { background: #2d2d2d; border: 1px solid #444; color: white; padding: 10px; border-radius: 5px; outline: none; }
-        input:focus { border-color: var(--accent); }
-        
-        #log-btn { background: var(--accent); color: #121212; border: none; padding: 11px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; height: 39px; }
-        #log-btn:hover { background: #00cc7e; }
-
-        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; }
-        th { text-align: left; padding: 15px; background: #2a2a2a; color: #888; font-size: 0.75rem; }
-        td { padding: 15px; border-bottom: 1px solid #333; }
-        .artist-name { color: var(--accent); font-weight: bold; }
-        .copy-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-        .copy-btn:hover { background: var(--accent); color: #121212; }
+        :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-dark: #2c3e50; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
+        .wrapper { width: 100%; max-width: 500px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .logo-container { text-align: center; margin-bottom: 10px; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px;}
+        .sync-status { font-size: 0.65rem; text-align: center; color: #888; background: #eee; padding: 5px; border-radius: 4px; margin-bottom: 15px; letter-spacing: 1px; }
+        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; }
+        select, .btn { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn-main { background: var(--rhr-red); color: #fff; font-weight: bold; cursor: pointer; border: none; }
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; }
+        .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; background: #fff; justify-content: space-between; }
+        .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
+        .t-artist { font-weight: bold; text-transform: uppercase; }
+        .time-col { font-family: monospace; font-weight: bold; color: var(--rhr-dark); }
+        .dev-footer { text-align: center; font-size: 0.65rem; color: #999; margin-top: 20px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <header>
-        <div>
-            <h1 style="margin:0; font-size: 1.6rem; color: var(--accent);">RHR Scheduler</h1>
-            <p style="margin:5px 0; color:#888; font-size: 0.8rem;">Live Playout & Cloud History Sync</p>
-        </div>
-        <div id="status" class="status-pill offline">SYNCING...</div>
-    </header>
+    <div class="card">
+        <div class="logo-container"><h1 style="color:var(--rhr-red); margin:0;">RHR</h1></div>
+        <div class="station-name">Rugby Hospital Radio</div>
+        <div id="sync-status" class="sync-status">INITIALIZING CLOUD SYNC...</div>
 
-    <div class="input-panel">
-        <div class="input-group">
-            <label>UK Artist</label>
-            <input type="text" id="artist" placeholder="e.g. David Bowie" autofocus>
+        <div id="setup-view">
+            <label>Start Hour</label>
+            <select id="start-hour"></select>
+            <label>Duration</label>
+            <select id="shift-duration"></select>
+            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE & SYNC LOG</button>
         </div>
-        <div class="input-group">
-            <label>Song Title</label>
-            <input type="text" id="title" placeholder="e.g. Starman">
+
+        <div id="monitor" style="display:none;">
+            <div id="playlist-box"></div>
+            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET / NEW LOG</button>
         </div>
-        <div class="input-group">
-            <label>Air Time</label>
-            <input type="time" id="airtime">
-        </div>
-        <button id="log-btn" onclick="submitEntry()">LOG TRACK</button>
+        <div class="dev-footer">v2.17 | Developed by Tony Wilding</div>
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th width="15%">AIR TIME</th>
-                <th width="35%">ARTIST</th>
-                <th width="35%">TITLE</th>
-                <th width="15%">ACTION</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-            <!-- Cloud data will appear here -->
-        </tbody>
-    </table>
 </div>
 
 <script>
-    // --- VERIFIED CONNECTIONS ---
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuqGGbU60k0xUchgmWuhe7_krlnAJlOTZCYPGLdwR3aI4d8xdmbX1R3ZOncVPAHCLIQg/exec";
-    const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog";
-    const ENTRY_ARTIST = "entry.1096403488";
-    const ENTRY_TITLE = "entry.1682859365";
+    // --- CLOUD CONFIGURATION ---
+    const GOOGLE_READ_URL = "https://script.google.com/macros/s/AKfycbzO8LobmU_i3MclI4xTS-nDAr9G2uxCoq53AVJDCExiodJRWIx9M5OdNzpBPrsYJF5x/exec";
+    const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog"; 
+    const ENTRY_ARTIST = "1096403488";
+    const ENTRY_TITLE = "1682859365";
+    const ENTRY_TIME = "2099191890";
+    const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
 
-    // Set default time to current
-    function setClock() {
-        const now = new Date();
-        document.getElementById('airtime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-    }
-    setClock();
+    let masterLibrary = [];
+    let globalHistory = [];
 
-    // 1. Fetch from Google Sheet
-    async function loadHistory() {
+    window.onload = async function() {
+        const hBox = document.getElementById('start-hour');
+        for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
+        const dBox = document.getElementById('shift-duration');
+        for(let i=1; i<=24; i++) dBox.add(new Option(i + " Hours", i));
+
         try {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            const body = document.getElementById('table-body');
-            const status = document.getElementById('status');
-
-            if (data.error) throw new Error();
-
-            status.innerText = "Cloud Sync Active";
-            status.className = "status-pill online";
-
-            body.innerHTML = "";
-            data.reverse().slice(0, 12).forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="color:#888; font-family:monospace;">${row.scheduledTime || '--:--'}</td>
-                    <td class="artist-name">${row.artist}</td>
-                    <td>${row.title}</td>
-                    <td><button class="copy-btn" onclick="copyRow('${row.artist} - ${row.title}')">COPY</button></td>
-                `;
-                body.appendChild(tr);
-            });
+            const resp = await fetch(GOOGLE_READ_URL);
+            const data = await resp.json();
+            globalHistory = data.map(item => ({
+                artist: item.artist,
+                title: item.title,
+                timestamp: new Date(item.timestamp).getTime()
+            }));
+            document.getElementById('sync-status').innerText = `CLOUD SYNC ACTIVE: ${globalHistory.length} TRACKS IN MEMORY`;
         } catch (e) {
-            document.getElementById('status').innerText = "Sync Error";
-            document.getElementById('status').className = "status-pill offline";
+            document.getElementById('sync-status').innerText = "OFFLINE MODE: LOCAL HISTORY ONLY";
         }
+    };
+
+    async function connectAndBuild() {
+        try {
+            const resp = await fetch(_MASTER_REF);
+            const csv = await resp.text();
+            Papa.parse(csv, {
+                header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    masterLibrary = results.data.filter(r => {
+                        const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
+                        return isEnabled && r.Artist && r.Title;
+                    });
+                    runLogic();
+                }
+            });
+        } catch (err) { alert("Could not connect to Master Library."); }
     }
 
-    // 2. Submit to Google Form
-    function submitEntry() {
-        const art = document.getElementById('artist').value;
-        const tit = document.getElementById('title').value;
-        const tim = document.getElementById('airtime').value;
+    function runLogic() {
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        const duration = parseInt(document.getElementById('shift-duration').value);
+        let playlist = [];
+        let sessionHistory = [...globalHistory];
 
-        if (!art || !tit) return alert("Enter Artist and Title");
+        for (let h = 0; h < duration; h++) {
+            let curHour = (startHour + h) % 24;
+            let elapsed = 0;
+            while (elapsed < 3600) {
+                let picks = masterLibrary.filter(s => {
+                    const match = sessionHistory.findLast(hi => hi.title === s.Title && hi.artist === s.Artist);
+                    if (match) {
+                        const diff = Date.now() - match.timestamp;
+                        if (diff < 15300000) return false; // 4h 15m rule
+                        if (diff >= 79200000 && diff <= 93600000) return false; // Mirror rule
+                    }
+                    return true;
+                });
 
-        const postUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?${ENTRY_ARTIST}=${encodeURIComponent(art)}&${ENTRY_TITLE}=${encodeURIComponent(tit)}&submit=Submit`;
-        
-        fetch(postUrl, { mode: 'no-cors' });
-
-        document.getElementById('artist').value = "";
-        document.getElementById('title').value = "";
-        document.getElementById('artist').focus();
-        setClock();
-
-        setTimeout(loadHistory, 2000);
+                if (picks.length > 0) {
+                    let p = picks[Math.floor(Math.random() * picks.length)];
+                    let time = curHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed/60).toString().padStart(2,'0');
+                    playlist.push({...p, timeStr: time});
+                    sessionHistory.push({artist: p.Artist, title: p.Title, timestamp: Date.now()});
+                    elapsed += 240; 
+                } else break;
+            }
+        }
+        renderAndSync(playlist);
     }
 
-    // 3. Copy Helper
-    function copyRow(text) {
-        navigator.clipboard.writeText(text);
-        const btn = event.target;
-        btn.innerText = "COPIED";
-        setTimeout(() => btn.innerText = "COPY", 1000);
-    }
+    function renderAndSync(playlist) {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        document.getElementById('playlist-box').innerHTML = playlist.map(t => `
+            <div class="track-row">
+                <span><span class="t-artist">${t.Artist}</span> - ${t.Title}</span>
+                <span class="time-col">${t.timeStr}</span>
+            </div>
+        `).join('');
 
-    // Auto-refresh history every 30 seconds
-    setInterval(loadHistory, 30000);
-    loadHistory();
+        playlist.forEach(track => {
+            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?entry.${ENTRY_ARTIST}=${encodeURIComponent(track.Artist)}&entry.${ENTRY_TITLE}=${encodeURIComponent(track.Title)}&entry.${ENTRY_TIME}=${encodeURIComponent(track.timeStr)}&submit=Submit`;
+            fetch(formUrl, { mode: 'no-cors' });
+        });
+    }
 </script>
-
 </body>
 </html>
