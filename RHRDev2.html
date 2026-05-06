@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHR | Virtual Producer v2.17</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-dark: #2c3e50; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f4f4; padding: 10px; display: flex; justify-content: center; }
+        .wrapper { width: 100%; max-width: 500px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .logo-container { text-align: center; margin-bottom: 10px; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px;}
+        .sync-status { font-size: 0.65rem; text-align: center; color: #888; background: #eee; padding: 5px; border-radius: 4px; margin-bottom: 15px; letter-spacing: 1px; }
+        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; }
+        select, .btn { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn-main { background: var(--rhr-red); color: #fff; font-weight: bold; cursor: pointer; border: none; }
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; }
+        .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; background: #fff; justify-content: space-between; }
+        .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
+        .t-artist { font-weight: bold; text-transform: uppercase; }
+        .time-col { font-family: monospace; font-weight: bold; color: var(--rhr-dark); }
+        .dev-footer { text-align: center; font-size: 0.65rem; color: #999; margin-top: 20px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="card">
+        <div class="logo-container"><h1 style="color:var(--rhr-red); margin:0;">RHR</h1></div>
+        <div class="station-name">Rugby Hospital Radio</div>
+        <div id="sync-status" class="sync-status">INITIALIZING CLOUD SYNC...</div>
+
+        <div id="setup-view">
+            <label>Start Hour</label>
+            <select id="start-hour"></select>
+            <label>Duration</label>
+            <select id="shift-duration"></select>
+            <button class="btn btn-main" onclick="connectAndBuild()">GENERATE & SYNC LOG</button>
+        </div>
+
+        <div id="monitor" style="display:none;">
+            <div id="playlist-box"></div>
+            <button class="btn btn-main" style="background:#555" onclick="location.reload()">↺ RESET / NEW LOG</button>
+        </div>
+        <div class="dev-footer">v2.17 | Developed by Tony Wilding</div>
+    </div>
+</div>
+
+<script>
+    // --- CLOUD CONFIGURATION ---
+    const GOOGLE_READ_URL = "https://script.google.com/macros/s/AKfycbzO8LobmU_i3MclI4xTS-nDAr9G2uxCoq53AVJDCExiodJRWIx9M5OdNzpBPrsYJF5x/exec";
+    const FORM_ID = "1m2y8vi3FOcOOBIuycfv-QWoqUnAGbLNgKEDhyXPMsog"; 
+    const ENTRY_ARTIST = "1096403488";
+    const ENTRY_TITLE = "1682859365";
+    const ENTRY_TIME = "2099191890";
+    const _MASTER_REF = 'https://raw.githubusercontent.com/tonywilding33/Radio/main/rhr_master.csv';
+
+    let masterLibrary = [];
+    let globalHistory = [];
+
+    window.onload = async function() {
+        const hBox = document.getElementById('start-hour');
+        for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
+        const dBox = document.getElementById('shift-duration');
+        for(let i=1; i<=24; i++) dBox.add(new Option(i + " Hours", i));
+
+        // FETCH SHARED HISTORY ON STARTUP
+        try {
+            const resp = await fetch(GOOGLE_READ_URL);
+            const data = await resp.json();
+            globalHistory = data.map(item => ({
+                artist: item.artist,
+                title: item.title,
+                timestamp: new Date(item.timestamp).getTime()
+            }));
+            document.getElementById('sync-status').innerText = `CLOUD SYNC ACTIVE: ${globalHistory.length} TRACKS IN MEMORY`;
+        } catch (e) {
+            document.getElementById('sync-status').innerText = "OFFLINE MODE: LOCAL HISTORY ONLY";
+        }
+    };
+
+    async function connectAndBuild() {
+        try {
+            const resp = await fetch(_MASTER_REF);
+            const csv = await resp.text();
+            Papa.parse(csv, {
+                header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    masterLibrary = results.data.filter(r => {
+                        const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
+                        return isEnabled && r.Artist && r.Title;
+                    });
+                    runLogic();
+                }
+            });
+        } catch (err) { alert("Could not connect to Master Library."); }
+    }
+
+    function runLogic() {
+        const startHour = parseInt(document.getElementById('start-hour').value);
+        const duration = parseInt(document.getElementById('shift-duration').value);
+        let playlist = [];
+        let sessionHistory = [...globalHistory];
+
+        for (let h = 0; h < duration; h++) {
+            let curHour = (startHour + h) % 24;
+            let elapsed = 0;
+            while (elapsed < 3600) {
+                let picks = masterLibrary.filter(s => {
+                    const match = sessionHistory.findLast(hi => hi.title === s.Title && hi.artist === s.Artist);
+                    if (match) {
+                        const diff = Date.now() - match.timestamp;
+                        // RULE: 4h 15m Repetition
+                        if (diff < 15300000) return false; 
+                        // RULE: +/- 2h Mirror (Horizontal Shuffling)
+                        if (diff >= 79200000 && diff <= 93600000) return false; 
+                    }
+                    return true;
+                });
+
+                if (picks.length > 0) {
+                    let p = picks[Math.floor(Math.random() * picks.length)];
+                    let time = curHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed/60).toString().padStart(2,'0');
+                    playlist.push({...p, timeStr: time});
+                    // Update session history so current picks affect the next ones in this log
+                    sessionHistory.push({artist: p.Artist, title: p.Title, timestamp: Date.now()});
+                    elapsed += 240; // Approx 4 mins per song
+                } else break;
+            }
+        }
+        renderAndSync(playlist);
+    }
+
+    function renderAndSync(playlist) {
+        document.getElementById('setup-view').style.display = 'none';
+        document.getElementById('monitor').style.display = 'block';
+        document.getElementById('playlist-box').innerHTML = playlist.map(t => `
+            <div class="track-row">
+                <span><span class="t-artist">${t.Artist}</span> - ${t.Title}</span>
+                <span class="time-col">${t.timeStr}</span>
+            </div>
+        `).join('');
+
+        // SILENT PUSH TO GOOGLE FORM
+        playlist.forEach(track => {
+            const formUrl = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?entry.${ENTRY_ARTIST}=${encodeURIComponent(track.Artist)}&entry.${ENTRY_TITLE}=${encodeURIComponent(track.Title)}&entry.${ENTRY_TIME}=${encodeURIComponent(track.timeStr)}&submit=Submit`;
+            fetch(formUrl, { mode: 'no-cors' });
+        });
+        
+        console.log("Log generated and synced to Cloud.");
+    }
+</script>
+</body>
+</html>
