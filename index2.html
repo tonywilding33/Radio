@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v2 LE</title>
+    <title>RHR | Virtual Producer v1.4 LE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
@@ -80,7 +80,7 @@
 
                 <label>Specials</label>
                 <select id="specials-select" onchange="syncSelection(this)">
-                    <option value="">-- No Specials --</option>
+                    <option value="">-- All Specials --</option>
                     <option value="CHRISTMAS">Christmas</option>
                     <option value="REQUESTS">Requests</option>
                 </select>
@@ -169,7 +169,6 @@
                 header: true, dynamicTyping: true, skipEmptyLines: true,
                 complete: function(results) {
                     masterLibrary = results.data.filter(r => {
-                        // Strict filter: Enabled must be 'Y' AND Location 1 MUST have a value
                         const isEnabled = String(r.Enabled || '').trim().toUpperCase() === 'Y';
                         const hasLocation = String(r['Location 1'] || '').trim().length > 0;
                         return isEnabled && hasLocation;
@@ -218,12 +217,17 @@
 
             while (elapsed < 3600) {
                 let picks = masterLibrary.filter(s => {
+                    // Filters
                     if (filterType === "GENRE" && String(s.Genre || '').toUpperCase() !== filterVal) return false;
                     if (filterType === "DECADE" && !String(s.Decade || '').includes(filterVal)) return false;
-                    if (filterType === "SPECIAL" && filterVal === "CHRISTMAS" && !xmsRegex.test(s.Title) && !xmsRegex.test(s.Artist)) return false;
                     
+                    // Xmas filtering (Only filter if Christmas is NOT the selected special)
                     const isXmasTrack = xmsRegex.test(s.Title) || xmsRegex.test(s.Artist);
-                    if (isXmasTrack && !isDecember && filterVal !== "CHRISTMAS") return false;
+                    if (filterType === "SPECIAL" && filterVal === "CHRISTMAS") {
+                        if (!isXmasTrack) return false;
+                    } else {
+                        if (isXmasTrack && !isDecember) return false;
+                    }
 
                     const songMatch = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                     const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
