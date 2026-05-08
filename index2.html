@@ -13,21 +13,22 @@
         .logo-container { text-align: center; margin-bottom: 10px; }
         .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
         .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
-        label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
         
-        .show-selector { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
-        .radio-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
-        .radio-option { display: flex; align-items: center; font-size: 0.8rem; cursor: pointer; background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #ddd; transition: all 0.2s; }
-        .radio-option input { margin-right: 8px; cursor: pointer; accent-color: var(--rhr-red); }
+        label { display: block; font-weight: bold; margin: 12px 0 5px; font-size: 0.85rem; color: #444; }
         
-        /* Disabled Styling */
-        .radio-option.disabled { background: #f0f0f0; border-color: #eee; color: #aaa; cursor: not-allowed; }
-        .radio-option.disabled input { cursor: not-allowed; opacity: 0.5; }
+        .mode-container { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px; }
+        
+        /* Dropdown Styling */
+        select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: #fff; box-sizing: border-box; cursor: pointer; color: #333; }
+        select:disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; border-color: #eee; }
+        
+        .radio-option { display: flex; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; color: var(--rhr-dark); }
+        .radio-option input { margin-right: 10px; transform: scale(1.2); accent-color: var(--rhr-red); }
 
-        select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; box-sizing: border-box; }
-        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; box-sizing: border-box; }
+        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: opacity 0.2s; box-sizing: border-box; }
         .btn-main { background: var(--rhr-red); color: #fff; }
-        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 500px; overflow-y: auto; margin: 15px 0; background: #fff; }
+        
+        #playlist-box { border: 1px solid #eee; border-radius: 8px; max-height: 450px; overflow-y: auto; margin: 15px 0; background: #fff; }
         .hour-marker { background: var(--rhr-dark); color: #fff; padding: 8px 15px; font-size: 0.9rem; font-weight: bold; position: sticky; top: 0; z-index: 10; }
         .track-row { display: flex; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 0.85rem; }
         .track-row:nth-of-type(even) { background-color: var(--rhr-pink-fill); }
@@ -36,8 +37,9 @@
         .t-title { color: #555; font-size: 0.8rem; }
         .t-loc { font-weight: bold; color: var(--rhr-red); font-family: monospace; margin-left: 5px; }
         .time-col { font-weight: bold; color: var(--rhr-dark); font-family: monospace; min-width: 50px; text-align: right; }
-        .btn-group { display: flex; gap: 10px; }
-        .btn-group .btn { flex: 1; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-group .btn { flex: 1; margin-top: 0; }
         .dev-footer { text-align: center; font-size: 0.65rem; color: #999; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
@@ -55,25 +57,45 @@
         <div class="station-name">Rugby Hospital Radio</div>
 
         <div id="setup-view">
-            <div class="show-selector">
-                <label>Show Mode</label>
-                <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="showType" value="NORMAL" checked> Normal</label>
-                    <label class="radio-option"><input type="radio" name="showType" value="COUNTRY"> Country</label>
-                    <label class="radio-option"><input type="radio" name="showType" value="JAZZ"> Jazz</label>
-                    <label class="radio-option"><input type="radio" name="showType" value="ROCK"> Rock</label>
-                    <label class="radio-option"><input type="radio" name="showType" value="SOUL"> Soul</label>
-                    <label class="radio-option"><input type="radio" name="showType" value="DISCO"> Disco</label>
-                    
-                    <!-- Disabled Modes -->
-                    <label class="radio-option disabled"><input type="radio" name="showType" value="CHRISTMAS" disabled> Christmas</label>
-                    <label class="radio-option disabled"><input type="radio" name="showType" value="REQUESTS" disabled> Requests</label>
+            <div class="mode-container">
+                <label class="radio-option">
+                    <input type="radio" name="masterMode" value="NORMAL" checked onclick="toggleSelectors()"> NORMAL MODE
+                </label>
+
+                <label>Genre Select</label>
+                <select id="genre-select" onchange="setSpecialistMode()">
+                    <option value="">-- Choose Genre --</option>
+                    <option value="COUNTRY">Country</option>
+                    <option value="JAZZ">Jazz</option>
+                    <option value="ROCK">Rock</option>
+                    <option value="SOUL">Soul</option>
+                    <option value="DISCO">Disco</option>
+                </select>
+
+                <label>Seasonal / Event</label>
+                <select id="seasonal-select" disabled>
+                    <option value="">-- Choose Mode --</option>
+                    <option value="CHRISTMAS">Christmas</option>
+                    <option value="REQUESTS">Requests</option>
+                </select>
+
+                <label>Decade (Coming Soon)</label>
+                <select id="decade-select" disabled>
+                    <option value="">-- Choose Decade --</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Start Hour</label>
+                    <select id="start-hour"></select>
+                </div>
+                <div style="flex: 1;">
+                    <label>Duration</label>
+                    <select id="shift-duration"></select>
                 </div>
             </div>
-            <label>Start Hour</label>
-            <select id="start-hour"></select>
-            <label>Duration</label>
-            <select id="shift-duration"></select>
+
             <button class="btn btn-main" id="gen-btn" onclick="initConnect()">GENERATE BROADCAST LOG</button>
         </div>
 
@@ -104,6 +126,19 @@
         for(let i=1; i<=3; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
         await loadGlobalHistory();
     };
+
+    function toggleSelectors() {
+        // If Normal Mode radio is clicked, clear the dropdowns
+        document.getElementById('genre-select').value = "";
+    }
+
+    function setSpecialistMode() {
+        const genre = document.getElementById('genre-select').value;
+        if (genre !== "") {
+            // Uncheck Normal Mode if a genre is picked
+            document.getElementsByName('masterMode')[0].checked = false;
+        }
+    }
 
     async function loadGlobalHistory() {
         try {
@@ -144,8 +179,12 @@
     async function buildLog() {
         const startHour = parseInt(document.getElementById('start-hour').value);
         const duration = parseInt(document.getElementById('shift-duration').value);
-        const showType = document.querySelector('input[name="showType"]:checked').value;
         
+        // Logic to determine active mode
+        let selectedMode = "NORMAL";
+        const genreVal = document.getElementById('genre-select').value;
+        if (genreVal !== "") selectedMode = genreVal;
+
         playlistData = {};
         let tracksToSave = [];
         const isDecember = new Date().getMonth() === 11;
@@ -159,7 +198,7 @@
 
             while (elapsed < 3600) {
                 let picks = masterLibrary.filter(s => {
-                    if (showType !== "NORMAL" && String(s.Genre || '').toUpperCase() !== showType) return false;
+                    if (selectedMode !== "NORMAL" && String(s.Genre || '').toUpperCase() !== selectedMode) return false;
                     
                     const isXmasTrack = xmsRegex.test(s.Title) || xmsRegex.test(s.Artist);
                     if (isXmasTrack && !isDecember) return false;
@@ -176,7 +215,7 @@
 
                 if (picks.length === 0) {
                     picks = masterLibrary.filter(s => {
-                        if (showType !== "NORMAL" && String(s.Genre || '').toUpperCase() !== showType) return false;
+                        if (selectedMode !== "NORMAL" && String(s.Genre || '').toUpperCase() !== selectedMode) return false;
                         const sm = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                         const am = sessionHistory.findLast(hi => hi.Artist === s.Artist);
                         return !(sm && (Date.now() - sm.time < 16200000)) && !(am && (Date.now() - am.time < 8100000));
