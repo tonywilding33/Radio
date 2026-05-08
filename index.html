@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.2 LE</title>
+    <title>RHR | Virtual Producer v1.02 LE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
@@ -37,7 +37,7 @@
         .ver-tag { position: absolute; bottom: 5px; right: 10px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
-<body oncontextmenu="return false;"> <!-- Right click disabled here -->
+<body oncontextmenu="return false;">
 
 <div class="wrapper">
     <div class="card">
@@ -83,7 +83,6 @@
         const hBox = document.getElementById('start-hour');
         for(let i=0; i<24; i++) hBox.add(new Option(i.toString().padStart(2, '0') + ":00", i));
         const dBox = document.getElementById('shift-duration');
-        // CHANGED: Limited to 3 hours max
         for(let i=1; i<=3; i++) dBox.add(new Option(i + (i === 1 ? " Hour" : " Hours"), i));
         await loadGlobalHistory();
     };
@@ -95,7 +94,6 @@
             sessionHistory = historyData.map(item => ({
                 Artist: item.artist, Title: item.title, time: new Date(item.timestamp).getTime() 
             }));
-            console.log("History Sync Success.");
         } catch (err) { console.warn("Starting fresh session."); }
     }
 
@@ -130,6 +128,10 @@
         const duration = parseInt(document.getElementById('shift-duration').value);
         playlistData = {};
         let tracksToSave = [];
+        
+        const now = new Date();
+        const isDecember = now.getMonth() === 11;
+        const xmsRegex = /christmas|xmas/i;
 
         for (let h = 0; h < duration; h++) {
             let currentHour = (startHour + h) % 24;
@@ -139,15 +141,19 @@
 
             while (elapsed < 3600) {
                 let picks = masterLibrary.filter(s => {
+                    // Seasonal Restriction Check
+                    const isXmasTrack = xmsRegex.test(s.Title) || xmsRegex.test(s.Artist);
+                    if (isXmasTrack && !isDecember) return false;
+
                     const songMatch = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                     const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
-                    const now = Date.now();
+                    const ts = Date.now();
                     
-                    if (songMatch && (now - songMatch.time < 16200000)) return false; 
-                    if (artistMatch && (now - artistMatch.time < 8100000)) return false;
+                    if (songMatch && (ts - songMatch.time < 16200000)) return false; 
+                    if (artistMatch && (ts - artistMatch.time < 8100000)) return false;
                     
                     if (songMatch) {
-                        const diff = Math.abs(now - songMatch.time);
+                        const diff = Math.abs(ts - songMatch.time);
                         if (diff >= 84300000 && diff <= 88500000) return false;
                     }
                     return targets.includes(parseInt(s.Energy));
@@ -155,6 +161,9 @@
 
                 if (picks.length === 0) {
                     picks = masterLibrary.filter(s => {
+                        const isXmasTrack = xmsRegex.test(s.Title) || xmsRegex.test(s.Artist);
+                        if (isXmasTrack && !isDecember) return false;
+                        
                         const sm = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                         const am = sessionHistory.findLast(hi => hi.Artist === s.Artist);
                         return !(sm && (Date.now() - sm.time < 16200000)) && !(am && (Date.now() - am.time < 8100000));
