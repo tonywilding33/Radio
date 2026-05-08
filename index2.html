@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.2 LE</title>
+    <title>RHR | Virtual Producer v2 Specialist LE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
@@ -20,7 +20,6 @@
         .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-top: -5px; margin-bottom: 20px;}
         label { display: block; font-weight: bold; margin: 10px 0 5px; font-size: 0.85rem; color: #444; }
         
-        /* Specialist Show Styling */
         .show-selector { 
             background: #f9f9f9; 
             padding: 15px; 
@@ -28,9 +27,16 @@
             margin-bottom: 15px; 
             border: 1px solid #eee;
         }
-        .radio-group { display: flex; gap: 15px; margin-top: 5px; }
-        .radio-option { display: flex; align-items: center; font-size: 0.9rem; cursor: pointer; }
+        /* Grid layout for radio buttons to keep it tidy */
+        .radio-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-top: 8px; 
+        }
+        .radio-option { display: flex; align-items: center; font-size: 0.85rem; cursor: pointer; color: #333; }
         .radio-option input { margin-right: 8px; cursor: pointer; accent-color: var(--rhr-red); }
+        .radio-option.disabled { opacity: 0.4; cursor: not-language; }
 
         select { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; appearance: none; box-sizing: border-box; }
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: opacity 0.2s; box-sizing: border-box; }
@@ -54,7 +60,7 @@
 
 <div class="wrapper">
     <div class="card">
-        <div class="ver-tag">LOADED: v1.4-SPEC</div>
+        <div class="ver-tag">LOADED: v1.5-MULTI</div>
         <div class="logo-container">
             <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
                 <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
@@ -66,14 +72,16 @@
 
         <div id="setup-view">
             <div class="show-selector">
-                <label>Specialist Show Mode</label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="showType" value="NORMAL" checked> Normal
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="showType" value="COUNTRY"> Country
-                    </label>
+                <label>Show Type</label>
+                <div class="radio-grid">
+                    <label class="radio-option"><input type="radio" name="showType" value="NORMAL" checked> Normal</label>
+                    <label class="radio-option"><input type="radio" name="showType" value="COUNTRY"> Country</label>
+                    <label class="radio-option"><input type="radio" name="showType" value="JAZZ"> Jazz</label>
+                    <label class="radio-option"><input type="radio" name="showType" value="ROCK"> Rock</label>
+                    <label class="radio-option"><input type="radio" name="showType" value="SOUL"> Soul</label>
+                    <label class="radio-option"><input type="radio" name="showType" value="DISCO"> Disco</label>
+                    <label class="radio-option disabled"><input type="radio" name="showType" value="XMAS" disabled> Christmas</label>
+                    <label class="radio-option disabled"><input type="radio" name="showType" value="REQUESTS" disabled> Requests</label>
                 </div>
             </div>
 
@@ -168,10 +176,12 @@
 
             while (elapsed < 3600) {
                 let picks = masterLibrary.filter(s => {
-                    // Specialist Show Filtering
-                    if (showType === "COUNTRY" && String(s.Genre || '').toUpperCase() !== 'COUNTRY') return false;
+                    // Specialist Show Filtering logic
+                    if (showType !== "NORMAL") {
+                        if (String(s.Genre || '').toUpperCase() !== showType) return false;
+                    }
 
-                    // Christmas Check
+                    // Christmas Global Restriction
                     const isXmasTrack = xmsRegex.test(s.Title) || xmsRegex.test(s.Artist);
                     if (isXmasTrack && !isDecember) return false;
 
@@ -189,10 +199,11 @@
                     return targets.includes(parseInt(s.Energy));
                 });
 
-                // Fallback for tight rotations
                 if (picks.length === 0) {
                     picks = masterLibrary.filter(s => {
-                        if (showType === "COUNTRY" && String(s.Genre || '').toUpperCase() !== 'COUNTRY') return false;
+                        if (showType !== "NORMAL") {
+                            if (String(s.Genre || '').toUpperCase() !== showType) return false;
+                        }
                         const isXmasTrack = xmsRegex.test(s.Title) || xmsRegex.test(s.Artist);
                         if (isXmasTrack && !isDecember) return false;
                         
