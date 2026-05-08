@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RHR | Virtual Producer v1.4b LE</title>
+    <title>RHR | Virtual Producer v2 LE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
@@ -18,11 +18,10 @@
         
         .mode-container { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 15px; }
         
-        /* Dropdown Styling */
-        select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: #fff; box-sizing: border-box; cursor: pointer; color: #333; }
+        select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: #fff; box-sizing: border-box; cursor: pointer; color: #333; margin-bottom: 5px; }
         select:disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; border-color: #eee; }
         
-        .radio-option { display: flex; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; color: var(--rhr-dark); }
+        .radio-option { display: flex; align-items: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; color: var(--rhr-dark); cursor: pointer; }
         .radio-option input { margin-right: 10px; transform: scale(1.2); accent-color: var(--rhr-red); }
 
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: opacity 0.2s; box-sizing: border-box; }
@@ -59,12 +58,12 @@
         <div id="setup-view">
             <div class="mode-container">
                 <label class="radio-option">
-                    <input type="radio" name="masterMode" value="NORMAL" checked onclick="toggleSelectors()"> NORMAL MODE
+                    <input type="radio" id="mode-normal" name="masterMode" value="NORMAL" checked onclick="clearSpecialists()"> NORMAL MODE
                 </label>
 
                 <label>Genre Select</label>
-                <select id="genre-select" onchange="setSpecialistMode()">
-                    <option value="">-- Choose Genre --</option>
+                <select id="genre-select" onchange="syncSelection(this)">
+                    <option value="">-- All Genres --</option>
                     <option value="COUNTRY">Country</option>
                     <option value="JAZZ">Jazz</option>
                     <option value="ROCK">Rock</option>
@@ -72,16 +71,24 @@
                     <option value="DISCO">Disco</option>
                 </select>
 
-                <label>Seasonal / Event</label>
-                <select id="seasonal-select" disabled>
-                    <option value="">-- Choose Mode --</option>
-                    <option value="CHRISTMAS">Christmas</option>
-                    <option value="REQUESTS">Requests</option>
+                <label>Decades</label>
+                <select id="decade-select" onchange="syncSelection(this)">
+                    <option value="">-- All Decades --</option>
+                    <option value="50">50's</option>
+                    <option value="60">60's</option>
+                    <option value="70">70's</option>
+                    <option value="80">80's</option>
+                    <option value="90">90's</option>
+                    <option value="00">00's</option>
+                    <option value="10">10's</option>
+                    <option value="20">20's</option>
                 </select>
 
-                <label>Decade (Coming Soon)</label>
-                <select id="decade-select" disabled>
-                    <option value="">-- Choose Decade --</option>
+                <label>Specials</label>
+                <select id="specials-select" onchange="syncSelection(this)">
+                    <option value="">-- No Specials --</option>
+                    <option value="CHRISTMAS">Christmas</option>
+                    <option value="REQUESTS">Requests</option>
                 </select>
             </div>
 
@@ -127,16 +134,26 @@
         await loadGlobalHistory();
     };
 
-    function toggleSelectors() {
-        // If Normal Mode radio is clicked, clear the dropdowns
+    function clearSpecialists() {
         document.getElementById('genre-select').value = "";
+        document.getElementById('decade-select').value = "";
+        document.getElementById('specials-select').value = "";
     }
 
-    function setSpecialistMode() {
-        const genre = document.getElementById('genre-select').value;
-        if (genre !== "") {
-            // Uncheck Normal Mode if a genre is picked
-            document.getElementsByName('masterMode')[0].checked = false;
+    function syncSelection(el) {
+        if (el.value !== "") {
+            document.getElementById('mode-normal').checked = false;
+            // Clear other dropdowns to ensure only one filter is active at a time
+            if(el.id !== 'genre-select') document.getElementById('genre-select').value = "";
+            if(el.id !== 'decade-select') document.getElementById('decade-select').value = "";
+            if(el.id !== 'specials-select') document.getElementById('specials-select').value = "";
+        } else {
+            // If all dropdowns are empty, default back to Normal
+            if (document.getElementById('genre-select').value === "" && 
+                document.getElementById('decade-select').value === "" && 
+                document.getElementById('specials-select').value === "") {
+                document.getElementById('mode-normal').checked = true;
+            }
         }
     }
 
@@ -180,10 +197,19 @@
         const startHour = parseInt(document.getElementById('start-hour').value);
         const duration = parseInt(document.getElementById('shift-duration').value);
         
-        // Logic to determine active mode
-        let selectedMode = "NORMAL";
-        const genreVal = document.getElementById('genre-select').value;
-        if (genreVal !== "") selectedMode = genreVal;
+        let filterType = "NORMAL";
+        let filterVal = "";
+
+        if (document.getElementById('genre-select').value !== "") {
+            filterType = "GENRE";
+            filterVal = document.getElementById('genre-select').value;
+        } else if (document.getElementById('decade-select').value !== "") {
+            filterType = "DECADE";
+            filterVal = document.getElementById('decade-select').value;
+        } else if (document.getElementById('specials-select').value !== "") {
+            filterType = "SPECIAL";
+            filterVal = document.getElementById('specials-select').value;
+        }
 
         playlistData = {};
         let tracksToSave = [];
@@ -198,10 +224,14 @@
 
             while (elapsed < 3600) {
                 let picks = masterLibrary.filter(s => {
-                    if (selectedMode !== "NORMAL" && String(s.Genre || '').toUpperCase() !== selectedMode) return false;
+                    // Application of filters
+                    if (filterType === "GENRE" && String(s.Genre || '').toUpperCase() !== filterVal) return false;
+                    if (filterType === "DECADE" && !String(s.Decade || '').includes(filterVal)) return false;
+                    if (filterType === "SPECIAL" && filterVal === "CHRISTMAS" && !xmsRegex.test(s.Title) && !xmsRegex.test(s.Artist)) return false;
                     
+                    // Seasonal protection for Normal/Genre/Decade modes
                     const isXmasTrack = xmsRegex.test(s.Title) || xmsRegex.test(s.Artist);
-                    if (isXmasTrack && !isDecember) return false;
+                    if (isXmasTrack && !isDecember && filterVal !== "CHRISTMAS") return false;
 
                     const songMatch = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                     const artistMatch = sessionHistory.findLast(hi => hi.Artist === s.Artist);
@@ -210,12 +240,14 @@
                     if (songMatch && (ts - songMatch.time < 16200000)) return false; 
                     if (artistMatch && (ts - artistMatch.time < 8100000)) return false;
                     if (songMatch && Math.abs(ts - songMatch.time) >= 84300000 && Math.abs(ts - songMatch.time) <= 88500000) return false;
+                    
                     return targets.includes(parseInt(s.Energy));
                 });
 
                 if (picks.length === 0) {
                     picks = masterLibrary.filter(s => {
-                        if (selectedMode !== "NORMAL" && String(s.Genre || '').toUpperCase() !== selectedMode) return false;
+                        if (filterType === "GENRE" && String(s.Genre || '').toUpperCase() !== filterVal) return false;
+                        if (filterType === "DECADE" && !String(s.Decade || '').includes(filterVal)) return false;
                         const sm = sessionHistory.findLast(hi => hi.Title === s.Title && hi.Artist === s.Artist);
                         const am = sessionHistory.findLast(hi => hi.Artist === s.Artist);
                         return !(sm && (Date.now() - sm.time < 16200000)) && !(am && (Date.now() - am.time < 8100000));
@@ -235,7 +267,6 @@
             playlistData[currentHour] = hourTracks;
         }
 
-        // ORIGINAL SYNC LOGIC (RESTORED)
         fetch(GLOBAL_HISTORY_API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(tracksToSave) });
         renderUI();
     }
