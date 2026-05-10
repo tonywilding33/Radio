@@ -33,7 +33,8 @@
         .t-artist { font-weight: bold; color: #222; text-transform: uppercase; }
         .t-title { color: #555; font-size: 0.8rem; }
         .t-loc { font-weight: bold; color: var(--rhr-red); font-family: monospace; margin-left: 5px; }
-        .t-subentry { font-size: 0.72rem; color: #666; margin-top: 3px; font-style: italic; font-weight: 500; }
+        /* Smaller font for subentry */
+        .t-subentry { font-size: 0.72rem; color: #666; margin-top: 3px; font-style: italic; font-weight: 500; display: block; }
         .time-col { font-weight: bold; color: var(--rhr-dark); font-family: monospace; min-width: 50px; text-align: right; }
         
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
@@ -260,20 +261,23 @@
                     let time = currentHour.toString().padStart(2,'0') + ":" + Math.floor(elapsed / 60).toString().padStart(2,'0');
                     let finalLoc = (String(p['Location 1'] || '').trim() + " " + (String(p['Location 2'] || '').toUpperCase() === 'PC' ? 'PC' : '')).trim();
                     
-                    // --- ALBUM TRIGGER LOGIC START ---
+                    // --- TRIGGER LOGIC FOR ALBUM TRACKS ---
                     let subEntry = null;
-                    const hasAlbumName = p.Album && String(p.Album).trim().length > 0;
-                    const hasSongList = p['Song List'] && String(p['Song List']).trim().length > 0;
+                    const albumName = String(p.Album || '').trim();
+                    const albumTracks = String(p.Album_Track || '').trim();
 
-                    if (hasAlbumName && hasSongList) {
-                        const sources = String(p['Song List']).split(';').map(s => s.trim());
-                        const randomSource = sources[Math.floor(Math.random() * sources.length)];
-                        const parts = randomSource.split(' - ');
-                        if (parts.length === 2) {
-                            subEntry = `and/or ${parts[1].trim()} ${parts[0].trim()} (${p.Album})`;
+                    if (albumName.length > 0 && albumTracks.length > 0) {
+                        const list = albumTracks.split(';').map(item => item.trim());
+                        const randomTrack = list[Math.floor(Math.random() * list.length)];
+                        
+                        // Parse "Location - Title"
+                        const splitTrack = randomTrack.split(' - ');
+                        if (splitTrack.length === 2) {
+                            const loc = splitTrack[0].trim();
+                            const title = splitTrack[1].trim();
+                            subEntry = `and/or ${title} ${loc} (${albumName})`;
                         }
                     }
-                    // --- ALBUM TRIGGER LOGIC END ---
 
                     hourTracks.push({ ...p, timeStr: time, locFinal: finalLoc, subEntry: subEntry });
                     tracksToSave.push({ Artist: p.Artist, Title: p.Title });
@@ -299,7 +303,7 @@
                     <div class="track-info">
                         <div class="t-artist">${t.Artist}</div>
                         <div class="t-title">${t.Title} <span class="t-loc">${t.locFinal}</span></div>
-                        ${t.subEntry ? `<div class="t-subentry">${t.subEntry}</div>` : ''}
+                        ${t.subEntry ? `<span class="t-subentry">${t.subEntry}</span>` : ''}
                     </div>
                     <div class="time-col">${t.timeStr}</div>
                 </div>
