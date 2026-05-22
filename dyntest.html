@@ -2,54 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RHR | Different Strokes Tool</title>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; }
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; }
-        .card { background: #fff; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--rhr-red); }
-        .btn { width: 100%; padding: 16px; background: var(--rhr-red); color: #fff; border: none; border-radius: 8px; cursor: pointer; }
-        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); white-space: pre-wrap; display: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; }
+        .wrapper { width: 100%; max-width: 500px; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); }
+        h3 { color: var(--rhr-red); margin-top: 0; }
+        label { display: block; font-weight: bold; margin: 15px 0 5px; font-size: 0.85rem; color: #444; }
+        input { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; background: var(--rhr-red); color: #fff; margin-top: 20px; }
+        .btn:disabled { background: #ccc; }
+        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); font-size: 0.9rem; display: none; white-space: pre-wrap; color: #333; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h3>Different Strokes Tool</h3>
-    <input type="text" id="instrument" placeholder="Instrument">
-    <input type="text" id="reference" placeholder="Reference (Optional)">
-    <button class="btn" id="gen-btn" onclick="processRequest()">GENERATE PLAYLIST</button>
-    <div id="output"></div>
+<div class="wrapper">
+    <div class="card">
+        <h3>Different Strokes Tool</h3>
+        
+        <label>Instrument</label>
+        <input type="text" id="instrument" placeholder="e.g. Saxophone">
+        
+        <label>Reference</label>
+        <input type="text" id="reference" placeholder="e.g. Baker Street">
+
+        <button class="btn" id="gen-btn" onclick="processRequest()">GENERATE PLAYLIST</button>
+
+        <div id="output"></div>
+    </div>
 </div>
 
 <script>
+    // PASTE YOUR NEW DEPLOYMENT URL HERE
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyIbT7pHva1xdstm8UkrsMneFZnn8zUi0cwBshMv-bz9htEE0c5V8vzE8K3lL71RiQb/exec";
 
     async function processRequest() {
+        const inst = document.getElementById('instrument').value;
+        const ref = document.getElementById('reference').value || "no specific reference";
         const out = document.getElementById('output');
+        const btn = document.getElementById('gen-btn');
+
+        if (!inst) { alert("Please enter an instrument!"); return; }
+
         out.style.display = 'block';
-        out.innerText = "Curating...";
+        out.innerText = "Curating playlist...";
+        btn.disabled = true;
 
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: "Playlist for " + document.getElementById('instrument').value })
+                body: JSON.stringify({ prompt: `Create a 3-song playlist for ${inst} inspired by ${ref}.` })
             });
 
-            const text = await response.text();
+            const data = await response.json();
             
-            // Check if the response starts with '<' (usually an HTML error page)
-            if (text.trim().startsWith("<")) {
-                console.error("Received HTML instead of JSON:", text);
-                out.innerText = "ACCESS ERROR: The server returned HTML. Ensure 'Who has access' is set to 'Anyone' in your Deployment settings.";
+            // Handle logical errors returned by the script
+            if (data.error) {
+                out.innerText = "Script Error: " + data.error;
+            } else if (data.candidates && data.candidates[0].content.parts[0].text) {
+                out.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                const data = JSON.parse(text);
-                out.innerText = data.candidates ? data.candidates[0].content.parts[0].text : JSON.stringify(data);
+                out.innerText = "Unexpected response format. Check your Script logic.";
             }
         } catch (e) {
-            out.innerText = "Connection Error: " + e.message;
+            // This is where "Failed to fetch" gets caught
+            out.innerText = "Failed to fetch: This usually happens if the script URL is wrong, 'Who has access' isn't 'Anyone', or CORS is blocked. Check the browser F12 Console.";
+        } finally {
+            btn.disabled = false;
         }
     }
 </script>
+
 </body>
 </html>
