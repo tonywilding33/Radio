@@ -31,15 +31,15 @@
         </div>
         <div class="station-name">Different Strokes Tool</div>
         
-        <div class="instruction">Enter at least one detail below to generate your curated prompt.</div>
+        <div class="instruction">Enter an instrument <b>or</b> a reference track to generate your prompt.</div>
 
         <label>Instrument to Focus On</label>
-        <input type="text" id="instrument" placeholder="e.g. Saxophone">
+        <input type="text" id="instrument" placeholder="e.g. Piano">
         
         <label>Reference Track or Artist (Optional)</label>
-        <input type="text" id="reference" placeholder="e.g. Baker Street">
+        <input type="text" id="reference" placeholder="e.g. Elton John">
 
-        <button class="btn" onclick="generatePrompt()">GENERATE PROMPT</button>
+        <button class="btn" onclick="processPrompt()">GENERATE PROMPT</button>
 
         <div id="output" onclick="copyToClipboard()"></div>
     </div>
@@ -47,22 +47,24 @@
 
 <script>
     const PROMPT_URL = "https://raw.githubusercontent.com/tonywilding33/Radio/main/different_strokes_ai_prompt.txt";
-    let template = "";
+    let rawTemplate = "";
 
-    async function fetchTemplate() {
+    // Fetch the template in the background on load
+    async function init() {
         const response = await fetch(PROMPT_URL + "?cb=" + Date.now());
-        template = await response.text();
+        rawTemplate = await response.text();
     }
 
-    function generatePrompt() {
+    // Process the prompt in the background once details are entered
+    function processPrompt() {
         const inst = document.getElementById('instrument').value;
         const ref = document.getElementById('reference').value;
         
-        if (!inst && !ref) { alert("Please enter at least an instrument or a reference!"); return; }
+        if (!inst && !ref) { alert("Please enter at least one detail."); return; }
 
-        let finalPrompt = template
-            .replace("[INSERT INSTRUMENT NAME]", inst || "any prominent instrument")
-            .replace("[INSERT ARTIST/SONG NAME]", ref || "a classic, recognizable sound");
+        let finalPrompt = rawTemplate
+            .replace("[INSERT INSTRUMENT NAME]", inst || "the chosen instrument")
+            .replace("[INSERT ARTIST/SONG NAME]", ref || "the provided reference style");
 
         const out = document.getElementById('output');
         out.innerText = finalPrompt;
@@ -74,7 +76,7 @@
         alert("Prompt copied to clipboard!");
     }
 
-    fetchTemplate();
+    init();
 </script>
 
 </body>
