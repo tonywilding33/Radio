@@ -12,10 +12,11 @@
         .logo-container { text-align: center; margin-bottom: 10px; }
         .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
         .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin: 15px 0;}
+        .instruction { font-size: 0.85rem; color: #666; margin-bottom: 15px; text-align: center; }
         label { display: block; font-weight: bold; margin: 15px 0 5px; font-size: 0.85rem; color: #444; }
         input { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
         .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; background: var(--rhr-red); color: #fff; margin-top: 20px; }
-        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); font-size: 0.85rem; display: none; white-space: pre-wrap; }
+        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); font-size: 0.85rem; display: none; white-space: pre-wrap; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -29,16 +30,18 @@
             </svg>
         </div>
         <div class="station-name">Different Strokes Tool</div>
+        
+        <div class="instruction">Enter at least one detail below to generate your curated prompt.</div>
 
         <label>Instrument to Focus On</label>
         <input type="text" id="instrument" placeholder="e.g. Saxophone">
         
-        <label>Reference Track or Artist</label>
-        <input type="text" id="reference" placeholder="e.g. Baker Street by Gerry Rafferty">
+        <label>Reference Track or Artist (Optional)</label>
+        <input type="text" id="reference" placeholder="e.g. Baker Street">
 
         <button class="btn" onclick="generatePrompt()">GENERATE PROMPT</button>
 
-        <div id="output"></div>
+        <div id="output" onclick="copyToClipboard()"></div>
     </div>
 </div>
 
@@ -55,21 +58,20 @@
         const inst = document.getElementById('instrument').value;
         const ref = document.getElementById('reference').value;
         
-        if (!inst || !ref) { alert("Please fill in both fields!"); return; }
+        if (!inst && !ref) { alert("Please enter at least an instrument or a reference!"); return; }
 
-        const finalPrompt = template
-            .replace("[INSERT INSTRUMENT NAME]", inst)
-            .replace("[INSERT ARTIST/SONG NAME]", ref);
+        let finalPrompt = template
+            .replace("[INSERT INSTRUMENT NAME]", inst || "any prominent instrument")
+            .replace("[INSERT ARTIST/SONG NAME]", ref || "a classic, recognizable sound");
 
         const out = document.getElementById('output');
         out.innerText = finalPrompt;
         out.style.display = 'block';
-        
-        // Auto-select text for easy copying
-        const range = document.createRange();
-        range.selectNode(out);
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
+    }
+
+    function copyToClipboard() {
+        navigator.clipboard.writeText(document.getElementById('output').innerText);
+        alert("Prompt copied to clipboard!");
     }
 
     fetchTemplate();
