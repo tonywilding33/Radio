@@ -1,30 +1,68 @@
-function doOptions(e) {
-  return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeader("Access-Control-Allow-Origin", "*")
-    .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
-    .setHeader("Access-Control-Allow-Headers", "Content-Type");
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHR | Different Strokes</title>
+    <script>
+        // Disable Right-Click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+    <style>
+        :root { --rhr-red: #e31e24; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; user-select: none; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; border-top: 6px solid var(--rhr-red); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 100%; max-width: 500px; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: var(--rhr-red); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #output { margin-top: 20px; white-space: pre-wrap; font-size: 0.9rem; color: #333; line-height: 1.5; }
+    </style>
+</head>
+<body>
 
-function doPost(e) {
-  var apiKey = "YOUR_ACTUAL_GEMINI_API_KEY_HERE";
-  var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
-  
-  var requestData = JSON.parse(e.postData.contents);
-  var prompt = "Act as a music curator. Provide a 3-song playlist featuring instrument: " + requestData.instrument + 
-               ". Reference vibe: " + requestData.reference + 
-               ". Guidelines: Accessible/recognizable melodies, pre-1970s and post-2000s mix. Present as a table.";
+<div class="card">
+    <div class="station-name">Different Strokes</div>
+    <input type="text" id="instrument" placeholder="Instrument (e.g. Piano)">
+    <input type="text" id="reference" placeholder="Reference Artist (Optional)">
+    <button onclick="generate()">GENERATE PLAYLIST</button>
+    <div id="output"></div>
+</div>
 
-  var payload = { "contents": [{ "parts": [{ "text": prompt }] }] };
+<script>
+    async function generate() {
+        const out = document.getElementById('output');
+        out.innerText = "Curating your playlist...";
+        
+        try {
+            const response = await fetch("https://script.google.com/macros/s/AKfycbxqhwAk6b0M4IxY7DF7AOBbRXwudvBilgra2BQ8DpUc_pVsWenSlnIwkN0WFosAJGKF/exec", {
+                method: "POST",
+                body: JSON.stringify({
+                    instrument: document.getElementById('instrument').value,
+                    reference: document.getElementById('reference').value
+                })
+            });
+            
+            const data = await response.json();
+            
+            // Recursive function to extract text from any nested JSON structure
+            const findText = (obj) => {
+                let found = "";
+                const search = (o) => {
+                    if (o && typeof o === 'object') {
+                        if (o.text) found = o.text;
+                        for (let key in o) search(o[key]);
+                    }
+                };
+                search(obj);
+                return found;
+            };
 
-  var response = UrlFetchApp.fetch(url, {
-    "method": "post",
-    "contentType": "application/json",
-    "payload": JSON.stringify(payload),
-    "muteHttpExceptions": true
-  });
+            out.innerText = findText(data) || "No content returned. Please check your API key in the Google Apps Script.";
+        } catch (e) {
+            out.innerText = "Connection failed. Please ensure the Google Apps Script is deployed as a 'New Version'.";
+        }
+    }
+</script>
 
-  return ContentService.createTextOutput(response.getContentText())
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader("Access-Control-Allow-Origin", "*");
-}
+</body>
+</html>
