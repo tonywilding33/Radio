@@ -1,0 +1,20 @@
+To help you streamline the curation process for your future radio show features, here is a structured AI prompt designed to generate playlists that feel familiar and engaging for your listeners:
+
+---
+
+### The AI Prompt Template
+
+> "Act as a music curator for a radio show. I need a 3-song playlist featuring a specific lead instrument. Please provide 3 tracks that feature clear, recognizable melodies.
+> **Guidelines for selection:**
+> 1. **Instrument Focus:** The instrument must be the prominent lead melody or a core feature of the track.
+> 2. **Accessibility:** Choose tracks that are well-known, melodic, and accessible to a general audience, including hospital patients. Avoid overly obscure or abstract indie music.
+> 3. **Balance:** Include at least one classic track (pre-1970s) and at least one modern track (post-2000s) to keep the soundscape fresh.
+> 
+> 
+> **Please present the output in a table with columns for: Artist, Track, and a brief 'Why it works' justification.**
+> The lead instrument for this request is: **[INSERT INSTRUMENT NAME]**
+> My reference track/artist for the 'vibe' is: **[INSERT ARTIST/SONG NAME]"**
+
+---
+
+What instrument would you like to focus on for our next "Different Strokes" feature, and do you have a specific artist or song in mind as a reference point?
