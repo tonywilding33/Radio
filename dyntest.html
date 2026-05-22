@@ -2,57 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RHR | Different Strokes Tool</title>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; }
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; }
-        .card { background: #fff; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--rhr-red); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 16px; background: var(--rhr-red); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); display: none; white-space: pre-wrap; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; }
+        .wrapper { width: 100%; max-width: 500px; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); }
+        .logo-container { text-align: center; margin-bottom: 10px; }
+        .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin: 15px 0;}
+        label { display: block; font-weight: bold; margin: 15px 0 5px; font-size: 0.85rem; color: #444; }
+        input { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; background: var(--rhr-red); color: #fff; margin-top: 20px; }
+        .btn:disabled { background: #ccc; }
+        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); font-size: 0.85rem; display: none; white-space: pre-wrap; color: #333; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h3>Different Strokes Tool</h3>
-    <input type="text" id="instrument" placeholder="Instrument (e.g. Saxophone)">
-    <input type="text" id="reference" placeholder="Reference (Optional)">
-    <button class="btn" id="gen-btn" onclick="processRequest()">GENERATE PLAYLIST</button>
-    <div id="output"></div>
+<div class="wrapper">
+    <div class="card">
+        <div class="logo-container">
+            <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+                <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
+                <text x="50%" y="65%" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="48" fill="var(--rhr-red)" font-weight="900">RHR</text>
+            </svg>
+        </div>
+        <div class="station-name">Different Strokes Tool</div>
+
+        <label>Instrument to Focus On</label>
+        <input type="text" id="instrument" placeholder="e.g. Saxophone">
+        
+        <label>Reference Track or Artist (Optional)</label>
+        <input type="text" id="reference" placeholder="e.g. Baker Street">
+
+        <button class="btn" id="gen-btn" onclick="processRequest()">GENERATE PLAYLIST</button>
+
+        <div id="output"></div>
+    </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "YOUR_WEB_APP_URL_HERE"; // Put your REAL URL here
+    const PROMPT_URL = "https://raw.githubusercontent.com/tonywilding33/Radio/main/different_strokes_ai_prompt.txt";
+    const SCRIPT_URL = "YOUR_DEPLOYED_SCRIPT_URL_HERE"; 
+    let template = "";
+
+    // Fetch the template on load
+    fetch(PROMPT_URL + "?cb=" + Date.now()).then(r => r.text()).then(t => template = t);
 
     async function processRequest() {
-        const out = document.getElementById('output');
-        const btn = document.getElementById('gen-btn');
         const inst = document.getElementById('instrument').value;
         const ref = document.getElementById('reference').value || "no specific reference";
-        
-        if (!inst) { alert("Enter an instrument!"); return; }
+        const out = document.getElementById('output');
+        const btn = document.getElementById('gen-btn');
+
+        if (!inst) { alert("Please enter an instrument!"); return; }
+
+        const finalPrompt = template
+            .replace("[INSERT INSTRUMENT NAME]", inst)
+            .replace("[INSERT ARTIST/SONG NAME]", ref);
 
         out.style.display = 'block';
-        out.innerText = "Curating...";
+        out.innerText = "Curating playlist...";
         btn.disabled = true;
 
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: "POST",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ prompt: `Create a 3-song playlist for ${inst} inspired by ${ref}.` })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: finalPrompt })
             });
 
             const data = await response.json();
-            console.log("Response Data:", data); // Debugging
-            out.innerText = data.candidates[0].content.parts[0].text;
+            
+            if (data.error) {
+                out.innerText = "Script Error: " + data.error;
+            } else if (data.candidates) {
+                out.innerText = data.candidates[0].content.parts[0].text;
+            } else {
+                out.innerText = "Unexpected response: " + JSON.stringify(data);
+            }
         } catch (e) {
-            out.innerText = "Error: " + e.message + "\nCheck F12 Console for details.";
+            out.innerText = "Connection Error: Ensure your script is deployed as 'Anyone' and the URL is correct.";
         } finally {
             btn.disabled = false;
         }
     }
 </script>
+
 </body>
 </html>
