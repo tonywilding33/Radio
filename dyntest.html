@@ -2,94 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RHR | Different Strokes Tool</title>
     <style>
         :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; }
-        .wrapper { width: 100%; max-width: 500px; }
-        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); }
-        .logo-container { text-align: center; margin-bottom: 10px; }
-        .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
-        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin: 15px 0;}
-        label { display: block; font-weight: bold; margin: 15px 0 5px; font-size: 0.85rem; color: #444; }
-        input { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
-        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; background: var(--rhr-red); color: #fff; margin-top: 20px; }
-        .btn:disabled { background: #ccc; }
-        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); font-size: 0.85rem; display: none; white-space: pre-wrap; color: #333; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-top: 6px solid var(--rhr-red); }
+        .btn { width: 100%; padding: 16px; background: var(--rhr-red); color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); white-space: pre-wrap; display: none; }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="card">
-        <div class="logo-container">
-            <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
-                <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
-                <text x="50%" y="65%" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="48" fill="var(--rhr-red)" font-weight="900">RHR</text>
-            </svg>
-        </div>
-        <div class="station-name">Different Strokes Tool</div>
-
-        <label>Instrument to Focus On</label>
-        <input type="text" id="instrument" placeholder="e.g. Saxophone">
-        
-        <label>Reference Track or Artist (Optional)</label>
-        <input type="text" id="reference" placeholder="e.g. Baker Street">
-
-        <button class="btn" id="gen-btn" onclick="processRequest()">GENERATE PLAYLIST</button>
-
-        <div id="output"></div>
-    </div>
+<div class="card">
+    <h3>Different Strokes Tool</h3>
+    <input type="text" id="instrument" placeholder="Instrument">
+    <input type="text" id="reference" placeholder="Reference (Optional)">
+    <button class="btn" id="gen-btn" onclick="processRequest()">GENERATE PLAYLIST</button>
+    <div id="output"></div>
 </div>
 
 <script>
-    const PROMPT_URL = "https://raw.githubusercontent.com/tonywilding33/Radio/main/different_strokes_ai_prompt.txt";
-    const SCRIPT_URL = "YOUR_DEPLOYED_SCRIPT_URL_HERE"; 
-    let template = "";
-
-    // Fetch the template on load
-    fetch(PROMPT_URL + "?cb=" + Date.now()).then(r => r.text()).then(t => template = t);
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyIbT7pHva1xdstm8UkrsMneFZnn8zUi0cwBshMv-bz9htEE0c5V8vzE8K3lL71RiQb/exec";
 
     async function processRequest() {
-        const inst = document.getElementById('instrument').value;
-        const ref = document.getElementById('reference').value || "no specific reference";
         const out = document.getElementById('output');
-        const btn = document.getElementById('gen-btn');
-
-        if (!inst) { alert("Please enter an instrument!"); return; }
-
-        const finalPrompt = template
-            .replace("[INSERT INSTRUMENT NAME]", inst)
-            .replace("[INSERT ARTIST/SONG NAME]", ref);
-
         out.style.display = 'block';
-        out.innerText = "Curating playlist...";
-        btn.disabled = true;
+        out.innerText = "Curating...";
 
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: finalPrompt })
+                body: JSON.stringify({ prompt: "Playlist for " + document.getElementById('instrument').value })
             });
 
-            const data = await response.json();
+            const text = await response.text();
             
-            if (data.error) {
-                out.innerText = "Script Error: " + data.error;
-            } else if (data.candidates) {
-                out.innerText = data.candidates[0].content.parts[0].text;
+            // Check if the response starts with '<' (usually an HTML error page)
+            if (text.trim().startsWith("<")) {
+                console.error("Received HTML instead of JSON:", text);
+                out.innerText = "ACCESS ERROR: The server returned HTML. Ensure 'Who has access' is set to 'Anyone' in your Deployment settings.";
             } else {
-                out.innerText = "Unexpected response: " + JSON.stringify(data);
+                const data = JSON.parse(text);
+                out.innerText = data.candidates ? data.candidates[0].content.parts[0].text : JSON.stringify(data);
             }
         } catch (e) {
-            out.innerText = "Connection Error: Ensure your script is deployed as 'Anyone' and the URL is correct.";
-        } finally {
-            btn.disabled = false;
+            out.innerText = "Connection Error: " + e.message;
         }
     }
 </script>
-
 </body>
 </html>
