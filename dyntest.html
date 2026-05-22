@@ -2,39 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Playlist Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHR | Different Strokes Tool</title>
+    <style>
+        :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; --rhr-pink-line: #f1a9a9; --rhr-dark: #2c3e50; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; }
+        .wrapper { width: 100%; max-width: 500px; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-top: 6px solid var(--rhr-red); }
+        .logo-container { text-align: center; margin-bottom: 10px; }
+        .rhr-logo-svg { width: 120px; height: auto; display: block; margin: 0 auto; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin: 15px 0;}
+        label { display: block; font-weight: bold; margin: 15px 0 5px; font-size: 0.85rem; color: #444; }
+        input { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        .btn { width: 100%; border: none; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; background: var(--rhr-red); color: #fff; margin-top: 20px; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        #output { margin-top: 20px; padding: 15px; background: #f9f9f9; border-left: 4px solid var(--rhr-red); font-size: 0.85rem; display: none; white-space: pre-wrap; }
+    </style>
 </head>
 <body>
 
-    <input type="text" id="inst" placeholder="Instrument">
-    <input type="text" id="ref" placeholder="Reference">
-    <button id="go">GENERATE</button>
-    <div id="out"></div>
+<div class="wrapper">
+    <div class="card">
+        <div class="logo-container">
+            <svg class="rhr-logo-svg" viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg">
+                <path d="M80 120C80 120 20 85 20 45C20 25 35 15 50 15C60 15 72 22 80 35C88 22 100 15 110 15C125 15 140 25 140 45C140 85 80 120 80 120Z" fill="var(--rhr-pink-fill)" />
+                <text x="50%" y="65%" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="48" fill="var(--rhr-red)" font-weight="900">RHR</text>
+            </svg>
+        </div>
+        <div class="station-name">Different Strokes Tool</div>
 
-    <script>
-        document.getElementById('go').addEventListener('click', async function() {
-            const out = document.getElementById('out');
-            out.innerText = "Loading...";
-            
-            try {
-                const response = await fetch("https://script.google.com/macros/s/AKfycbxqhwAk6b0M4IxY7DF7AOBbRXwudvBilgra2BQ8DpUc_pVsWenSlnIwkN0WFosAJGKF/exec", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "text/plain"
-                    },
-                    body: JSON.stringify({
-                        instrument: document.getElementById('inst').value,
-                        reference: document.getElementById('ref').value
-                    })
-                });
-                
-                const data = await response.json();
-                out.innerText = data.candidates[0].content.parts[0].text;
-            } catch (err) {
-                out.innerText = "Error: " + err.message + " (This is a CORS block. Ensure the Google Script is re-deployed.)";
-            }
-        });
-    </script>
+        <label>Instrument to Focus On</label>
+        <input type="text" id="instrument" placeholder="e.g. Saxophone">
+        
+        <label>Reference Track or Artist</label>
+        <input type="text" id="reference" placeholder="e.g. Baker Street by Gerry Rafferty">
+
+        <button class="btn" id="gen-btn" onclick="generatePrompt()" disabled>LOADING...</button>
+
+        <div id="output"></div>
+    </div>
+</div>
+
+<script>
+    const PROMPT_URL = "https://raw.githubusercontent.com/tonywilding33/Radio/main/different_strokes_ai_prompt.txt";
+    let template = "";
+
+    async function fetchTemplate() {
+        const btn = document.getElementById('gen-btn');
+        try {
+            const response = await fetch(PROMPT_URL + "?cb=" + Date.now());
+            template = await response.text();
+            btn.innerText = "GENERATE PROMPT";
+            btn.disabled = false;
+        } catch (e) {
+            btn.innerText = "ERROR LOADING TEMPLATE";
+        }
+    }
+
+    function generatePrompt() {
+        const inst = document.getElementById('instrument').value;
+        const ref = document.getElementById('reference').value;
+        
+        if (!inst || !ref) { alert("Please fill in both fields!"); return; }
+
+        const finalPrompt = template
+            .replace("[INSERT INSTRUMENT NAME]", inst)
+            .replace("[INSERT ARTIST/SONG NAME]", ref);
+
+        const out = document.getElementById('output');
+        out.innerText = finalPrompt;
+        out.style.display = 'block';
+        
+        // Auto-select text
+        const range = document.createRange();
+        range.selectNode(out);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+    }
+
+    fetchTemplate();
+</script>
 
 </body>
 </html>
