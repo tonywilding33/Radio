@@ -1,71 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>RHR | Different Strokes</title>
-    <script>
-        // Disable Right-Click
-        document.addEventListener('contextmenu', event => event.preventDefault());
-    </script>
-    <style>
-        :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; user-select: none; }
-        .card { background: #fff; padding: 30px; border-radius: 12px; border-top: 6px solid var(--rhr-red); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 100%; max-width: 500px; }
-        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px;}
-        .instruction { font-size: 0.85rem; color: #666; margin-bottom: 15px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn { width: 100%; border: none; padding: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; background: var(--rhr-red); color: #fff; margin-top: 10px; }
-        #output { margin-top: 20px; white-space: pre-wrap; font-size: 0.85rem; color: #333; line-height: 1.5; padding: 10px; border: 1px solid #eee; display: none; }
-    </style>
-</head>
-<body>
+function doOptions(e) {
+  return ContentService.createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeader("Access-Control-Allow-Origin", "*")
+    .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
+    .setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
 
-<div class="card">
-    <div class="station-name">Different Strokes</div>
-    <div class="instruction">Enter details to generate your curated playlist.</div>
-    
-    <input type="text" id="instrument" placeholder="Instrument (e.g. Piano)">
-    <input type="text" id="reference" placeholder="Reference Artist (Optional)">
-    <button class="btn" id="gen-btn" onclick="generatePlaylist()">GENERATE PLAYLIST</button>
-    
-    <div id="output"></div>
-</div>
+function doPost(e) {
+  var apiKey = "YOUR_ACTUAL_GEMINI_API_KEY_HERE";
+  var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+  
+  var requestData = JSON.parse(e.postData.contents);
+  var prompt = "Act as a music curator. Provide a 3-song playlist featuring instrument: " + requestData.instrument + 
+               ". Reference vibe: " + requestData.reference + 
+               ". Guidelines: Accessible/recognizable melodies, pre-1970s and post-2000s mix. Present as a table.";
 
-<script>
-    async function generatePlaylist() {
-        const inst = document.getElementById('instrument').value;
-        const ref = document.getElementById('reference').value;
-        const out = document.getElementById('output');
-        const btn = document.getElementById('gen-btn');
-        
-        if (!inst && !ref) return alert("Please enter at least one detail.");
-        
-        // UI Feedback
-        out.style.display = "block";
-        out.innerText = "Curating your playlist, please wait...";
-        btn.disabled = true;
+  var payload = { "contents": [{ "parts": [{ "text": prompt }] }] };
 
-        try {
-            const response = await fetch("https://script.google.com/macros/s/AKfycbxqhwAk6b0M4IxY7DF7AOBbRXwudvBilgra2BQ8DpUc_pVsWenSlnIwkN0WFosAJGKF/exec", {
-                method: "POST",
-                mode: "no-cors", // Use no-cors if you encounter persistent CORS issues
-                body: JSON.stringify({ instrument: inst, reference: ref })
-            });
+  var response = UrlFetchApp.fetch(url, {
+    "method": "post",
+    "contentType": "application/json",
+    "payload": JSON.stringify(payload),
+    "muteHttpExceptions": true
+  });
 
-            // Note: If using "no-cors", response.json() will not work. 
-            // If the script works, we expect the output directly.
-            out.innerText = "Playlist generated. (Check console if data is missing).";
-            
-            // If you switch back to normal CORS, use:
-            // const data = await response.json();
-            // out.innerText = data.candidates[0].content.parts[0].text;
-            
-        } catch (err) {
-            out.innerText = "Error: Unable to connect. Check your script deployment.";
-        } finally {
-            btn.disabled = false;
-        }
-    }
-</script>
-</body>
-</html>
+  return ContentService.createTextOutput(response.getContentText())
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader("Access-Control-Allow-Origin", "*");
+}
