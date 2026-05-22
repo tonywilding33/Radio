@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RHR | Different Strokes</title>
+    <script>
+        // Disable Right-Click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+    </script>
+    <style>
+        :root { --rhr-red: #e31e24; --rhr-pink-fill: #fde2e2; }
+        body { font-family: -apple-system, sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; user-select: none; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; border-top: 6px solid var(--rhr-red); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 100%; max-width: 500px; }
+        .station-name { color: var(--rhr-red); font-size: 1.2rem; font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px;}
+        .instruction { font-size: 0.85rem; color: #666; margin-bottom: 15px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn { width: 100%; border: none; padding: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; background: var(--rhr-red); color: #fff; margin-top: 10px; }
+        #output { margin-top: 20px; white-space: pre-wrap; font-size: 0.85rem; color: #333; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="station-name">Different Strokes</div>
+    <div class="instruction">Enter an instrument or reference track to generate your playlist.</div>
+    
+    <input type="text" id="instrument" placeholder="Instrument (e.g. Piano)">
+    <input type="text" id="reference" placeholder="Reference Artist (Optional)">
+    <button class="btn" onclick="generatePlaylist()">GENERATE PLAYLIST</button>
+    
+    <div id="output"></div>
+</div>
+
+<script>
+    async function generatePlaylist() {
+        const inst = document.getElementById('instrument').value;
+        const ref = document.getElementById('reference').value;
+        const out = document.getElementById('output');
+        
+        if (!inst && !ref) return alert("Please enter at least one detail.");
+        
+        out.innerText = "Curating your playlist...";
+
+        try {
+            const response = await fetch("https://script.google.com/macros/s/AKfycbxqhwAk6b0M4IxY7DF7AOBbRXwudvBilgra2BQ8DpUc_pVsWenSlnIwkN0WFosAJGKF/exec", {
+                method: "POST",
+                body: JSON.stringify({ instrument: inst, reference: ref })
+            });
+            
+            const data = await response.json();
+            // Display only the AI's final text output from the proxy
+            out.innerText = data.candidates[0].content.parts[0].text;
+        } catch (err) {
+            out.innerText = "Error: Unable to connect to the curation service.";
+        }
+    }
+</script>
+</body>
+</html>
