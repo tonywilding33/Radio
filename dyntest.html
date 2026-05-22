@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playlist Generator</title>
+</head>
+<body>
+
+    <input type="text" id="inst" placeholder="Instrument">
+    <input type="text" id="ref" placeholder="Reference">
+    <button id="go">GENERATE</button>
+    <div id="out"></div>
+
+    <script>
+        document.getElementById('go').addEventListener('click', async function() {
+            const out = document.getElementById('out');
+            out.innerText = "Loading...";
+            
+            try {
+                const response = await fetch("https://script.google.com/macros/s/AKfycbxqhwAk6b0M4IxY7DF7AOBbRXwudvBilgra2BQ8DpUc_pVsWenSlnIwkN0WFosAJGKF/exec", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        instrument: document.getElementById('inst').value,
+                        reference: document.getElementById('ref').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Directly accessing the Gemini text path
+                out.innerText = data.candidates[0].content.parts[0].text;
+            } catch (err) {
+                out.innerText = "Error: " + err.message;
+            }
+        });
+    </script>
+
+</body>
+</html>
