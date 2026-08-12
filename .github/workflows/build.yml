@@ -1,1 +1,28 @@
 .github/workflows/build.yml
+name: Build Mac App
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build Mac App Bundle
+        run: pyinstaller --windowed --onefile PlaylistTracker.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PlaylistTracker-Mac
+          path: dist/PlaylistTracker.app
