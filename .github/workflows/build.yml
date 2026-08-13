@@ -16,7 +16,6 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-        cache: 'pip'
 
     - name: Install Linux GUI Dependencies
       if: matrix.os == 'ubuntu-latest'
@@ -31,7 +30,7 @@ jobs:
 
     - name: Compile with PyInstaller
       run: |
-        pyinstaller --noconsole --onefile --name "Requests Tracker" "RequestsTracker.py"
+        pyinstaller --noconsole --onefile --name "Requests Tracker" "Requests Tracker.py"
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
