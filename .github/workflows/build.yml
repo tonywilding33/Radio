@@ -1,39 +1,42 @@
-name: Build Cross-Platform Binaries
-on: workflow_dispatch
+name: Build Ward Visitor Request Collector
+
+on:
+  push:
+    branches: [ "main" ]
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies & PyInstaller
+        run: |
+          pip install flet requests
+          pyinstaller --onefile --noconsole --name="WardCollector" "Ward Visitor Request Collector.py"
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Executable
+          path: dist/*.exe
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Install Linux GUI Dependencies
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-tk
-
-    - name: Install Python Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller
-
-    - name: Compile with PyInstaller
-      run: |
-        pyinstaller --noconsole --onefile --name "Requests Tracker" "Requests Tracker.py"
-
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: RequestsTracker-${{ matrix.os }}
-        path: dist/Requests Tracker*
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Flet CLI
+        run: pip install flet
+      - name: Build Android APK via Flet Build
+        run: flet build apk --project-name="WardCollector"
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-APK
+          path: build/apk/*.apk
