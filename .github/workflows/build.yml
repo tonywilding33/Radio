@@ -13,10 +13,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install dependencies & PyInstaller
-        run: |
-          pip install flet requests pyinstaller
-          python -m PyInstaller --onefile --noconsole --name="WardCollector" main.py
+      - name: Install dependencies
+        run: pip install flet requests pyinstaller
+      - name: Build Windows Executable
+        run: python -m PyInstaller --onefile --noconsole --name="WardCollector" main.py
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -39,7 +39,7 @@ jobs:
       - name: Install Flet CLI
         run: pip install flet
       - name: Build Android APK
-        run: echo "y" | flet build apk
+        run: yes | flet build apk
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
