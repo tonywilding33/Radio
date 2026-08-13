@@ -7,6 +7,9 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: Radio
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -21,10 +24,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Windows-Executable
-          path: dist/*.exe
+          path: Radio/dist/*.exe
 
   build-android:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Radio
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -44,4 +50,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Android-APK
-          path: build/apk/*.apk
+          path: Radio/build/apk/*.apk
