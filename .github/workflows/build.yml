@@ -38,8 +38,8 @@ jobs:
           java-version: '17'
       - name: Install Flet CLI
         run: pip install flet
-      - name: Build Android APK via Flet Build
-        run: flet build apk --project "WardCollector"
+      - name: Build Android APK
+        run: flet build apk
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
