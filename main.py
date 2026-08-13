@@ -78,7 +78,7 @@ def main(page: ft.Page):
               parts[1],
               parts[2],
               parts[3],
-          ]
+          )
           if db_name == username and "Granted" in db_access:
             if (not secretword or db_word == secretword) and (
                 not serial or db_serial == serial
