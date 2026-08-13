@@ -1,4 +1,11 @@
-build-windows:
+name: Build Ward Visitor Request Collector
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-windows:
     runs-on: windows-latest
     env:
       PYTHONUTF8: "1"
@@ -16,5 +23,27 @@ build-windows:
         uses: actions/upload-artifact@v4
         with:
           name: Windows-Executable
-          # Changed this to a broader path so it catches the output
           path: build/windows/
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Set up Java (JDK 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Install Flet CLI
+        run: pip install flet
+      - name: Build Android APK
+        run: printf "y\n" | flet build apk
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-APK
+          path: build/apk/*.apk
