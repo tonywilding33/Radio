@@ -39,7 +39,7 @@ jobs:
       - name: Install Flet CLI
         run: pip install flet
       - name: Build Android APK
-        run: flet build apk
+        run: echo "y" | flet build apk
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
