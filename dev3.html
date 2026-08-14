@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>HOSPITAL RADIO SUITE * | Volunteer Help Hub</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+            -webkit-user-select: none; user-select: none;
+        }
+        .box { width: 100%; max-width: 550px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; box-sizing: border-box; }
+        h2 { font-size: 1.6rem; margin-bottom: 25px; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
+        .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; }
+        .nav-btn { 
+            display: block; width: 100%; background: var(--accent); color: #0f172a; border: none; padding: 16px; 
+            border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; text-align: center; 
+            text-decoration: none; margin-bottom: 12px; box-sizing: border-box; transition: opacity 0.2s;
+        }
+        .nav-btn:hover { opacity: 0.9; }
+        .nav-btn.secondary { background: #334155; color: var(--text); }
+        .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div class="box">
+        <h2>Volunteer Help Hub</h2>
+        <div class="status">SELECT AN APPLICATION GUIDE</div>
+        
+        <a href="ward.html" class="nav-btn">1. Ward Visitor Request Collector</a>
+        <a href="notes.html" class="nav-btn secondary">2. Show Notes App</a>
+        <a href="tracker.html" class="nav-btn secondary">3. Request Data Tracker</a>
+        <a href="db.html" class="nav-btn secondary">4. DB Connector Hub</a>
+    </div>
+    <div class="credit-footer">Developed by Tony Wilding &bull; © 2026</div>
+</body>
+</html>
