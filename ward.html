@@ -23,48 +23,48 @@
     <div class="box">
         <h2>Ward Visitor Request Collector Guide</h2>
         <pre>OVERVIEW
-The Ward Visitor Request Collector is a professional PowerShell native Windows Forms application designed for hospital radio stations[cite: 7]. It streamlines patient request collection, local library track availability querying, secure Base64 encrypted configuration via bin_res\db_connect.txt, dynamic station-specific UAC synchronization (<StationID>_uac.txt), live network management, direct thermal printer execution, show notes coordination, and automated session exporting managed through a WVRC.ini configuration setup[cite: 7].
+The Ward Visitor Request Collector is a professional PowerShell native Windows Forms application designed for hospital radio stations. It streamlines patient request collection, local library track availability querying, secure Base64 encrypted configuration via bin_res\db_connect.txt, dynamic station-specific UAC synchronization (<StationID>_uac.txt), live network management, direct thermal printer execution, show notes coordination, and automated session exporting managed through a WVRC.ini configuration setup.
 
 1. SYSTEM REQUIREMENTS & SETUP
-• Environment: Windows PowerShell (compatible with Windows 10/11)[cite: 7].
-• Core Dependencies: System.Windows.Forms and System.Drawing assemblies (automatically loaded by the script)[cite: 7].
+• Environment: Windows PowerShell (compatible with Windows 10/11).
+• Core Dependencies: System.Windows.Forms and System.Drawing assemblies (automatically loaded by the script).
 • Data & Configuration Storage:
-  - WVRC.ini: Stores application settings including Station ID, active username, Wi-Fi parameters, printer IP/credentials, and the administrator password[cite: 7].
-  - bin_res\db_connect.txt: Base64 encrypted configuration file containing remote links for the database and UAC files[cite: 7].
-  - <StationID>_uac.txt (e.g., rugby_uac.txt): Local station-specific User Access Control file containing base64-encoded user permission records[cite: 7].
-  - <StationID>hr.txt: Local library database file stored in the bin_res directory[cite: 7].
-• Subdirectories: Automatically provisions bin_res, Reports, and Show Notes folders upon startup[cite: 7].
+  - WVRC.ini: Stores application settings including Station ID, active username, Wi-Fi parameters, printer IP/credentials, and the administrator password.
+  - bin_res\db_connect.txt: Base64 encrypted configuration file containing remote links for the database and UAC files.
+  - <StationID>_uac.txt (e.g., rugby_uac.txt): Local station-specific User Access Control file containing base64-encoded user permission records.
+  - <StationID>hr.txt: Local library database file stored in the bin_res directory.
+• Subdirectories: Automatically provisions bin_res, Reports, and Show Notes folders upon startup.
 
 2. CONFIGURING NETWORK, PRINTER & SECURITY SYNC (SETTINGS & IMPORT TAB)
-• Admin Access & Password Security: The Settings tab is protected behind an administrative password lock to prevent unauthorized configuration changes[cite: 7]. Enter the administrator password (default is hospital or configured value) to unlock the configuration panel, with settings persisted within WVRC.ini[cite: 7].
-• Station ID Configuration: Modify the station prefix (e.g., rugby) to automatically map local UAC and library database files[cite: 7].
-• Encrypted Import Routine: Click "Download & Sync from db_connect.txt" to decode Base64 configurations, download the latest remote library database, and synchronize the station UAC file[cite: 7].
-• User Access Control (UAC) Selection: View decrypted granted users in the list box and click "Set Active User from Granted List" to assign the active collector username[cite: 7].
-• Network & Wi-Fi Management: Click "Scan Networks" to populate available wireless SSIDs[cite: 7]. Select your target network, enter enterprise credentials (Network Username and Password) or standard WPA2-PSK passwords, and click "Connect Net" to generate profile XML, apply via netsh, and connect[cite: 7]. Use "Disconnect Net" to safely terminate wireless sessions[cite: 7].
-• Printer Configuration: Enter the Wi-Fi Printer IP, username, and password[cite: 7]. Click "Ping Test Printer" to verify network connectivity and save all preferences by clicking "Save to WVRC.ini"[cite: 7].
+• Admin Access & Password Security: The Settings tab is protected behind an administrative password lock to prevent unauthorized configuration changes. Enter the administrator password (default is hospital or configured value) to unlock the configuration panel, with settings persisted within WVRC.ini.
+• Station ID Configuration: Modify the station prefix (e.g., rugby) to automatically map local UAC and library database files.
+• Encrypted Import Routine: Click "Download & Sync from db_connect.txt" to decode Base64 configurations, download the latest remote library database, and synchronize the station UAC file.
+• User Access Control (UAC) Selection: View decrypted granted users in the list box and click "Set Active User from Granted List" to assign the active collector username.
+• Network & Wi-Fi Management: Click "Scan Networks" to populate available wireless SSIDs. Select your target network, enter enterprise credentials (Network Username and Password) or standard WPA2-PSK passwords, and click "Connect Net" to generate profile XML, apply via netsh, and connect. Use "Disconnect Net" to safely terminate wireless sessions.
+• Printer Configuration: Enter the Wi-Fi Printer IP, username, and password. Click "Ping Test Printer" to verify network connectivity and save all preferences by clicking "Save to WVRC.ini".
 
 3. MANAGING PATIENT REQUESTS & FORM WORKFLOW (PATIENT FORM TAB)
-• The primary operational hub is the Patient Form tab, combining request intake, database verification, and live show notes[cite: 7].
-• Request Details: Date is auto-populated in dd_MM_yy format[cite: 7]. Specify the ward name and select the request source type (Patient, Staff, Visitor, Dedication, Filler), along with the source name[cite: 7]. Collector name is automatically populated from the active user configuration[cite: 7].
-• Track Information: Enter Artist Name, Song Title, and an optional Alternative track suggestion[cite: 7].
-• Library Availability Query: Click "Query Library" to verify track availability against the local database (<StationID>hr.txt) under strict UAC validation[cite: 7].
-• Printer Operations: Click "Connect Print" to verify and lock printer connectivity[cite: 7]. Click "Print" to dispatch raw text job data directly to port 9100[cite: 7]. Click "Disc. Print" to safely release the printer connection[cite: 7].
-• Saving & Show Notes: Use the Show Notes / Dedication Chat text box to log on-air messaging, shoutouts, or special dedications[cite: 7]. Click "Save & Next Patient" to append the request to the active session list and clear form fields for the next entry[cite: 7].
+• The primary operational hub is the Patient Form tab, combining request intake, database verification, and live show notes.
+• Request Details: Date is auto-populated in dd_MM_yy format. Specify the ward name and select the request source type (Patient, Staff, Visitor, Dedication, Filler), along with the source name. Collector name is automatically populated from the active user configuration.
+• Track Information: Enter Artist Name, Song Title, and an optional Alternative track suggestion.
+• Library Availability Query: Click "Query Library" to verify track availability against the local database (<StationID>hr.txt) under strict UAC validation.
+• Printer Operations: Click "Connect Print" to verify and lock printer connectivity. Click "Print" to dispatch raw text job data directly to port 9100. Click "Disc. Print" to safely release the printer connection.
+• Saving & Show Notes: Use the Show Notes / Dedication Chat text box to log on-air messaging, shoutouts, or special dedications. Click "Save & Next Patient" to append the request to the active session list and clear form fields for the next entry.
 
 4. STUDIO RECALL & EXPORT (STUDIO RECALL & EXPORT TAB)
-• Session Recall: View all requests captured during the current session in the list box and click "Refresh Session List" to synchronize updates[cite: 7].
-• Load External Files: Click "Load from Saved File..." to import previously saved report text files from the Reports directory into the studio recall view[cite: 7].
-• Subfolder Export: Click "Generate Subfolder Report Files" to automatically generate and export three distinct files formatted with today's date tag[cite: 7]:
-  - Central playlist file (Requests_<date>.txt) in bin_res[cite: 7].
-  - Comprehensive daily report (Reports_<date>.txt) in Reports[cite: 7].
-  - On-air show notes log (Show Notes_<date>.txt) in Show Notes[cite: 7].
+• Session Recall: View all requests captured during the current session in the list box and click "Refresh Session List" to synchronize updates.
+• Load External Files: Click "Load from Saved File..." to import previously saved report text files from the Reports directory into the studio recall view.
+• Subfolder Export: Click "Generate Subfolder Report Files" to automatically generate and export three distinct files formatted with today's date tag:
+  - Central playlist file (Requests_<date>.txt) in bin_res.
+  - Comprehensive daily report (Reports_<date>.txt) in Reports.
+  - On-air show notes log (Show Notes_<date>.txt) in Show Notes.
 
 END USER LICENSE AGREEMENT & SUPPORT
-• Acceptance of Terms: By downloading, installing, or using the application, you agree to be bound by the terms of this End User License Agreement[cite: 7].
-• Grant of License: Granted a personal, non-exclusive, non-transferable, revocable license for internal operational management, playlist tracking, and reporting purposes[cite: 7].
-• Restrictions: Unauthorized modification, reverse engineering, decompilation, disassembly, or redistribution of the source code is prohibited[cite: 7]. Users are responsible for complying with third-party API terms of service[cite: 7].
-• Disclaimer & Liability: Provided "as is" without warranty of any kind, express or implied[cite: 7]. Authors and copyright holders assume no liability for claims or damages arising from software use[cite: 7].
-• Support & Credits: Direct inquiries, licensing questions, or contributions can be sent to the administrator via email at tonywilding152@gmail.com[cite: 7]. Design Concept by Tony Wilding © 2026[cite: 7].</pre>
+• Acceptance of Terms: By downloading, installing, or using the application, you agree to be bound by the terms of this End User License Agreement.
+• Grant of License: Granted a personal, non-exclusive, non-transferable, revocable license for internal operational management, playlist tracking, and reporting purposes.
+• Restrictions: Unauthorized modification, reverse engineering, decompilation, disassembly, or redistribution of the source code is prohibited. Users are responsible for complying with third-party API terms of service.
+• Disclaimer & Liability: Provided "as is" without warranty of any kind, express or implied. Authors and copyright holders assume no liability for claims or damages arising from software use.
+• Support & Credits: Direct inquiries, licensing questions, or contributions can be sent to the administrator via email at tonywilding152@gmail.com. Design Concept by Tony Wilding © 2026.</pre>
         <a href="index.html" class="back-btn">&larr; Back to Help Hub</a>
     </div>
     <div class="credit-footer">Developed by Tony Wilding &bull; © 2026</div>
