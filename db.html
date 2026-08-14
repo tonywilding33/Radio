@@ -23,52 +23,52 @@
     <div class="box">
         <h2>DB Connector - Secure Gateway & UAC Hub Guide</h2>
         <pre>1. OVERVIEW
-The DB Connector - Secure Gateway & UAC Hub is a PowerShell-based desktop application designed to manage secure online repository links, configure station-specific User Access Control (UAC) prefixes, manage administrative credentials, and generate 2-step authentication records for station deployments.
+The DB Connector - Secure Gateway & UAC Hub is a PowerShell-based desktop application designed to manage secure online repository links, configure station-specific User Access Control (UAC) prefixes, manage administrative credentials, and generate 2-step authentication records for station deployments[cite: 5].
 
 2. STARTUP AND AUTHENTICATION
-• Login: When you launch the application, a secure login dialog box appears.
-• Password: Enter the administrative access password to proceed.
-• Note: The default password for a fresh installation is hospital. Entering the correct password unlocks the main dashboard.
+• Login: When you launch the application, a secure login dialog box appears[cite: 5].
+• Password: Enter the administrative access password to proceed[cite: 5].
+• Note: The default password for a fresh installation is hospital[cite: 5]. Entering the correct password unlocks the main dashboard[cite: 5].
 
 3. ONLINE REPOSITORY & GATEWAY LINKS
-The top section of the dashboard handles network paths and repository integration:
-• GitHub Raw DB Link: Enter the raw URL pointing to your online database.
-• Test DB Connection: Tests the reachability of the database URL by verifying an HTTP 200 OK response and updates the status indicator.
-• GitHub Raw UAC Link: Specifies the repository directory URL where station UAC files are published.
-• 4-Character UAC Prefix: Enter a unique 4-character station identifier (format: XXXX), which dictates the filename structure (XXXX_uac.txt).
-• Save Settings to INI: Saves all link configurations, prefixes, and current user parameters to the local DBConnector.ini file and synchronizes exports to the .bin_res directory.
+The top section of the dashboard handles network paths and server integration[cite: 5]:
+• Database URL: Enter the web URL pointing to your online database[cite: 5].
+• Test DB Connection: Tests the reachability of the database URL by verifying an HTTP 200 OK response and updates the status indicator[cite: 5].
+• UAC Directory URL: Specifies the server directory URL where station UAC files are published[cite: 5].
+• 4-Character UAC Prefix: Enter a unique 4-character station identifier (format: XXXX), which dictates the filename structure (XXXX_uac.txt)[cite: 5].
+• Save Settings to INI: Saves all link configurations, prefixes, and current user parameters to the local DBConnector.ini file and synchronizes exports to the .bin_res directory[cite: 5].
 
 4. PASSWORD MANAGER
-• Use this section to update the login password required to open the application.
-• Type your new password into the text box and click Save Password to update the secure configuration setting.
+• Use this section to update the login password required to open the application[cite: 5].
+• Type your new password into the text box and click Save Password to update the secure configuration setting[cite: 5].
 
 5. UAC & USER AUTHENTICATION GENERATOR
-This module manages user access credentials and authorization lists:
-• Enter User Name: Input the name of the user requiring access.
-• Generate Credentials & Update UAC: Generates a secure secret word and a unique randomized serial code.
-• Record Structure: Formats the output line as User Name | Secret Word | Serial | Granted.
-• File Output: Appends the generated authorization record to the local station file (${UacPrefix}_uac.txt) and updates the .bin_res resource files.
-• Copy Last Record to Clipboard: Copies the most recent authentication entry directly to your clipboard for quick sharing.
+This module manages user access credentials and authorization lists[cite: 5]:
+• Enter User Name: Input the name of the user requiring access[cite: 5].
+• Generate Credentials & Update UAC: Generates a secure secret word and a unique randomized serial code[cite: 5].
+• Record Structure: Formats the output line as User Name | Secret Word | Serial | Granted[cite: 5].
+• File Output: Appends the generated authorization record to the local station file (${UacPrefix}_uac.txt) and updates the .bin_res resource files[cite: 5].
+• Copy Last Record to Clipboard: Copies the most recent authentication entry directly to your clipboard for quick sharing[cite: 5].
 
 6. SYSTEM FILE STRUCTURE
-The application automatically creates and maintains the following local components:
-• DBConnector.ini: Configuration file storing settings, administrative passwords, and link definitions.
-• .bin_res/: Protected directory containing exported synchronization records, including db_connect.txt (Base64-encoded gateway links) and encrypted user authorization logs.
-• ${UacPrefix}_uac.txt: Station-specific text files tracking active user access permissions.
+The application automatically creates and maintains the following local components[cite: 5]:
+• DBConnector.ini: Configuration file storing settings, administrative passwords, and link definitions[cite: 5].
+• .bin_res/: Protected directory containing exported synchronization records, including db_connect.txt (Base64-encoded gateway links) and encrypted user authorization logs[cite: 5].
+• ${UacPrefix}_uac.txt: Station-specific text files tracking active user access permissions[cite: 5].
 
 7. END USER LICENSE AGREEMENT (EULA)
-• License Grant: This software is provided for authorized station deployment, management, and administrative configuration purposes.
-• Restrictions: Unauthorized distribution, modification of core security routines, or reverse engineering of the gateway logic is strictly prohibited.
-• Disclaimer of Warranty: The software is provided "as is" without warranty of any kind, express or implied. The author or distributor assumes no liability for operational downtime, data loss, or network connectivity issues arising from its use.
+• License Grant: This software is provided for authorized station deployment, management, and administrative configuration purposes[cite: 5].
+• Restrictions: Unauthorized distribution, modification of core security routines, or reverse engineering of the gateway logic is strictly prohibited[cite: 5].
+• Disclaimer of Warranty: The software is provided "as is" without warranty of any kind, express or implied[cite: 5]. The author or distributor assumes no liability for operational downtime, data loss, or network connectivity issues arising from its use[cite: 5].
 
 8. SUPPORT & TROUBLESHOOTING
-• Configuration Reset: If settings become misaligned, you can safely delete DBConnector.ini to revert to default parameters (including the default administrative password hospital).
-• Connectivity Checks: Use the Test DB Connection feature to troubleshoot GitHub raw link response codes and verify network accessibility.
-• Log Diagnostics: Ensure that station UAC prefixes match the expected 4-character naming convention to guarantee successful remote synchronization.
+• Configuration Reset: If settings become misaligned, you can safely delete DBConnector.ini to revert to default parameters (including the default administrative password hospital)[cite: 5].
+• Connectivity Checks: Use the Test DB Connection feature to troubleshoot database link response codes and verify network accessibility[cite: 5].
+• Log Diagnostics: Ensure that station UAC prefixes match the expected 4-character naming convention to guarantee successful remote synchronization[cite: 5].
 
 9. SUPPORT & CREDITS
-• Support & Contributions: Direct inquiries, licensing questions, or contributions can be sent to the administrator via email at tonywilding152@gmail.com.
-• Credits: Design Concept: Tony Wilding | Copyright: © 2026.</pre>
+• Support & Contributions: Direct inquiries, licensing questions, or contributions can be sent to the administrator via email at tonywilding152@gmail.com[cite: 5].
+• Credits: Design Concept: Tony Wilding | Copyright: © 2026[cite: 5].</pre>
         <a href="index.html" class="back-btn">&larr; Back to Help Hub</a>
     </div>
     <div class="credit-footer">Developed by Tony Wilding &bull; © 2026</div>
