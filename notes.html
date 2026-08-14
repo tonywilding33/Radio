@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>Show Notes Guide * | Hospital Radio Suite</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; margin: 0; padding: 40px 20px;
+            -webkit-user-select: none; user-select: none; box-sizing: border-box;
+        }
+        .box { width: 100%; max-width: 800px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; box-sizing: border-box; }
+        h2 { font-size: 1.4rem; margin-bottom: 20px; text-align: center; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-top: 0; }
+        pre { background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; font-size: 0.85rem; white-space: pre-wrap; border-left: 4px solid var(--accent); line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; margin: 0 0 20px 0; max-height: 450px; overflow-y: auto; }
+        .back-btn { display: block; width: 100%; background: #475569; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; text-align: center; text-decoration: none; text-transform: uppercase; box-sizing: border-box; }
+        .back-btn:hover { background: #64748b; }
+        .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div class="box">
+        <h2>Show Notes App - Live Production Hub Guide</h2>
+        <pre>OVERVIEW
+The Show Notes App - Live Production Hub is a professional PowerShell native Windows Forms application designed to streamline show notes management, live request intake, priority flagging, network connectivity, printer configuration, analysis tracking, and session logging through a ShowNotes.ini configuration setup.
+
+1. SYSTEM REQUIREMENTS & SETUP
+• Environment: Windows PowerShell (compatible with Windows 10/11).
+• Core Dependencies: System.Windows.Forms and System.Drawing assemblies (automatically loaded by the script).
+• Data & Configuration Storage:
+  - ShowNotes.ini: Stores application settings including AdminPassword, DataDirectory, printer details, and Wi-Fi parameters.
+  - Cumulative ShowNotes.txt: Master history file maintaining pipe-delimited records: Timestamp | SourceChannel | SenderName | RequestDetails | Priority | AssignedSegment.
+  - processed shownotes.txt: Tracks processed text files to prevent duplicate loading.
+
+2. SHOW NOTES & LIVE REQUESTS (SHOW NOTES & REQUESTS TAB)
+The primary operational hub is the Show Notes & Requests tab, combining rundown loading and live request intake.
+• Show Notes Display: Click "Load Latest Show Notes" to scan the designated directory for text files and load the most recent production rundown into the read-only display view.
+• Add Live Request / Note Group:
+  - Source Channel: Select the intake channel from options including Email, Phone, Messaging, Website, Social Media, WhatsApp, Walk-In, or Other.
+  - Sender / Caller: Input the name of the person submitting the note or request.
+  - Priority Flag: Assign a priority level such as Normal, High, Urgent / Live On-Air, or Filler.
+  - Request / Note Details: Enter the message, call details, or track request text.
+• Save Action: Click "Add Live Note ->" to validate entries, append the record to Cumulative ShowNotes.txt, and clear input fields for the next entry.
+
+3. CONFIGURING NETWORK, PRINTER & SECURITY (SETTINGS TAB)
+The Settings tab is protected behind an administrative password lock to prevent unauthorized configuration changes.
+• Admin Access & Password Security: Enter the administrator password (default is hospital) into the password field and click "Unlock Settings" to access the configuration panel.
+• Unified Directory Path: Modify or browse for the custom directory path where show note text files are stored.
+• Printer Configuration & Credentials:
+  - Click "Scan Printers" to discover available local printers via Windows discovery.
+  - Select the printer type (Hard-Wired or Wi-Fi / Network).
+  - Enter printer credentials (Printer User / ID and Printer Password) and click "Test Print" to verify communication.
+• Wireless Network Configuration: Click "Scan Networks" to populate available wireless SSIDs. Enter network user ID and password if required, then click "Connect Network" or "Disconnect Network".
+• Diagnostics & Persistence: Click "Test Internet Connection" to verify web connectivity, and click "Save All Changes to ShowNotes.ini" to persist preferences.
+
+4. ANALYSIS & PRINT FUNCTIONS (ANALYSIS & PRINT TAB)
+• Run Analysis: Click "Run Analysis" to process the cumulative show notes history file, displaying total logged items and recent entries.
+• Printer Status & Management: Monitor the real-time Active / Inactive indicator (green for active, red for inactive) and use the dedicated "Connect" and "Disconnect" buttons.
+• Print Operations: Click "Print Report" to execute print jobs, protected by automated active printer checks.
+
+END USER LICENSE AGREEMENT & SUPPORT
+• Acceptance of Terms: By downloading, installing, or using the application, you agree to be bound by the terms of this End User License Agreement.
+• Grant of License: Granted a personal, non-exclusive, non-transferable, revocable license for internal operational management, show notes tracking, and reporting purposes.
+• Restrictions: Unauthorized modification, reverse engineering, decompilation, disassembly, or redistribution of the source code is prohibited. Users are responsible for ensuring compliance with internal data governance policies.
+• Disclaimer of Warranties: Provided "as is" without warranty of any kind, express or implied. Authors and copyright holders assume no liability for claims or damages arising from software use.
+• Support & Contributions: Direct inquiries, licensing questions, or contributions can be sent to the administrator via email at tonywilding152@gmail.com. Design Concept by Tony Wilding © 2026.</pre>
+        <a href="index.html" class="back-btn">&larr; Back to Help Hub</a>
+    </div>
+    <div class="credit-footer">Developed by Tony Wilding &bull; © 2026</div>
+</body>
+</html>
