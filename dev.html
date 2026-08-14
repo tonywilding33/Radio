@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Tony Wilding">
+    <title>HOSPITAL RADIO SUITE * | Volunteer Help Hub</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --success: #10b981; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+            -webkit-user-select: none; user-select: none;
+        }
+        .box { width: 100%; max-width: 750px; background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid #334155; box-sizing: border-box; }
+        h2 { font-size: 1.5rem; margin-bottom: 20px; text-align: center; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 0; }
+        .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        .status { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; padding: 12px; background: #0f172a; border-radius: 8px; border: 1px solid #475569; text-align: center; }
+        button { width: 100%; background: #334155; color: var(--text); border: none; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; transition: background 0.2s; }
+        button.active { background: var(--accent); color: #0f172a; }
+        button:hover { background: #475569; }
+        button.active:hover { background: var(--accent); }
+        pre { background: #0f172a; color: #fff; padding: 20px; border-radius: 8px; font-size: 0.85rem; white-space: pre-wrap; border-left: 4px solid var(--accent); line-height: 1.6; font-family: 'Segoe UI', monospace; overflow-x: auto; max-height: 380px; overflow-y: auto; margin: 0; }
+        .credit-footer { width: 100%; text-align: center; color: #f8fafc; font-size: 0.65rem; padding: 25px 0; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div class="box">
+        <h2>Volunteer Help Hub</h2>
+        <div class="nav-grid">
+            <button id="btn-ward" class="active" onclick="switchTab('ward')">1. Ward Visitor Collector</button>
+            <button id="btn-notes" onclick="switchTab('notes')">2. Show Notes Hub</button>
+            <button id="btn-tracker" onclick="switchTab('tracker')">3. Request Data Tracker</button>
+            <button id="btn-db" onclick="switchTab('db')">4. DB Connector Hub</button>
+        </div>
+        <div id="loadStatus" class="status">SYSTEM READY // SELECT AN APP GUIDE ABOVE</div>
+        <div id="outputArea">
+            <pre id="helpDisplay"></pre>
+        </div>
+    </div>
+    <div class="credit-footer">Developed by Tony Wilding &bull; © 2026</div>
+
+    <script>
+        const guides = {
+            ward: `WARD VISITOR REQUEST COLLECTOR (FRONT-LINE INTERACTION)
+============================================================
+• PURPOSE: Used strictly on hospital wards by volunteers engaging directly with patients to collect track requests and personal dedications.
+• KEY CAPABILITIES:
+  - Patient Request Intake: Records ward names, source types (Patient, Staff, Visitor, Dedication, Filler), and track details.
+  - Library Querying: Checks track availability against local station databases (<StationID>hr.txt) under UAC rules.
+  - Printer Integration: Direct thermal printer execution via port 9100.
+  - Session Exports: Automatically outputs files into bin_res, Reports, and Show Notes directories.
+• CONFIGURATION: Managed via WVRC.ini and synchronized with base64 encoded db_connect.txt files.`,
+
+            notes: `SHOW NOTES APP - LIVE PRODUCTION HUB (STUDIO ON-AIR)
+============================================================
+• PURPOSE: Serves as the dedicated live production hub for managing incoming messages and running the on-air request show.
+• KEY CAPABILITIES:
+  - Rundown Management: Scan and load the latest production text files instantly.
+  - Live Request Intake: Capture submissions across multi-channel sources (Phone, Email, WhatsApp, Social Media, Walk-In).
+  - Priority Flagging: Assign flags such as Normal, High, Urgent / Live On-Air, or Filler.
+  - Archiving: Appends data directly into Cumulative ShowNotes.txt with real-time analysis and printer status monitoring.`,
+
+            tracker: `REQUEST DATA TRACKER WARD ASSISTED (STUDIO ADMIN)
+============================================================
+• PURPOSE: Operates as the administrative studio tool dedicated to compiling comprehensive reports from historical session data.
+• KEY CAPABILITIES:
+  - Cumulative Log Processing: Analyzes historical performance metrics and operational session files.
+  - Reporting: Generates structured monthly and annual statistical summaries by ward and request category.
+  - Governance Support: Simplifies station administration and ensures reliable record-keeping for regulatory or operational audits.`,
+
+            db: `DB CONNECTOR - SECURE GATEWAY & UAC HUB (BACK-END)
+============================================================
+• PURPOSE: Acts as the secure background technical hub maintaining system connectivity, repository links, and user access controls.
+• KEY CAPABILITIES:
+  - Gateway Integration: Manages GitHub raw database links and tests connectivity (HTTP 200 checks).
+  - UAC Management: Configures 4-character station prefixes (e.g., rugby_uac.txt) and generates 2-step authentication credentials.
+  - Synchronization: Automatically updates base64-encoded resource configurations within the .bin_res directory.`
+        };
+
+        function switchTab(appKey) {
+            document.querySelectorAll('.nav-grid button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${appKey}`).classList.add('active');
+            document.getElementById('helpDisplay').innerText = guides[appKey];
+            document.getElementById('loadStatus').innerText = `LOADED MANUAL: ${appKey.toUpperCase()}`;
+        }
+
+        // Initialize with default tab
+        switchTab('ward');
+    </script>
+</body>
+</html>
