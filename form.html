@@ -36,16 +36,17 @@
     <div id="uacOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center;">
         <div style="background: #fff; padding: 20px; border-radius: 8px; width: 100%; max-width: 350px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
             <h3 style="margin-bottom: 12px; color: #1a73e8; font-size: 1.1rem;">Studio Security Login</h3>
+            <div style="font-size: 0.75rem; color: #666; margin-bottom: 10px;">User: <b>Request Collector</b></div>
             <div class="form-group" style="margin-bottom: 10px;">
-                <label for="uacUser">Username</label>
-                <input type="text" id="uacUser" placeholder="Enter username">
+                <label for="uacSecret">Secret Word</label>
+                <input type="password" id="uacSecret" placeholder="Enter secret word">
             </div>
             <div class="form-group" style="margin-bottom: 15px;">
-                <label for="uacPass">Secret Word / Password</label>
+                <label for="uacPass">Password</label>
                 <input type="password" id="uacPass" placeholder="Enter password">
             </div>
             <button type="button" id="uacLoginBtn" style="background: #1a73e8; color: #fff;">Login</button>
-            <div id="uacError" style="color: #d93025; font-size: 0.8rem; margin-top: 8px; text-align: center; display: none;">Invalid username or password.</div>
+            <div id="uacError" style="color: #d93025; font-size: 0.8rem; margin-top: 8px; text-align: center; display: none;">Invalid secret word or password.</div>
         </div>
     </div>
 
@@ -140,6 +141,7 @@
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3vWgPjZOqatIuuXzmkztnl9lC45SHWmIqoJH3LEeJygxjiG6efQMKb2a9hsln5e8C/exec';
         const UAC_URL = 'https://raw.githubusercontent.com/tonywilding33/Radio/refs/heads/main/UAC.txt';
+        const ENCODED_USER = 'UmVxdWVzdCBDb2xsZWN0b3I='; // Base64 for "Request Collector"
 
         const now = new Date();
         const dd = String(now.getDate()).padStart(2, '0');
@@ -154,13 +156,14 @@
 
         // UAC Login Handler
         document.getElementById('uacLoginBtn').addEventListener('click', async function() {
-            const userIn = document.getElementById('uacUser').value.trim();
+            const secretIn = document.getElementById('uacSecret').value.trim();
             const passIn = document.getElementById('uacPass').value.trim();
             const errorEl = document.getElementById('uacError');
             const loginBtn = document.getElementById('uacLoginBtn');
+            const targetUser = atob(ENCODED_USER);
 
-            if (!userIn || !passIn) {
-                errorEl.textContent = 'Please enter both username and password.';
+            if (!secretIn || !passIn) {
+                errorEl.textContent = 'Please enter both secret word and password.';
                 errorEl.style.display = 'block';
                 return;
             }
@@ -178,11 +181,12 @@
                 for (let line of lines) {
                     line = line.trim();
                     if (!line) continue;
-                    const parts = line.split(/[:,\s]+/);
-                    if (parts.length >= 2) {
+                    const parts = line.split(':');
+                    if (parts.length >= 3) {
                         const fileUser = parts[0].trim();
-                        const filePass = parts[1].trim();
-                        if (fileUser === userIn && filePass === passIn) {
+                        const fileSecret = parts[1].trim();
+                        const filePass = parts[2].trim();
+                        if (fileUser === targetUser && fileSecret === secretIn && filePass === passIn) {
                             authenticated = true;
                             break;
                         }
@@ -190,11 +194,8 @@
                 }
 
                 if (authenticated) {
-                    // Hide overlay
                     document.getElementById('uacOverlay').style.display = 'none';
-                    // Enable library button
                     document.getElementById('openLibraryBtn').disabled = false;
-                    // Auto resize form window to left 50%
                     try {
                         const halfWidth = Math.floor(window.screen.width / 2);
                         window.resizeTo(halfWidth, window.screen.height);
@@ -202,10 +203,9 @@
                     } catch (e) {
                         console.log('Window resizing restricted by browser environment.');
                     }
-                    // Load show notes
                     loadShowNotes();
                 } else {
-                    errorEl.textContent = 'Invalid username or password.';
+                    errorEl.textContent = 'Invalid secret word or password.';
                     errorEl.style.display = 'block';
                 }
             } catch (err) {
@@ -222,7 +222,6 @@
             const screenHeight = window.screen.height;
             const halfWidth = Math.floor(screenWidth / 2);
             
-            // Open library on right 50% without standard controls where possible
             window.open(
                 'https://rugbyhospitalradio.co.uk/library', 
                 'LibraryDB', 
