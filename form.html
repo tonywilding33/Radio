@@ -154,7 +154,7 @@
 
         let cachedRequests = [];
 
-        // UAC Login Handler
+        // UAC Login Handler with flexible parser and debugging
         document.getElementById('uacLoginBtn').addEventListener('click', async function() {
             const secretIn = document.getElementById('uacSecret').value.trim();
             const passIn = document.getElementById('uacPass').value.trim();
@@ -162,8 +162,8 @@
             const loginBtn = document.getElementById('uacLoginBtn');
             const targetUser = atob(ENCODED_USER);
 
-            if (!secretIn || !passIn) {
-                errorEl.textContent = 'Please enter both secret word and password.';
+            if (!passIn) {
+                errorEl.textContent = 'Please enter the password.';
                 errorEl.style.display = 'block';
                 return;
             }
@@ -178,18 +178,37 @@
                 const lines = text.split('\n');
                 let authenticated = false;
 
+                console.log('Target User:', JSON.stringify(targetUser));
+                console.log('Input Secret:', JSON.stringify(secretIn));
+                console.log('Input Pass:', JSON.stringify(passIn));
+
                 for (let line of lines) {
                     line = line.trim();
                     if (!line) continue;
                     const parts = line.split(':');
+                    
+                    let fileUser = '';
+                    let fileSecret = '';
+                    let filePass = '';
+
                     if (parts.length >= 3) {
-                        const fileUser = parts[0].trim();
-                        const fileSecret = parts[1].trim();
-                        const filePass = parts[2].trim();
-                        if (fileUser === targetUser && fileSecret === secretIn && filePass === passIn) {
-                            authenticated = true;
-                            break;
-                        }
+                        fileUser = parts[0].trim();
+                        fileSecret = parts[1].trim();
+                        filePass = parts[2].trim().replace(/\r$/, '');
+                    } else if (parts.length === 2) {
+                        fileUser = parts[0].trim();
+                        filePass = parts[1].trim().replace(/\r$/, '');
+                    }
+
+                    console.log('Parsed Line -> User:', JSON.stringify(fileUser), '| Secret:', JSON.stringify(fileSecret), '| Pass:', JSON.stringify(filePass));
+
+                    const userMatch = fileUser.toLowerCase() === targetUser.toLowerCase();
+                    const passMatch = filePass === passIn;
+                    const secretMatch = fileSecret ? (fileSecret === secretIn) : true;
+
+                    if (userMatch && passMatch && secretMatch) {
+                        authenticated = true;
+                        break;
                     }
                 }
 
@@ -209,6 +228,7 @@
                     errorEl.style.display = 'block';
                 }
             } catch (err) {
+                console.error(err);
                 errorEl.textContent = 'Network error fetching security profile.';
                 errorEl.style.display = 'block';
             } finally {
