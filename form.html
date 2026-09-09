@@ -22,7 +22,7 @@
         .btn-export { background: #f9ab00; color: #000; margin-top: 8px; }
         .notes-list { border: 1px solid #ddd; border-radius: 6px; padding: 6px; max-height: 200px; overflow-y: auto; background: #fafafa; margin-top: 6px; }
         .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
-        .note-item input[type="checkbox"] { width: 22px; height: 22px; margin-top: 2px; cursor: pointer; }
+        .note-item input[type="checkbox"] { width: 22px; height: 22px; margin-top: 2px; cursor: pointer; accent-color: #34a853; }
         .note-details { flex: 1; font-size: 0.8rem; }
         .note-details .song-title { font-weight: bold; color: #1a73e8; font-size: 0.85rem; }
         .note-details .meta { color: #666; margin-top: 2px; }
@@ -132,10 +132,9 @@
     </div>
 
     <script>
-        const ENCODED_SCRIPT_URL = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J6M3ZXZ1BqWk9xYXRJdXVYem1renRubDlsQzQ1U0hXbUlxb0pIM0xlRWp5Z3hqaUc2ZWZRUUtWYTlhdnNsbjVlOEMvZXhlYw==';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3vWgPjZOqatIuuXzmkztnl9lC45SHWmIqoJH3LEeJygxjiG6efQMKb2a9hsln5e8C/exec';
         const ENCODED_UAC_URL = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3Rvbnl3aWxkaW5nMzMvUmFkaW8vcmVmcy9oZWFkcy9tYWluL1VBQy50eHQ=';
 
-        const SCRIPT_URL = atob(ENCODED_SCRIPT_URL);
         const UAC_URL = atob(ENCODED_UAC_URL);
         const ENCODED_USER = 'V2FyZCBWaXNpdG9y';
 
