@@ -154,7 +154,7 @@
 
         let cachedRequests = [];
 
-        // UAC Login Handler with flexible parser and debugging
+        // UAC Login Handler supporting pipe (|) and colon (:) delimiters
         document.getElementById('uacLoginBtn').addEventListener('click', async function() {
             const secretIn = document.getElementById('uacSecret').value.trim();
             const passIn = document.getElementById('uacPass').value.trim();
@@ -184,20 +184,22 @@
 
                 for (let line of lines) {
                     line = line.trim();
-                    if (!line) continue;
-                    const parts = line.split(':');
+                    if (!line || line.startsWith('#')) continue;
+                    
+                    // Split by pipe (|) or colon (:) and trim whitespace around each part
+                    const parts = line.split(/[|:]/).map(p => p.trim());
                     
                     let fileUser = '';
                     let fileSecret = '';
                     let filePass = '';
 
                     if (parts.length >= 3) {
-                        fileUser = parts[0].trim();
-                        fileSecret = parts[1].trim();
-                        filePass = parts[2].trim().replace(/\r$/, '');
+                        fileUser = parts[0];
+                        fileSecret = parts[1];
+                        filePass = parts[2].replace(/\r$/, '');
                     } else if (parts.length === 2) {
-                        fileUser = parts[0].trim();
-                        filePass = parts[1].trim().replace(/\r$/, '');
+                        fileUser = parts[0];
+                        filePass = parts[1].replace(/\r$/, '');
                     }
 
                     console.log('Parsed Line -> User:', JSON.stringify(fileUser), '| Secret:', JSON.stringify(fileSecret), '| Pass:', JSON.stringify(filePass));
