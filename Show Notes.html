@@ -149,11 +149,10 @@
     </div>
 
     <script>
-        const ENCODED_SCRIPT_URL = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J6M3ZXZ1BqWk9xYXRJdXVYem1renRubDlsQzQ1U0hXbUlxb0pIM0xlRWp5Z3hqaUc2ZWZRUUtWYTlhdnNsbjVlOEMvZXhlYw==';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3vWgPjZOqatIuuXzmkztnl9lC45SHWmIqoJH3LEeJygxjiG6efQMKb2a9hsln5e8C/exec';
         const ENCODED_UAC_URL = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3Rvbnl3aWxkaW5nMzMvUmFkaW8vcmVmcy9oZWFkcy9tYWluL1VBQy50eHQ=';
-        const ENCODED_USER = 'U2hvdyBOb3Rlcw=='; // Base64 for "Show Notes"
+        const TARGET_USER = 'Show Notes';
 
-        const SCRIPT_URL = atob(ENCODED_SCRIPT_URL);
         const UAC_URL = atob(ENCODED_UAC_URL);
 
         const now = new Date();
@@ -171,7 +170,6 @@
             const passIn = document.getElementById('uacPass').value.trim();
             const errorEl = document.getElementById('uacError');
             const loginBtn = document.getElementById('uacLoginBtn');
-            const targetUser = atob(ENCODED_USER);
 
             if (!passIn) {
                 errorEl.textContent = 'Please enter the password.';
@@ -193,28 +191,18 @@
                     line = line.trim();
                     if (!line || line.startsWith('#')) continue;
                     
-                    const parts = line.split(/[|:]/).map(p => p.trim());
-                    
-                    let fileUser = '';
-                    let fileSecret = '';
-                    let filePass = '';
-
+                    const parts = line.split('|').map(p => p.trim());
                     if (parts.length >= 3) {
-                        fileUser = parts[0];
-                        fileSecret = parts[1];
-                        filePass = parts[2].replace(/\r$/, '');
-                    } else if (parts.length === 2) {
-                        fileUser = parts[0];
-                        filePass = parts[1].replace(/\r$/, '');
-                    }
+                        const fileUser = parts[0];
+                        const fileSecret = parts[1];
+                        const filePass = parts[2].replace(/\r$/, '');
 
-                    const userMatch = fileUser.toLowerCase() === targetUser.toLowerCase();
-                    const passMatch = filePass === passIn;
-                    const secretMatch = fileSecret ? (fileSecret === secretIn) : true;
-
-                    if (userMatch && passMatch && secretMatch) {
-                        authenticated = true;
-                        break;
+                        if (fileUser.toLowerCase() === TARGET_USER.toLowerCase() && 
+                            fileSecret === secretIn && 
+                            filePass === passIn) {
+                            authenticated = true;
+                            break;
+                        }
                     }
                 }
 
