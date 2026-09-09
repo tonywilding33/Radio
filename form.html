@@ -6,16 +6,7 @@
     <title>Hospital Radio Request Form</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { 
-            background: #f4f6f9; 
-            color: #333; 
-            padding: 12px 12px 12px 10px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            max-width: 600px; 
-            margin: 0; 
-        }
+        body { background: #f4f6f9; color: #333; padding: 12px; display: flex; flex-direction: column; gap: 12px; max-width: 600px; margin: 0 auto; }
         .card { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         h2 { color: #1a73e8; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .form-group { margin-bottom: 8px; }
@@ -187,10 +178,15 @@
                 const lines = text.split('\n');
                 let authenticated = false;
 
+                console.log('Target User:', JSON.stringify(targetUser));
+                console.log('Input Secret:', JSON.stringify(secretIn));
+                console.log('Input Pass:', JSON.stringify(passIn));
+
                 for (let line of lines) {
                     line = line.trim();
                     if (!line || line.startsWith('#')) continue;
                     
+                    // Split by pipe (|) or colon (:) and trim whitespace around each part
                     const parts = line.split(/[|:]/).map(p => p.trim());
                     
                     let fileUser = '';
@@ -206,6 +202,8 @@
                         filePass = parts[1].replace(/\r$/, '');
                     }
 
+                    console.log('Parsed Line -> User:', JSON.stringify(fileUser), '| Secret:', JSON.stringify(fileSecret), '| Pass:', JSON.stringify(filePass));
+
                     const userMatch = fileUser.toLowerCase() === targetUser.toLowerCase();
                     const passMatch = filePass === passIn;
                     const secretMatch = fileSecret ? (fileSecret === secretIn) : true;
@@ -219,7 +217,6 @@
                 if (authenticated) {
                     document.getElementById('uacOverlay').style.display = 'none';
                     document.getElementById('openLibraryBtn').disabled = false;
-                    
                     try {
                         const halfWidth = Math.floor(window.screen.width / 2);
                         window.resizeTo(halfWidth, window.screen.height);
@@ -227,7 +224,6 @@
                     } catch (e) {
                         console.log('Window resizing restricted by browser environment.');
                     }
-                    
                     loadShowNotes();
                 } else {
                     errorEl.textContent = 'Invalid secret word or password.';
