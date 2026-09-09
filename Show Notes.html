@@ -31,10 +31,9 @@
         .notes-section { flex: 1; display: flex; flex-direction: column; min-height: 250px; }
         .notes-list { flex: 1; border: 1px solid #ddd; border-radius: 6px; padding: 8px; overflow-y: auto; background: #fafafa; margin-top: 6px; max-height: 350px; }
         .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px; }
-        .note-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .note-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #34a853; }
         .note-details { flex: 1; font-size: 0.8rem; }
         .note-details .song-title { font-weight: bold; color: #1a73e8; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; }
-        .note-details .meta { color: #666; margin-top: 1px; }
     </style>
 </head>
 <body>
@@ -298,7 +297,7 @@
                 div.className = 'note-item';
                 div.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" ${isPlayed ? 'checked' : ''} onchange="togglePlayed(${index}, this.checked)">
+                        <input type="checkbox" ${isPlayed ? 'checked' : ''} onchange="togglePlayed(${index}, this.checked)" title="Mark main song as played">
                         <div class="note-details" style="flex: 1;">
                             <div class="song-title">
                                 <span>${req.Artist} — ${req.Song} <span style="font-weight: normal; color: ${isPlayed ? '#34a853' : '#d93025'};">(${isPlayed ? 'p' : 'u'})</span></span>
@@ -306,8 +305,8 @@
                         </div>
                     </div>
                     ${req.Alternative && req.Alternative.trim() !== '' ? `
-                    <div style="display: flex; align-items: center; gap: 8px; border-top: 1px dashed #eee; padding-top: 6px; margin-top: 2px;">
-                        <input type="checkbox" ${isPlayedAlt ? 'checked' : ''} onchange="togglePlayedAlt(${index}, this.checked)">
+                    <div style="display: flex; align-items: center; gap: 8px; border-top: 1px dashed #ddd; padding-top: 6px; margin-top: 2px;">
+                        <input type="checkbox" ${isPlayedAlt ? 'checked' : ''} onchange="togglePlayedAlt(${index}, this.checked)" title="Mark alternative song as played">
                         <div class="note-details" style="flex: 1;">
                             <div class="song-title">
                                 <span style="color: #b06000;">Alt: ${req.Alternative} <span style="font-weight: normal; color: ${isPlayedAlt ? '#34a853' : '#d93025'};">(${isPlayedAlt ? 'p' : 'u'})</span></span>
