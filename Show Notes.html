@@ -120,7 +120,7 @@
 
             <div class="form-group">
                 <label for="altRequest">Alternative Request</label>
-                <input type="text" id="altRequest" placeholder="Alternative option">
+                <input type="text" id="altRequest" placeholder="Alternative option (Artist - Song)">
             </div>
 
             <div class="form-group">
@@ -356,16 +356,32 @@
 
             let textOutput = '';
             cachedRequests.forEach(r => {
-                const isPlayed = r.Played === true || r.Played === 'TRUE' || r.Played === 'true';
-                const isPlayedAlt = r.PlayedAlt === true || r.PlayedAlt === 'TRUE' || r.PlayedAlt === 'true';
+                const isMainPlayed = r.Played === true || r.Played === 'TRUE' || r.Played === 'true';
+                const isAltPlayed = r.PlayedAlt === true || r.PlayedAlt === 'TRUE' || r.PlayedAlt === 'true';
 
+                // Main Request Entry
                 if (r.Song && r.Song.trim() !== '') {
-                    const mainStatus = isPlayed ? '(p)' : '(u)';
+                    const mainStatus = isMainPlayed ? '(p)' : '(u)';
                     textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | | | ${r.Type}\n`;
                 }
+
+                // Dedicated Alternative Choice Entry with separate artist parsing
                 if (r.Alternative && r.Alternative.trim() !== '') {
-                    const altStatus = isPlayedAlt ? '(p)' : '(u)';
-                    textOutput += `${r.Artist} ${altStatus} | ${r.Alternative} | | | | | ${r.Type}\n`;
+                    const altStatus = isAltPlayed ? '(p)' : '(u)';
+                    let altArtist = r.Artist;
+                    let altSong = r.Alternative.trim();
+
+                    if (altSong.includes(' - ')) {
+                        const parts = altSong.split(' - ');
+                        altArtist = parts[0].trim();
+                        altSong = parts.slice(1).join(' - ').trim();
+                    } else if (altSong.includes(' — ')) {
+                        const parts = altSong.split(' — ');
+                        altArtist = parts[0].trim();
+                        altSong = parts.slice(1).join(' — ').trim();
+                    }
+
+                    textOutput += `${altArtist} ${altStatus} | ${altSong} | | | | | ${r.Type}\n`;
                 }
             });
 
