@@ -28,12 +28,11 @@
         button:hover { opacity: 0.9; }
         .btn-sync { background: #1a73e8; padding: 6px 12px; font-size: 0.8rem; }
         .btn-export { background: #f9ab00; color: #000; width: 100%; padding: 10px; font-size: 0.9rem; margin-top: 4px; }
-        .btn-alt { background: #b06000; color: #fff; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; margin-left: 6px; }
         
         .notes-section { flex: 1; display: flex; flex-direction: column; min-height: 250px; }
         .notes-list { flex: 1; border: 1px solid #ddd; border-radius: 6px; padding: 8px; overflow-y: auto; background: #fafafa; margin-top: 6px; max-height: 350px; }
-        .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
-        .note-item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; }
+        .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px; }
+        .note-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         .note-details { flex: 1; font-size: 0.8rem; }
         .note-details .song-title { font-weight: bold; color: #1a73e8; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; }
         .note-details .meta { color: #666; margin-top: 1px; }
@@ -294,31 +293,33 @@
 
             cachedRequests.forEach((req, index) => {
                 const isPlayed = req.Played === true || req.Played === 'TRUE' || req.Played === 'true';
-                const isAltActive = req.useAlt === true;
+                const isPlayedAlt = req.PlayedAlt === true || req.PlayedAlt === 'TRUE' || req.PlayedAlt === 'true';
                 
-                const currentSongDisplay = isAltActive ? `<em>(Alt)</em> ${req.Alternative}` : req.Song;
                 const div = document.createElement('div');
                 div.className = 'note-item';
                 div.innerHTML = `
-                    <input type="checkbox" ${isPlayed ? 'checked' : ''} onchange="togglePlayed(${index}, this.checked)">
-                    <div class="note-details">
-                        <div class="song-title">
-                            <span>${req.Artist} — ${currentSongDisplay} <span style="font-weight: normal; color: ${isPlayed ? '#34a853' : '#d93025'};">(${isPlayed ? 'p' : 'u'})</span></span>
-                            ${req.Alternative && req.Alternative.trim() !== '' ? `<button type="button" class="btn-alt" onclick="toggleAlternative(${index})">${isAltActive ? 'Revert to Main' : 'Play Alt'}</button>` : ''}
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" ${isPlayed ? 'checked' : ''} onchange="togglePlayed(${index}, this.checked)">
+                        <div class="note-details" style="flex: 1;">
+                            <div class="song-title">
+                                <span>${req.Artist} — ${req.Song} <span style="font-weight: normal; color: ${isPlayed ? '#34a853' : '#d93025'};">(${isPlayed ? 'p' : 'u'})</span></span>
+                            </div>
                         </div>
-                        <div class="meta"><b>Source/Ward:</b> ${req.Ward} | <b>Type:</b> ${req.Type} ${req.Patient ? '| <b>Name:</b> ' + req.Patient : ''}</div>
-                        ${req.Alternative && !isAltActive ? `<div class="meta" style="color: #b06000;"><b>Alt:</b> ${req.Alternative}</div>` : ''}
-                        ${req.Alternative && isAltActive ? `<div class="meta" style="color: #666;"><b>Main Song was:</b> ${req.Song}</div>` : ''}
-                        ${req.Notes ? `<div class="meta" style="font-style: italic; color: #444;"><b>Notes:</b> ${req.Notes}</div>` : ''}
                     </div>
+                    ${req.Alternative && req.Alternative.trim() !== '' ? `
+                    <div style="display: flex; align-items: center; gap: 8px; border-top: 1px dashed #eee; padding-top: 4px; margin-top: 2px;">
+                        <input type="checkbox" ${isPlayedAlt ? 'checked' : ''} onchange="togglePlayedAlt(${index}, this.checked)">
+                        <div class="note-details" style="flex: 1;">
+                            <div class="song-title">
+                                <span style="color: #b06000;">Alt: ${req.Alternative} <span style="font-weight: normal; color: ${isPlayedAlt ? '#34a853' : '#d93025'};">(${isPlayedAlt ? 'p' : 'u'})</span></span>
+                            </div>
+                        </div>
+                    </div>` : ''}
+                    <div class="meta" style="margin-left: 26px;"><b>Source/Ward:</b> ${req.Ward} | <b>Type:</b> ${req.Type} ${req.Patient ? '| <b>Name:</b> ' + req.Patient : ''}</div>
+                    ${req.Notes ? `<div class="meta" style="font-style: italic; color: #444; margin-left: 26px;"><b>Notes:</b> ${req.Notes}</div>` : ''}
                 `;
                 listEl.appendChild(div);
             });
-        }
-
-        function toggleAlternative(index) {
-            cachedRequests[index].useAlt = !cachedRequests[index].useAlt;
-            renderShowNotes();
         }
 
         async function togglePlayed(index, isChecked) {
@@ -335,6 +336,12 @@
             }
         }
 
+        async function togglePlayedAlt(index, isChecked) {
+            const req = cachedRequests[index];
+            req.PlayedAlt = isChecked;
+            renderShowNotes();
+        }
+
         function exportTrackerTxt() {
             if (!cachedRequests || cachedRequests.length === 0) {
                 alert('No requests found to export.');
@@ -343,16 +350,17 @@
 
             let textOutput = '';
             cachedRequests.forEach(r => {
-                let songField = r.Song;
-                if (r.useAlt && r.Alternative && r.Alternative.trim() !== '') {
-                    songField = r.Alternative; // Export the alternative song if chosen to fill time
-                } else if (r.Alternative && r.Alternative.trim() !== '') {
-                    songField += ` alt ${r.Alternative}`;
-                }
                 const isPlayed = r.Played === true || r.Played === 'TRUE' || r.Played === 'true';
-                const statusTag = isPlayed ? '(p)' : '(u)';
-                
-                textOutput += `${r.Artist} ${statusTag} | ${songField} | | | | | ${r.Type}\n`;
+                const isPlayedAlt = r.PlayedAlt === true || r.PlayedAlt === 'TRUE' || r.PlayedAlt === 'true';
+
+                if (r.Song && r.Song.trim() !== '') {
+                    const mainStatus = isPlayed ? '(p)' : '(u)';
+                    textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | | | ${r.Type}\n`;
+                }
+                if (r.Alternative && r.Alternative.trim() !== '') {
+                    const altStatus = isPlayedAlt ? '(p)' : '(u)';
+                    textOutput += `${r.Artist} ${altStatus} | ${r.Alternative} | | | | | ${r.Type}\n`;
+                }
             });
 
             const fileName = `Requests_${dateStr}.txt`;
