@@ -21,11 +21,11 @@
         .btn-sync { background: #1a73e8; font-size: 0.75rem; padding: 4px 8px; width: auto; }
         .btn-export { background: #f9ab00; color: #000; margin-top: 8px; }
         .notes-list { border: 1px solid #ddd; border-radius: 6px; padding: 6px; max-height: 250px; overflow-y: auto; background: #fafafa; margin-top: 6px; }
-        .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px; }
-        .note-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #34a853; }
+        .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
+        .note-item input[type="checkbox"] { width: 22px; height: 22px; margin-top: 2px; cursor: pointer; accent-color: #34a853; }
         .note-details { flex: 1; font-size: 0.8rem; }
-        .note-details .song-title { font-weight: bold; color: #1a73e8; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; }
-        .meta { color: #666; margin-top: 2px; }
+        .note-details .song-title { font-weight: bold; color: #1a73e8; font-size: 0.85rem; }
+        .note-details .meta { color: #666; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -104,7 +104,7 @@
             </div>
 
             <div class="form-group">
-                <label for="altRequest">Alternative Request</label>
+                <label for="altRequest">Alternative Request (Format: Artist - Song)</label>
                 <input type="text" id="altRequest" placeholder="Artist - Song">
             </div>
 
@@ -122,7 +122,7 @@
             Played Tracker & Show Notes
             <button type="button" class="btn-sync" onclick="loadShowNotes()">Sync</button>
         </h2>
-        <div style="font-size: 0.75rem; color: #666;">Tracks marked played <code>(p)</code> or unplayed <code>(u)</code>.</div>
+        <div style="font-size: 0.75rem; color: #666;">Tracks marked played <code>(p)</code> or unplayed <code>(u)</code>. Each request and alternative choice has its own dedicated entry and tick box.</div>
         
         <div class="notes-list" id="notesList">
             <div style="padding: 15px; text-align: center; color: #888;">Loading requests...</div>
@@ -277,6 +277,21 @@
             }
         }
 
+        function parseAltDetails(mainArtist, altStr) {
+            let altArtist = mainArtist;
+            let altSong = altStr.trim();
+            if (altSong.includes(' - ')) {
+                const parts = altSong.split(' - ');
+                altArtist = parts[0].trim();
+                altSong = parts.slice(1).join(' - ').trim();
+            } else if (altSong.includes(' — ')) {
+                const parts = altSong.split(' — ');
+                altArtist = parts[0].trim();
+                altSong = parts.slice(1).join(' — ').trim();
+            }
+            return { artist: altArtist, song: altSong };
+        }
+
         function renderShowNotes() {
             const listEl = document.getElementById('notesList');
             listEl.innerHTML = '';
@@ -290,30 +305,34 @@
                 const isPlayed = req.Played === true || req.Played === 'TRUE' || req.Played === 'true';
                 const isPlayedAlt = req.PlayedAlt === true || req.PlayedAlt === 'TRUE' || req.PlayedAlt === 'true';
                 
-                const div = document.createElement('div');
-                div.className = 'note-item';
-                div.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" ${isPlayed ? 'checked' : ''} onchange="togglePlayed(${index}, this.checked)" title="Mark main song as played">
-                        <div class="note-details" style="flex: 1;">
-                            <div class="song-title">
-                                <span>${req.Artist} — ${req.Song} <span style="font-weight: normal; color: ${isPlayed ? '#34a853' : '#d93025'};">(${isPlayed ? 'p' : 'u'})</span></span>
-                            </div>
-                        </div>
+                // Primary Request Dedicated Line
+                const mainDiv = document.createElement('div');
+                mainDiv.className = 'note-item';
+                mainDiv.innerHTML = `
+                    <input type="checkbox" ${isPlayed ? 'checked' : ''} onchange="togglePlayed(${index}, this.checked)" title="Mark main song as played">
+                    <div class="note-details">
+                        <div class="song-title">${req.Artist} — ${req.Song} <span style="font-weight: normal; color: ${isPlayed ? '#34a853' : '#d93025'};">(${isPlayed ? 'p' : 'u'})</span></div>
+                        <div class="meta"><b>Ward:</b> ${req.Ward} | <b>Type:</b> ${req.Type} ${req.Patient ? '| <b>Patient:</b> ' + req.Patient : ''} (Primary)</div>
+                        ${req.Notes ? `<div class="meta" style="font-style: italic; color: #444;"><b>Notes:</b> ${req.Notes}</div>` : ''}
                     </div>
-                    ${req.Alternative && req.Alternative.trim() !== '' ? `
-                    <div style="display: flex; align-items: center; gap: 8px; border-top: 1px dashed #ddd; padding-top: 6px; margin-top: 2px;">
-                        <input type="checkbox" ${isPlayedAlt ? 'checked' : ''} onchange="togglePlayedAlt(${index}, this.checked)" title="Mark alternative song as played">
-                        <div class="note-details" style="flex: 1;">
-                            <div class="song-title">
-                                <span style="color: #b06000;">Alt: ${req.Alternative} <span style="font-weight: normal; color: ${isPlayedAlt ? '#34a853' : '#d93025'};">(${isPlayedAlt ? 'p' : 'u'})</span></span>
-                            </div>
-                        </div>
-                    </div>` : ''}
-                    <div class="meta" style="margin-left: 26px;"><b>Ward:</b> ${req.Ward} | <b>Type:</b> ${req.Type} ${req.Patient ? '| <b>Patient:</b> ' + req.Patient : ''}</div>
-                    ${req.Notes ? `<div class="meta" style="font-style: italic; color: #444; margin-left: 26px;"><b>Notes:</b> ${req.Notes}</div>` : ''}
                 `;
-                listEl.appendChild(div);
+                listEl.appendChild(mainDiv);
+
+                // Alternative Choice Dedicated Line (if provided)
+                if (req.Alternative && req.Alternative.trim() !== '') {
+                    const altDetails = parseAltDetails(req.Artist, req.Alternative);
+                    const altDiv = document.createElement('div');
+                    altDiv.className = 'note-item';
+                    altDiv.style.borderLeft = '3px solid #b06000';
+                    altDiv.innerHTML = `
+                        <input type="checkbox" ${isPlayedAlt ? 'checked' : ''} onchange="togglePlayedAlt(${index}, this.checked)" title="Mark alternative song as played">
+                        <div class="note-details">
+                            <div class="song-title" style="color: #b06000;">${altDetails.artist} — ${altDetails.song} <span style="font-weight: normal; color: ${isPlayedAlt ? '#34a853' : '#d93025'};">(${isPlayedAlt ? 'p' : 'u'})</span></div>
+                            <div class="meta"><b>Ward:</b> ${req.Ward} | <b>Type:</b> ${req.Type} ${req.Patient ? '| <b>Patient:</b> ' + req.Patient : ''} (Alternative Choice)</div>
+                        </div>
+                    `;
+                    listEl.appendChild(altDiv);
+                }
             });
         }
 
@@ -361,29 +380,17 @@
                     const isMainPlayed = r.Played === true || r.Played === 'TRUE' || r.Played === 'true';
                     const isAltPlayed = r.PlayedAlt === true || r.PlayedAlt === 'TRUE' || r.PlayedAlt === 'true';
 
-                    // Main Request Entry
+                    // Primary Request Entry
                     if (r.Song && r.Song.trim() !== '') {
                         const mainStatus = isMainPlayed ? '(p)' : '(u)';
                         textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | | | ${r.Type}\n`;
                     }
 
-                    // Dedicated Alternative Choice Entry with separate artist parsing
+                    // Dedicated Alternative Choice Entry with correct Artist - Song parsing
                     if (r.Alternative && r.Alternative.trim() !== '') {
                         const altStatus = isAltPlayed ? '(p)' : '(u)';
-                        let altArtist = r.Artist;
-                        let altSong = r.Alternative.trim();
-
-                        if (altSong.includes(' - ')) {
-                            const parts = altSong.split(' - ');
-                            altArtist = parts[0].trim();
-                            altSong = parts.slice(1).join(' - ').trim();
-                        } else if (altSong.includes(' — ')) {
-                            const parts = altSong.split(' — ');
-                            altArtist = parts[0].trim();
-                            altSong = parts.slice(1).join(' — ').trim();
-                        }
-
-                        textOutput += `${altArtist} ${altStatus} | ${altSong} | | | | | ${r.Type}\n`;
+                        const altDetails = parseAltDetails(r.Artist, r.Alternative);
+                        textOutput += `${altDetails.artist} ${altStatus} | ${altDetails.song} | | | | | ${r.Type}\n`;
                     }
                 });
 
