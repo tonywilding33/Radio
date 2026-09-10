@@ -380,17 +380,17 @@
                     const isMainPlayed = r.Played === true || r.Played === 'TRUE' || r.Played === 'true';
                     const isAltPlayed = r.PlayedAlt === true || r.PlayedAlt === 'TRUE' || r.PlayedAlt === 'true';
 
-                    // Primary Request Entry
+                    // Primary Request Entry (Artist | Title | Year | Era | Genre | RequestType)
                     if (r.Song && r.Song.trim() !== '') {
                         const mainStatus = isMainPlayed ? '(p)' : '(u)';
-                        textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | | | ${r.Type}\n`;
+                        textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | ${r.Type}\n`;
                     }
 
                     // Dedicated Alternative Choice Entry with correct Artist - Song parsing
                     if (r.Alternative && r.Alternative.trim() !== '') {
                         const altStatus = isAltPlayed ? '(p)' : '(u)';
                         const altDetails = parseAltDetails(r.Artist, r.Alternative);
-                        textOutput += `${altDetails.artist} ${altStatus} | ${altDetails.song} | | | | | ${r.Type}\n`;
+                        textOutput += `${altDetails.artist} ${altStatus} | ${altDetails.song} | | | ${r.Type}\n`;
                     }
                 });
 
