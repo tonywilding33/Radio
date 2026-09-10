@@ -362,7 +362,7 @@
                 // Main Request Entry (Artist | Title | Year | Era | Genre | RequestType)
                 if (r.Song && r.Song.trim() !== '') {
                     const mainStatus = isMainPlayed ? '(p)' : '(u)';
-                    textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | ${r.Type}\n`;
+                    textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | | ${r.Type}\n`;
                 }
 
                 // Dedicated Alternative Choice Entry with separate artist parsing
@@ -381,7 +381,7 @@
                         altSong = parts.slice(1).join(' — ').trim();
                     }
 
-                    textOutput += `${altArtist} ${altStatus} | ${altSong} | | | ${r.Type}\n`;
+                    textOutput += `${altArtist} ${altStatus} | ${altSong} | | | | ${r.Type}\n`;
                 }
             });
 
