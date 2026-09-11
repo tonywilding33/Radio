@@ -1,4 +1,4 @@
 ﻿Admin | golden | g#k@f0 | Granted
 Request Collector | bottle | f+(e^2 | Granted
-Show Notes | golden | 9+61%r | Granted
+Show Notes | golden | 9+61%r | Denied
 Ward Visitor | estate | tfu_pz | Denied
