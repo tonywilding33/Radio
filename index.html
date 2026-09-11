@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub - Offline for Maintenance</title>
+    <style>
+        :root {
+            --rhr-red: #D32F2F;
+            --rhr-dark-red: #9A0007;
+            --rhr-yellow: #FFC107;
+            --rhr-dark-bg: #222222;
+            --rhr-card-bg: #FFFFFF;
+            --rhr-text: #333333;
+        }
+
+        body {
+            background-color: var(--rhr-dark-bg);
+            color: var(--rhr-text);
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .maintenance-card {
+            background-color: var(--rhr-card-bg);
+            border-top: 6px solid var(--rhr-red);
+            border-bottom: 6px solid var(--rhr-yellow);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            width: 90%;
+        }
+
+        h1 {
+            color: var(--rhr-red);
+            font-size: 26px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555555;
+            margin-bottom: 25px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background-color: #FFF8E1;
+            color: #B78103;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            border: 1px solid var(--rhr-yellow);
+        }
+
+        .reload-btn {
+            background-color: var(--rhr-red);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            display: inline-block;
+        }
+
+        .reload-btn:hover {
+            background-color: var(--rhr-dark-red);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="maintenance-card">
+        <div class="status-badge">Scheduled Maintenance</div>
+        <h1>GitHub is Offline for Maintenance</h1>
+        <p>We are currently performing routine system upgrades. Our services are temporarily unavailable, but we will be back online shortly. Thank you for your patience.</p>
+        <a href="window.location.reload();" class="reload-btn">Try Again</a>
+    </div>
+
+</body>
+</html>
