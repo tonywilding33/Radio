@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hospital Radio Request Form</title>
+    <title>Ward Visitor Request Form</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
         body { background: #f4f6f9; color: #333; padding: 12px; display: flex; flex-direction: column; gap: 12px; max-width: 600px; margin: 0 auto; }
@@ -270,11 +270,20 @@
                     throw new Error('Google returned a login page. Check Apps Script deployment settings or authentication state.');
                 }
 
-                cachedRequests = JSON.parse(text);
+                cachedRequests = JSON.parse(text).map((req, idx) => ({
+                    ...req,
+                    rowIndex: req.rowIndex !== undefined ? req.rowIndex : idx + 2,
+                    Played: parseBool(req.Played ?? req.played ?? req.PLAYED),
+                    PlayedAlt: parseBool(req.PlayedAlt ?? req.altPlayed ?? req.AltPlayed ?? req['Alt Played'] ?? req.altplayed)
+                }));
                 renderShowNotes();
             } catch (err) {
                 listEl.innerHTML = `<div style="padding: 15px; text-align: center; color: #d93025; font-size: 0.8rem;">${err.message}</div>`;
             }
+        }
+
+        function parseBool(val) {
+            return val === true || val === 'TRUE' || val === 'true';
         }
 
         function parseAltDetails(mainArtist, altStr) {
@@ -302,8 +311,8 @@
             }
 
             cachedRequests.forEach((req, index) => {
-                const isPlayed = req.Played === true || req.Played === 'TRUE' || req.Played === 'true';
-                const isPlayedAlt = req.PlayedAlt === true || req.PlayedAlt === 'TRUE' || req.PlayedAlt === 'true';
+                const isPlayed = req.Played;
+                const isPlayedAlt = req.PlayedAlt;
                 
                 // Primary Request Dedicated Line
                 const mainDiv = document.createElement('div');
@@ -341,10 +350,12 @@
             req.Played = isChecked;
             renderShowNotes(); 
             try {
-                await fetch(SCRIPT_URL, {
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'updatePlayed', rowIndex: req.rowIndex, played: isChecked })
                 });
+                const res = await response.json();
+                if (res.status !== 'success') throw new Error(res.message || 'Server error');
             } catch (err) {
                 alert('Failed to update played status in Google Sheet.');
             }
@@ -355,12 +366,25 @@
             req.PlayedAlt = isChecked;
             renderShowNotes();
             try {
-                await fetch(SCRIPT_URL, {
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'updatePlayedAlt', rowIndex: req.rowIndex, playedAlt: isChecked })
+                    body: JSON.stringify({ 
+                        action: 'updatePlayedAlt', 
+                        altAction: 'updatePlayedAlt',
+                        updateAction: 'updatePlayedAlt',
+                        rowIndex: req.rowIndex, 
+                        playedAlt: isChecked,
+                        altPlayed: isChecked,
+                        AltPlayed: isChecked,
+                        'Alt Played': isChecked,
+                        value: isChecked
+                    })
                 });
+                const res = await response.json();
+                if (res.status !== 'success') throw new Error(res.message || 'Server error');
             } catch (err) {
-                console.warn('Backend update played alt optional sync note:', err);
+                console.error('Backend update played alt failed:', err);
+                alert('Failed to update alternative played status in Google Sheet.');
             }
         }
 
@@ -377,8 +401,8 @@
 
                 let textOutput = '';
                 cachedRequests.forEach(r => {
-                    const isMainPlayed = r.Played === true || r.Played === 'TRUE' || r.Played === 'true';
-                    const isAltPlayed = r.PlayedAlt === true || r.PlayedAlt === 'TRUE' || r.PlayedAlt === 'true';
+                    const isMainPlayed = r.Played;
+                    const isAltPlayed = r.PlayedAlt;
 
                     // Primary Request Entry (Artist | Title | Year | Era | Genre | RequestType)
                     if (r.Song && r.Song.trim() !== '') {
