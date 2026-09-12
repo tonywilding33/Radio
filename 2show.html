@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Show Notes & Request Entry</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: #f4f6f9; color: #333; padding: 16px; display: flex; flex-direction: column; gap: 12px; height: 100vh; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        h2 { color: #1a73e8; font-size: 1.1rem; }
+        .card { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        
+        .form-toggle-btn { background: #34a853; color: white; padding: 6px 12px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .form-container { display: none; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        .form-container.active { display: block; }
+        .form-group { margin-bottom: 8px; }
+        label { display: block; margin-bottom: 2px; font-weight: 600; font-size: 0.75rem; }
+        input, select, textarea { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+        textarea { resize: vertical; height: 35px; }
+        .row { display: flex; gap: 8px; }
+        .row .form-group { flex: 1; }
+        .btn-save { background: #34a853; width: 100%; margin-top: 6px; padding: 8px; font-size: 0.85rem; }
+
+        button { border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #fff; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        .btn-sync { background: #1a73e8; padding: 6px 12px; font-size: 0.8rem; }
+        .btn-export { background: #f9ab00; color: #000; width: 100%; padding: 10px; font-size: 0.9rem; margin-top: 4px; }
+        
+        .notes-section { flex: 1; display: flex; flex-direction: column; min-height: 250px; }
+        .notes-list { flex: 1; border: 1px solid #ddd; border-radius: 6px; padding: 8px; overflow-y: auto; background: #fafafa; margin-top: 6px; max-height: 350px; }
+        .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; flex-direction: column; gap: 6px; }
+        .note-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #34a853; }
+        .note-details { flex: 1; font-size: 0.8rem; }
+        .note-details .song-title { font-weight: bold; color: #1a73e8; font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+    <!-- UAC Security Login Overlay -->
+    <div id="uacOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+        <div style="background: #fff; padding: 20px; border-radius: 8px; width: 100%; max-width: 350px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <h3 style="margin-bottom: 12px; color: #1a73e8; font-size: 1.1rem;">Studio Security Login</h3>
+            <div style="font-size: 0.75rem; color: #666; margin-bottom: 10px;">User: <b>Show Notes</b></div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label for="uacSecret">Secret Word</label>
+                <input type="password" id="uacSecret" placeholder="Enter secret word">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="uacPass">Password</label>
+                <input type="password" id="uacPass" placeholder="Enter password">
+            </div>
+            <button type="button" id="uacLoginBtn" style="background: #1a73e8; color: #fff; padding: 10px; width: 100%; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Login</button>
+            <div id="uacError" style="color: #d93025; font-size: 0.8rem; margin-top: 8px; text-align: center; display: none;">Invalid secret word or password.</div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h2>Studio Control & Show Notes</h2>
+        <div style="display: flex; gap: 6px;">
+            <button class="form-toggle-btn" onclick="toggleAddForm()">+ Add Request</button>
+            <button class="btn-sync" onclick="loadShowNotes()">Sync</button>
+        </div>
+    </div>
+
+    <!-- Collapsible Add Request Panel for Studio -->
+    <div class="card form-container" id="addFormContainer">
+        <h3 style="font-size: 0.9rem; color: #34a853; margin-bottom: 8px;">Log Studio Request (Phone / Email / Dedication)</h3>
+        <form id="requestForm">
+            <div class="row">
+                <div class="form-group">
+                    <label for="reqDate">Date</label>
+                    <input type="text" id="reqDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="reqWard">Ward / Source</label>
+                    <input type="text" id="reqWard" value="Studio / Phone" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="reqType">Request Type</label>
+                <select id="reqType" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="Phone Call" selected>Phone Call</option>
+                    <option value="Email">Email</option>
+                    <option value="Dedication">Dedication</option>
+                    <option value="Patient">Patient</option>
+                    <option value="Ward Visitor">Ward Visitor</option>
+                    <option value="Staff">Staff</option>
+                    <option value="Relative / Friend">Relative / Friend</option>
+                    <option value="Social Media">Social Media</option>
+                    <option value="Letter / Postcard">Letter / Postcard</option>
+                    <option value="Filler">Filler</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="patientName">Requester / Recipient Name</label>
+                    <input type="text" id="patientName" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <label for="collectorName">Taker / Collector</label>
+                    <input type="text" id="collectorName" placeholder="Presenter name">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="artistName">Artist</label>
+                    <input type="text" id="artistName" placeholder="Artist" required>
+                </div>
+                <div class="form-group">
+                    <label for="songTitle">Song</label>
+                    <input type="text" id="songTitle" placeholder="Song" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="altRequest">Alternative Request</label>
+                <input type="text" id="altRequest" placeholder="Alternative option (Artist - Song)">
+            </div>
+
+            <div class="form-group">
+                <label for="recallNotes">Studio / Message Notes</label>
+                <textarea id="recallNotes" placeholder="Dedication message..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-save">Save Request to Sheet</button>
+        </form>
+    </div>
+
+    <!-- Show Notes & Played Tracker Section -->
+    <div class="card notes-section">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 0.95rem; color: #333;">Live Show Notes & Played Tracker</h3>
+            <span style="font-size: 0.75rem; color: #666;">Tick played songs</span>
+        </div>
+        
+        <div class="notes-list" id="notesList">
+            <div style="padding: 20px; text-align: center; color: #888;">Waiting for login...</div>
+        </div>
+
+        <button type="button" class="btn-export" onclick="exportTrackerTxt()">Save <code id="fileNameDisplay">Requests_dd_mm_yy.txt</code></button>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3vWgPjZOqatIuuXzmkztnl9lC45SHWmIqoJH3LEeJygxjiG6efQMKb2a9hsln5e8C/exec';
+        const ENCODED_UAC_URL = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3Rvbnl3aWxkaW5nMzMvUmFkaW8vcmVmcy9oZWFkcy9tYWluL1VBQy50eHQ=';
+        const TARGET_USER = 'Show Notes';
+
+        const UAC_URL = atob(ENCODED_UAC_URL);
+
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yy = String(now.getFullYear()).slice(-2);
+        const dateStr = `${dd}_${mm}_${yy}`;
+        document.getElementById('reqDate').value = dateStr;
+        document.getElementById('fileNameDisplay').textContent = `Requests_${dateStr}.txt`;
+
+        let cachedRequests = [];
+
+        document.getElementById('uacLoginBtn').addEventListener('click', async function() {
+            const secretIn = document.getElementById('uacSecret').value.trim();
+            const passIn = document.getElementById('uacPass').value.trim();
+            const errorEl = document.getElementById('uacError');
+            const loginBtn = document.getElementById('uacLoginBtn');
+
+            if (!passIn) {
+                errorEl.textContent = 'Please enter the password.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            loginBtn.textContent = 'Verifying...';
+            loginBtn.disabled = true;
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch(UAC_URL);
+                const text = await response.text();
+                const lines = text.split('\n');
+                let authenticated = false;
+
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line || line.startsWith('#')) continue;
+                    
+                    const parts = line.split('|').map(p => p.trim());
+                    if (parts.length >= 3) {
+                        const fileUser = parts[0];
+                        const fileSecret = parts[1];
+                        const filePass = parts[2].replace(/\r$/, '');
+
+                        if (fileUser.toLowerCase() === TARGET_USER.toLowerCase() && 
+                            fileSecret === secretIn && 
+                            filePass === passIn) {
+                            authenticated = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (authenticated) {
+                    document.getElementById('uacOverlay').style.display = 'none';
+                    loadShowNotes();
+                } else {
+                    errorEl.textContent = 'Invalid secret word or password.';
+                    errorEl.style.display = 'block';
+                }
+            } catch (err) {
+                console.error(err);
+                errorEl.textContent = 'Network error fetching security profile.';
+                errorEl.style.display = 'block';
+            } finally {
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
+            }
+        });
+
+        function toggleAddForm() {
+            const container = document.getElementById('addFormContainer');
+            container.classList.toggle('active');
+        }
+
+        document.getElementById('requestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const record = {
+                action: 'saveRequest',
+                date: document.getElementById('reqDate').value,
+                ward: document.getElementById('reqWard').value,
+                requestType: document.getElementById('reqType').value,
+                patient: document.getElementById('patientName').value,
+                collector: document.getElementById('collectorName').value,
+                artist: document.getElementById('artistName').value,
+                song: document.getElementById('songTitle').value,
+                alternative: document.getElementById('altRequest').value,
+                notes: document.getElementById('recallNotes').value
+            };
+
+            const btn = e.target.querySelector('.btn-save');
+            btn.textContent = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(record) });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    document.getElementById('artistName').value = '';
+                    document.getElementById('songTitle').value = '';
+                    document.getElementById('altRequest').value = '';
+                    document.getElementById('recallNotes').value = '';
+                    document.getElementById('patientName').value = '';
+                    toggleAddForm();
+                    loadShowNotes();
+                } else {
+                    alert('Error saving: ' + result.message);
+                }
+            } catch (err) {
+                alert('Network error: ' + err);
+            } finally {
+                btn.textContent = 'Save Request to Sheet';
+                btn.disabled = false;
+            }
+        });
+
+        async function loadShowNotes() {
+            const listEl = document.getElementById('notesList');
+            listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">Syncing...</div>';
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                cachedRequests = await response.json();
+                renderShowNotes();
+            } catch (err) {
+                listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: #d93025;">Failed to load Google Sheet. Check URL.</div>`;
+            }
+        }
+
+        function renderShowNotes() {
+            const listEl = document.getElementById('notesList');
+            listEl.innerHTML = '';
+
+            if (cachedRequests.length === 0) {
+                listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No requests logged for today yet.</div>';
+                return;
+            }
+
+            cachedRequests.forEach((req, index) => {
+                const isPlayed = req.Played === true || req.Played === 'TRUE' || req.Played === 'true';
+                const isPlayedAlt = req.PlayedAlt === true || req.PlayedAlt === 'TRUE' || req.PlayedAlt === 'true';
+                
+                const div = document.createElement('div');
+                div.className = 'note-item';
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" ${isPlayed ? 'checked' : ''} onchange="togglePlayed(${index}, this.checked)" title="Mark main song as played">
+                        <div class="note-details" style="flex: 1;">
+                            <div class="song-title">
+                                <span>${req.Artist} — ${req.Song} <span style="font-weight: normal; color: ${isPlayed ? '#34a853' : '#d93025'};">(${isPlayed ? 'p' : 'u'})</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    ${req.Alternative && req.Alternative.trim() !== '' ? `
+                    <div style="display: flex; align-items: center; gap: 8px; border-top: 1px dashed #ddd; padding-top: 6px; margin-top: 2px;">
+                        <input type="checkbox" ${isPlayedAlt ? 'checked' : ''} onchange="togglePlayedAlt(${index}, this.checked)" title="Mark alternative song as played">
+                        <div class="note-details" style="flex: 1;">
+                            <div class="song-title">
+                                <span style="color: #b06000;">Alt: ${req.Alternative} <span style="font-weight: normal; color: ${isPlayedAlt ? '#34a853' : '#d93025'};">(${isPlayedAlt ? 'p' : 'u'})</span></span>
+                            </div>
+                        </div>
+                    </div>` : ''}
+                    <div class="meta" style="margin-left: 26px;"><b>Source/Ward:</b> ${req.Ward} | <b>Type:</b> ${req.Type} ${req.Patient ? '| <b>Name:</b> ' + req.Patient : ''}</div>
+                    ${req.Notes ? `<div class="meta" style="font-style: italic; color: #444; margin-left: 26px;"><b>Notes:</b> ${req.Notes}</div>` : ''}
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        async function togglePlayed(index, isChecked) {
+            const req = cachedRequests[index];
+            req.Played = isChecked;
+            renderShowNotes();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'updatePlayed', rowIndex: req.rowIndex, played: isChecked })
+                });
+            } catch (err) {
+                alert('Failed to update played status in Google Sheet.');
+            }
+        }
+
+        async function togglePlayedAlt(index, isChecked) {
+            const req = cachedRequests[index];
+            req.PlayedAlt = isChecked;
+            renderShowNotes();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'updatePlayedAlt', rowIndex: req.rowIndex, playedAlt: isChecked })
+                });
+            } catch (err) {
+                console.warn('Backend update played alt optional sync note:', err);
+            }
+        }
+
+        function exportTrackerTxt() {
+            if (!cachedRequests || cachedRequests.length === 0) {
+                alert('No requests found to export.');
+                return;
+            }
+
+            let textOutput = '';
+            cachedRequests.forEach(r => {
+                const isMainPlayed = r.Played === true || r.Played === 'TRUE' || r.Played === 'true';
+                const isAltPlayed = r.PlayedAlt === true || r.PlayedAlt === 'TRUE' || r.PlayedAlt === 'true';
+
+                // Main Request Entry (Artist | Title | Year | Era | Genre | RequestType)
+                if (r.Song && r.Song.trim() !== '') {
+                    const mainStatus = isMainPlayed ? '(p)' : '(u)';
+                    textOutput += `${r.Artist} ${mainStatus} | ${r.Song} | | | | ${r.Type}\n`;
+                }
+
+                // Dedicated Alternative Choice Entry with separate artist parsing
+                if (r.Alternative && r.Alternative.trim() !== '') {
+                    const altStatus = isAltPlayed ? '(p)' : '(u)';
+                    let altArtist = r.Artist;
+                    let altSong = r.Alternative.trim();
+
+                    if (altSong.includes(' - ')) {
+                        const parts = altSong.split(' - ');
+                        altArtist = parts[0].trim();
+                        altSong = parts.slice(1).join(' - ').trim();
+                    } else if (altSong.includes(' — ')) {
+                        const parts = altSong.split(' — ');
+                        altArtist = parts[0].trim();
+                        altSong = parts.slice(1).join(' — ').trim();
+                    }
+
+                    textOutput += `${altArtist} ${altStatus} | ${altSong} | | | | ${r.Type}\n`;
+                }
+            });
+
+            const fileName = `Requests_${dateStr}.txt`;
+            const blob = new Blob([textOutput], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
