@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Radio - Live Notifications</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: #f4f6f9; color: #333; padding: 16px; display: flex; flex-direction: column; gap: 12px; height: 100vh; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        h2 { color: #1a73e8; font-size: 1.1rem; }
+        .card { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        button { border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #fff; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        .btn-sync { background: #1a73e8; padding: 6px 12px; font-size: 0.8rem; }
+        .notes-section { flex: 1; display: flex; flex-direction: column; min-height: 250px; }
+        .notes-list { flex: 1; border: 1px solid #ddd; border-radius: 6px; padding: 8px; overflow-y: auto; background: #fafafa; margin-top: 6px; }
+        .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; flex-direction: column; gap: 4px; }
+        .note-details { width: 100%; font-size: 0.8rem; }
+        .song-row { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #1a73e8; font-size: 0.85rem; margin-bottom: 2px; }
+        .alt-row { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #b06000; font-size: 0.85rem; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #eee; }
+        .note-details .meta { color: #666; margin-top: 1px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Live Song Request Notifications</h2>
+        <div>
+            <button class="btn-sync" onclick="loadShowNotes()">Sync</button>
+        </div>
+    </div>
+
+    <!-- Notifications / Latest Requests List -->
+    <div class="card notes-section">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 0.95rem; color: #333;">Latest Incoming Requests Feed</h3>
+            <span style="font-size: 0.75rem; color: #666;">View-only mode</span>
+        </div>
+        
+        <div class="notes-list" id="notesList">
+            <div style="padding: 20px; text-align: center; color: #888;">Loading requests...</div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3vWgPjZOqatIuuXzmkztnl9lC45SHWmIqoJH3LEeJygxjiG6efQMKb2a9hsln5e8C/exec';
+
+        let cachedRequests = [];
+
+        window.addEventListener('load', loadShowNotes);
+
+        async function loadShowNotes() {
+            const listEl = document.getElementById('notesList');
+            listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">Syncing...</div>';
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                cachedRequests = await response.json();
+                renderShowNotes();
+            } catch (err) {
+                listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: #d93025;">Failed to load Google Sheet. Check URL.</div>`;
+            }
+        }
+
+        function renderShowNotes() {
+            const listEl = document.getElementById('notesList');
+            listEl.innerHTML = '';
+
+            if (cachedRequests.length === 0) {
+                listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No requests logged for today yet.</div>';
+                return;
+            }
+
+            cachedRequests.forEach((req) => {
+                const isPlayed = req.Played === true || req.Played === 'TRUE' || req.Played === 'true' ||
+                                 req.played === true || req.played === 'TRUE' || req.played === 'true';
+                
+                const isPlayedAlt = req.PlayedAlt === true || req.PlayedAlt === 'TRUE' || req.PlayedAlt === 'true' ||
+                                    req.playedAlt === true || req.playedAlt === 'TRUE' || req.playedAlt === 'true' ||
+                                    req.AltPlayed === true || req.AltPlayed === 'TRUE' || req.AltPlayed === 'true' ||
+                                    req.altPlayed === true || req.altPlayed === 'TRUE' || req.altPlayed === 'true';
+
+                const div = document.createElement('div');
+                div.className = 'note-item';
+                div.innerHTML = `
+                    <div class="note-details">
+                        <div class="song-row">
+                            <span>${req.Artist} — ${req.Song}</span>
+                            <span style="font-size: 0.75rem; font-weight: normal; color: ${isPlayed ? '#34a853' : '#666'};">
+                                Status: ${isPlayed ? 'Played (p)' : 'Unplayed (u)'}
+                            </span>
+                        </div>
+                        <div class="meta"><b>Source/Ward:</b> ${req.Ward} | <b>Type:</b> ${req.Type} ${req.Patient ? '| <b>Name:</b> ' + req.Patient : ''}</div>
+                        ${req.Alternative && req.Alternative.trim() !== '' ? `
+                        <div class="alt-row">
+                            <span>Alt: ${req.Alternative}</span>
+                            <span style="font-size: 0.75rem; font-weight: normal; color: ${isPlayedAlt ? '#34a853' : '#666'};">
+                                Status: ${isPlayedAlt ? 'Played (p)' : 'Unplayed (u)'}
+                            </span>
+                        </div>` : ''}
+                        ${req.Notes ? `<div class="meta" style="font-style: italic; color: #444; margin-top: 4px;"><b>Notes:</b> ${req.Notes}</div>` : ''}
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
