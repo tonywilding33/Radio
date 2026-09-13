@@ -36,7 +36,6 @@
                         <label for="reqType">I am a...</label>
                         <select id="reqType" required>
                             <option value="">-- Select Type --</option>
-                            <option value="Patient">Patient</option>
                             <option value="Relative">Relative</option>
                             <option value="Friend">Friend</option>
                             <option value="Dedication">Dedication</option>
@@ -103,14 +102,14 @@
         document.getElementById('publicRequestForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // Format current date for the sheet[cite: 1]
+            // Format current date for the sheet
             const now = new Date();
             const dd = String(now.getDate()).padStart(2, '0');
             const mm = String(now.getMonth() + 1).padStart(2, '0');
             const yy = String(now.getFullYear()).slice(-2);
             const dateStr = `${dd}_${mm}_${yy}`;
 
-            // Parse first choice artist/song input if entered as "Artist - Title"[cite: 1]
+            // Parse first choice artist/song input if entered as "Artist - Title"
             let artistInput = document.getElementById('artistName').value.trim();
             let artist = artistInput;
             let song = '';
@@ -128,7 +127,7 @@
                 artist = 'Unknown';
             }
 
-            // Automatically insert the sender's name ("Your Name") into the message/dedication
+            // Automatically insert the sender's name into the message/dedication
             const senderName = document.getElementById('collectorName').value.trim();
             const userMessage = document.getElementById('recallNotes').value.trim();
             let finalNotes = userMessage;
@@ -136,7 +135,6 @@
             if (senderName) {
                 const signatureText = `From: ${senderName}`;
                 if (finalNotes) {
-                    // Append signature neatly if a message exists, ensuring it stays under 500 chars limit
                     finalNotes = `${finalNotes}\n\n(${signatureText})`;
                 } else {
                     finalNotes = signatureText;
@@ -144,16 +142,16 @@
             }
 
             const record = {
-                action: 'saveRequest',[cite: 1]
-                date: dateStr,[cite: 1]
-                ward: document.getElementById('reqWard').value,[cite: 1]
-                requestType: document.getElementById('reqType').value,[cite: 1]
-                patient: document.getElementById('patientName').value,[cite: 1]
-                collector: senderName,[cite: 1]
-                artist: artist,[cite: 1]
-                song: song,[cite: 1]
-                alternative: document.getElementById('altRequest').value,[cite: 1]
-                notes: finalNotes[cite: 1]
+                action: 'saveRequest',
+                date: dateStr,
+                ward: document.getElementById('reqWard').value,
+                requestType: document.getElementById('reqType').value,
+                patient: document.getElementById('patientName').value,
+                collector: senderName,
+                artist: artist,
+                song: song,
+                alternative: document.getElementById('altRequest').value,
+                notes: finalNotes
             };
 
             const btn = document.getElementById('submitBtn');
@@ -161,19 +159,17 @@
             btn.disabled = true;
 
             try {
-                const response = await fetch(SCRIPT_URL, {[cite: 1]
-                    method: 'POST',[cite: 1]
-                    body: JSON.stringify(record)[cite: 1]
+                // Using mode: 'no-cors' prevents browser CORS blocking when hosted on GitHub Pages
+                await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(record) 
                 });
-                const result = await response.json();[cite: 1]
                 
-                if (result.status === 'success' || response.ok) {
-                    showConfirmation();
-                } else {
-                    throw new Error(result.message || 'Server error');
-                }
+                showConfirmation();
             } catch (err) {
-                console.warn('Network issue or offline mode triggered:', err);[cite: 1]
+                console.warn('Submission network notice:', err);
                 showConfirmation();
             } finally {
                 btn.textContent = 'Send Request';
