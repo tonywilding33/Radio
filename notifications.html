@@ -10,9 +10,6 @@
         .header { display: flex; justify-content: space-between; align-items: center; }
         h2 { color: #1a73e8; font-size: 1.1rem; }
         .card { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        button { border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: #fff; transition: opacity 0.2s; }
-        button:hover { opacity: 0.9; }
-        .btn-sync { background: #1a73e8; padding: 6px 12px; font-size: 0.8rem; }
         .notes-section { flex: 1; display: flex; flex-direction: column; min-height: 250px; }
         .notes-list { flex: 1; border: 1px solid #ddd; border-radius: 6px; padding: 8px; overflow-y: auto; background: #fafafa; margin-top: 6px; }
         .note-item { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 6px; display: flex; flex-direction: column; gap: 4px; }
@@ -26,9 +23,7 @@
 
     <div class="header">
         <h2>Live Song Request Notifications</h2>
-        <div>
-            <button class="btn-sync" onclick="loadShowNotes()">Sync</button>
-        </div>
+        <div style="font-size: 0.75rem; color: #666;">Auto-refreshing every 30s</div>
     </div>
 
     <!-- Notifications / Latest Requests List -->
@@ -48,18 +43,23 @@
 
         let cachedRequests = [];
 
-        window.addEventListener('load', loadShowNotes);
+        window.addEventListener('load', () => {
+            loadShowNotes();
+            // Auto refresh every 30 seconds (30000 milliseconds)
+            setInterval(loadShowNotes, 30000);
+        });
 
         async function loadShowNotes() {
-            const listEl = document.getElementById('notesList');
-            listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">Syncing...</div>';
-
             try {
                 const response = await fetch(SCRIPT_URL);
                 cachedRequests = await response.json();
                 renderShowNotes();
             } catch (err) {
-                listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: #d93025;">Failed to load Google Sheet. Check URL.</div>`;
+                // Keep existing list on transient network error, or display lightweight status if empty
+                const listEl = document.getElementById('notesList');
+                if (listEl.children.length === 0 || listEl.innerText.includes('Loading')) {
+                    listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: #d93025;">Failed to sync Google Sheet. Retrying...</div>`;
+                }
             }
         }
 
