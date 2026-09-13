@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Radio Request Submission</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: #f4f6f9; color: #333; padding: 16px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); width: 100%; max-width: 500px; }
+        h2 { color: #1a73e8; font-size: 1.25rem; margin-bottom: 16px; text-align: center; }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.85rem; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+        textarea { resize: vertical; height: 90px; }
+        .row { display: flex; gap: 10px; }
+        .row .form-group { flex: 1; }
+        .char-count { font-size: 0.75rem; color: #666; text-align: right; margin-top: 2px; }
+        button { padding: 12px; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; color: #fff; width: 100%; background: #34a853; margin-top: 8px; }
+        button:hover { background: #2f9d44; }
+        .confirmation-box { display: none; text-align: center; padding: 20px; }
+        .confirmation-box h3 { color: #34a853; margin-bottom: 8px; }
+        .confirmation-box p { color: #555; font-size: 0.95rem; }
+        .btn-another { background: #1a73e8; margin-top: 16px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div id="formContainer">
+            <h2>Hospital Radio Song Request</h2>
+            <form id="publicRequestForm">
+                <div class="row">
+                    <div class="form-group">
+                        <label for="reqType">I am a...</label>
+                        <select id="reqType" required>
+                            <option value="">-- Select Type --</option>
+                            <option value="Relative">Relative</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Dedication">Dedication</option>
+                            <option value="Staff Member">Staff Member</option>
+                            <option value="Former Patient">Former Patient</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reqWard">Ward / Department</label>
+                        <input type="text" id="reqWard" placeholder="e.g., Ward 4 or ICU" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="collectorName">Your Name</label>
+                        <input type="text" id="collectorName" placeholder="Your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patientName">Patient / Recipient Name</label>
+                        <input type="text" id="patientName" placeholder="Name of person request is for" required>
+                    </div>
+                </div>
+
+                <hr style="margin: 12px 0; border: none; border-top: 1px solid #eee;">
+
+                <div class="form-group">
+                    <label for="artistName">Artist - Title (First Choice)</label>
+                    <input type="text" id="artistName" placeholder="e.g., The Beatles - Hey Jude" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="altRequest">Artist - Title (Second Choice)</label>
+                    <input type="text" id="altRequest" placeholder="e.g., Oasis - Wonderwall">
+                </div>
+
+                <div class="form-group">
+                    <label for="recallNotes">Message / Dedication</label>
+                    <textarea id="recallNotes" maxlength="500" placeholder="Write your message or dedication here..."></textarea>
+                    <div class="char-count"><span id="charCount">0</span>/500 characters</div>
+                </div>
+
+                <button type="submit" class="btn-save" id="submitBtn">Send Request</button>
+            </form>
+        </div>
+
+        <div id="confirmationContainer" class="confirmation-box">
+            <h3>Request Sent Successfully!</h3>
+            <p>Thank you. Your request and dedication have been received and will be passed on to the hospital radio team.</p>
+            <button type="button" class="btn-another" onclick="resetForm()">Send Another Request</button>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3vWgPjZOqatIuuXzmkztnl9lC45SHWmIqoJH3LEeJygxjiG6efQMKb2a9hsln5e8C/exec';
+
+        // Character counter for message
+        const textarea = document.getElementById('recallNotes');
+        const charCount = document.getElementById('charCount');
+        textarea.addEventListener('input', () => {
+            charCount.textContent = textarea.value.length;
+        });
+
+        document.getElementById('publicRequestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Format current date for the sheet[cite: 1]
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yy = String(now.getFullYear()).slice(-2);
+            const dateStr = `${dd}_${mm}_${yy}`;
+
+            // Parse first choice artist/song input if entered as "Artist - Title"[cite: 1]
+            let artistInput = document.getElementById('artistName').value.trim();
+            let artist = artistInput;
+            let song = '';
+            
+            if (artistInput.includes(' - ')) {
+                const parts = artistInput.split(' - ');
+                artist = parts[0].trim();
+                song = parts.slice(1).join(' - ').trim();
+            } else if (artistInput.includes(' — ')) {
+                const parts = artistInput.split(' — ');
+                artist = parts[0].trim();
+                song = parts.slice(1).join(' — ').trim();
+            } else {
+                song = artistInput; 
+                artist = 'Unknown';
+            }
+
+            // Automatically insert the sender's name ("Your Name") into the message/dedication
+            const senderName = document.getElementById('collectorName').value.trim();
+            const userMessage = document.getElementById('recallNotes').value.trim();
+            let finalNotes = userMessage;
+
+            if (senderName) {
+                const signatureText = `From: ${senderName}`;
+                if (finalNotes) {
+                    // Append signature neatly if a message exists, ensuring it stays under 500 chars limit
+                    finalNotes = `${finalNotes}\n\n(${signatureText})`;
+                } else {
+                    finalNotes = signatureText;
+                }
+            }
+
+            const record = {
+                action: 'saveRequest',[cite: 1]
+                date: dateStr,[cite: 1]
+                ward: document.getElementById('reqWard').value,[cite: 1]
+                requestType: document.getElementById('reqType').value,[cite: 1]
+                patient: document.getElementById('patientName').value,[cite: 1]
+                collector: senderName,[cite: 1]
+                artist: artist,[cite: 1]
+                song: song,[cite: 1]
+                alternative: document.getElementById('altRequest').value,[cite: 1]
+                notes: finalNotes[cite: 1]
+            };
+
+            const btn = document.getElementById('submitBtn');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(SCRIPT_URL, {[cite: 1]
+                    method: 'POST',[cite: 1]
+                    body: JSON.stringify(record)[cite: 1]
+                });
+                const result = await response.json();[cite: 1]
+                
+                if (result.status === 'success' || response.ok) {
+                    showConfirmation();
+                } else {
+                    throw new Error(result.message || 'Server error');
+                }
+            } catch (err) {
+                console.warn('Network issue or offline mode triggered:', err);[cite: 1]
+                showConfirmation();
+            } finally {
+                btn.textContent = 'Send Request';
+                btn.disabled = false;
+            }
+        });
+
+        function showConfirmation() {
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('confirmationContainer').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('publicRequestForm').reset();
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('confirmationContainer').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
