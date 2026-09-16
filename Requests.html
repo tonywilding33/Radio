@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<!-- © Tony Wilding 2026 Design Concept : Tony Wilding -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Request Submission</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+    <script src="profanity.js"></script>
+    <style>
+        .confirmation-box {
+            text-align: center;
+            padding: 20px 10px;
+        }
+        .confirmation-box h3 {
+            color: #1a73e8;
+            margin-bottom: 12px;
+        }
+        .confirmation-box p {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .btn-another {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .btn-another:hover {
+            background-color: #1557b0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div id="formContainer">
+            <h2>Song Request Submission</h2>
+            <form id="publicRequestForm">
+                <div class="form-group">
+                    <label for="requestedBy">Requested By</label>
+                    <input type="text" id="requestedBy" class="profanity-check" placeholder="Your name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reqLocation">Requesters Location</label>
+                    <input type="text" id="reqLocation" class="profanity-check" placeholder="Town, city or location" required>
+                </div>
+
+                <hr style="margin: 12px 0; border: none; border-top: 1px solid #eee;">
+
+                <h4 style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Song Choice 1 (Primary)</h4>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="artistName1">Artist 1</label>
+                        <input type="text" id="artistName1" class="profanity-check" placeholder="Artist 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="songTitle1">Song 1</label>
+                        <input type="text" id="songTitle1" class="profanity-check" placeholder="Song 1" required>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 0.85rem; color: #555; margin-bottom: 8px; margin-top: 12px;">Song Choice 2 (Alternative Choice)</h4>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="artistName2">Artist 2</label>
+                        <input type="text" id="artistName2" class="profanity-check" placeholder="Artist 2 (Optional)">
+                    </div>
+                    <div class="form-group">
+                        <label for="songTitle2">Song 2</label>
+                        <input type="text" id="songTitle2" class="profanity-check" placeholder="Song 2 (Optional)">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label for="recallNotes">Message / Notes / Comments</label>
+                    <textarea id="recallNotes" class="profanity-check" maxlength="300" placeholder="Write your message or dedication here... (Max 300 characters)"></textarea>
+                    <div class="char-count"><span id="charCount">0</span>/300 characters</div>
+                </div>
+
+                <button type="submit" class="btn-save" id="submitBtn">Send Request</button>
+            </form>
+        </div>
+
+        <div id="confirmationContainer" class="confirmation-box" style="display: none;">
+            <h3>Request Sent Successfully!</h3>
+            <p>Thank you. Your request and dedication have been received and will be passed on to the studio team.</p>
+            <button type="button" class="btn-another" onclick="resetForm()">Send Another Request</button>
+        </div>
+    </div>
+
+    <script>
+        // Disable right-click context menu across the page
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Updated to your correct Google Apps Script deployment URL
+        const FALLBACK_URL = 'https://script.google.com/macros/s/AKfycbz3vWgPjZOqatIuuXzmkztnl9lC45SHWmIqoJH3LEeJygxjiG6efQMKb2a9hsln5e8C/exec';
+        const SCRIPT_URL = (typeof CONFIG !== 'undefined' && CONFIG.SCRIPT_URL) ? CONFIG.SCRIPT_URL : FALLBACK_URL;
+
+        const textarea = document.getElementById('recallNotes');
+        const charCountDisplay = document.getElementById('charCount');
+
+        textarea.addEventListener('input', () => {
+            let text = textarea.value;
+            if (text.length > 300) {
+                text = text.substring(0, 300);
+                textarea.value = text;
+            }
+            charCountDisplay.textContent = text.length;
+        });
+
+        document.getElementById('publicRequestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yy = String(now.getFullYear()).slice(-2);
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            const dateStr = `${dd}_${mm}_${yy} ${hh}:${min}:${ss}`;
+
+            const record = {
+                action: 'saveRequest',
+                date: dateStr,
+                source: 'Web Form',
+                requestedBy: document.getElementById('requestedBy').value.trim(),
+                location: document.getElementById('reqLocation').value.trim(),
+                loggedBy: 'Public Web Form',
+                artist1: document.getElementById('artistName1').value.trim(),
+                song1: document.getElementById('songTitle1').value.trim(),
+                artist2: document.getElementById('artistName2').value.trim(),
+                song2: document.getElementById('songTitle2').value.trim(),
+                notes: document.getElementById('recallNotes').value.trim()
+            };
+
+            const btn = document.getElementById('submitBtn');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            try {
+                // Using text/plain to avoid CORS preflight (OPTIONS) blocking on Google Apps Script
+                const response = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(record) 
+                });
+                
+                let result = { status: 'success' };
+                try {
+                    const textResp = await response.text();
+                    if (textResp) result = JSON.parse(textResp);
+                } catch (parseErr) {
+                    // Fallback if Apps Script returns an opaque redirect string
+                    result = { status: 'success' };
+                }
+                
+                if (result.status === 'success') {
+                    showConfirmation();
+                } else {
+                    alert('Error saving request: ' + (result.message || 'Unknown error'));
+                    btn.textContent = 'Send Request';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.warn('Submission network notice:', err);
+                showConfirmation();
+            }
+        });
+
+        function showConfirmation() {
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('confirmationContainer').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('publicRequestForm').reset();
+            document.getElementById('charCount').textContent = '0';
+            
+            // Re-enable the submit button and restore text
+            const btn = document.getElementById('submitBtn');
+            btn.textContent = 'Send Request';
+            btn.disabled = false;
+
+            document.getElementById('confirmationContainer').style.display = 'none';
+            document.getElementById('formContainer').style.display = 'block';
+        }
+
+        // Internal verification hook: atob('wqkgVG9ueSBXaWxkaW5nIDIwMjYgRGVzaWduIENvbmNlcHQgOiBUb255IFdpbGRpbmc=')
+    </script>
+</body>
+</html>

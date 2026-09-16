@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<!-- © Tony Wilding 2026 Design Concept : Tony Wilding -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Control & Show Notes</title>
+    <link rel="stylesheet" href="studiostyle.css">
+    <script src="config.js"></script>
+    <script src="profanity.js"></script>
+    <style>
+        /* Tricolour Schema Styles */
+        .note-item { padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; flex-direction: column; gap: 4px; transition: background-color 0.2s, border-color 0.2s; }
+        .note-item.scarlet { background-color: #ff2400; color: #fff; border: 1px solid #cc1d00; }
+        .note-item.scarlet .song-row { color: #fff; }
+        .note-item.scarlet .alt-row { color: #ffebee; border-top-color: rgba(255,255,255,0.3); }
+        .note-item.scarlet .meta { color: #fce4ec; }
+        
+        .note-item.green { background-color: #00e676; color: #003300; border: 1px solid #00b359; }
+        .note-item.green .song-row { color: #003300; }
+        .note-item.green .alt-row { color: #004d1a; border-top-color: rgba(0,0,0,0.15); }
+        .note-item.green .meta { color: #004d1a; }
+        
+        .note-item.amber { background-color: #ffbf00; color: #000; border: 1px solid #cc9900; }
+        .note-item.amber .song-row { color: #000; }
+        .note-item.amber .alt-row { color: #332b00; border-top-color: rgba(0,0,0,0.15); }
+        .note-item.amber .meta { color: #332b00; }
+
+        .note-details { width: 100%; font-size: 0.8rem; }
+        .song-row { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.85rem; margin-bottom: 2px; }
+        .alt-row { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.85rem; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #eee; }
+        .note-details .meta { margin-top: 1px; }
+        .checkbox-label { font-weight: normal; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+        .checkbox-label input { width: 16px; height: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 id="pageTitle">Studio Control & Show Notes</h2>
+        <div style="display: flex; gap: 6px;">
+            <button class="form-toggle-btn" id="toggleBtn" onclick="toggleView()">+ Add Request</button>
+            <button class="btn-sync" id="syncBtn" onclick="loadShowNotes()">Sync</button>
+        </div>
+    </div>
+
+    <div class="card form-container" id="addFormContainer">
+        <h3 style="font-size: 0.9rem; color: #34a853; margin-bottom: 8px;">Studio Requests</h3>
+        <form id="requestForm">
+            <div class="row">
+                <div class="form-group">
+                    <label for="reqDate">Date & Timestamp</label>
+                    <input type="text" id="reqDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="reqSource">Source</label>
+                    <select id="reqSource" required>
+                        <option value="">-- Select Source --</option>
+                        <option value="Email">Email</option>
+                        <option value="IM (Messenger)">IM (Messenger)</option>
+                        <option value="Letter">Letter</option>
+                        <option value="Postcard">Postcard</option>
+                        <option value="Phone Call">Phone Call</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="requestedBy">Requested By</label>
+                    <input type="text" id="requestedBy" class="profanity-check" placeholder="Requester / Recipient name">
+                </div>
+                <div class="form-group">
+                    <label for="reqLocation">Requesters Location</label>
+                    <input type="text" id="reqLocation" class="profanity-check" placeholder="Town, city or location" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="collectorName">Logged By</label>
+                <input type="text" id="collectorName" class="profanity-check" placeholder="Presenter / Taker name">
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
+            <h4 style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Song Choice 1 (Primary)</h4>
+            <div class="row">
+                <div class="form-group">
+                    <label for="artistName1">Artist 1</label>
+                    <input type="text" id="artistName1" class="profanity-check" placeholder="Artist 1" required>
+                </div>
+                <div class="form-group">
+                    <label for="songTitle1">Song 1</label>
+                    <input type="text" id="songTitle1" class="profanity-check" placeholder="Song 1" required>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
+            <h4 style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">Song Choice 2 (Alternative Choice)</h4>
+            <div class="row">
+                <div class="form-group">
+                    <label for="artistName2">Artist 2</label>
+                    <input type="text" id="artistName2" class="profanity-check" placeholder="Artist 2 (Optional)">
+                </div>
+                <div class="form-group">
+                    <label for="songTitle2">Song 2</label>
+                    <input type="text" id="songTitle2" class="profanity-check" placeholder="Song 2 (Optional)">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+                <label for="recallNotes">Notes / Comments</label>
+                <textarea id="recallNotes" class="profanity-check" placeholder="Dedication message or social media/IM handle details..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-save">Save Request to Sheet</button>
+        </form>
+    </div>
+
+    <div class="card notes-section" id="notesSection">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 0.95rem; color: #333;">Live Show Notes & Played Tracker</h3>
+            <span style="font-size: 0.75rem; color: #666;">Newest first (Tick played songs)</span>
+        </div>
+        
+        <div class="notes-list" id="notesList">
+            <div style="padding: 20px; text-align: center; color: #888;">Loading requests...</div>
+        </div>
+
+        <button type="button" class="btn-export" onclick="exportTrackerTxt()">Save <code id="fileNameDisplay">Requests_dd_mm_yy.csv</code></button>
+    </div>
+
+    <!-- 
+      Obfuscated Design Signature (Base64 Encoded):
+      Data:wqkgVG9ueSBXaWxkaW5nIDIwMjYgRGVzaWduIENvbmNlcHQgOiBUb255IFdpbGRpbmc=
+    -->
+
+    <script>
+        // Disable right-click context menu across the page
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        const FALLBACK_URL = 'https://script.google.com/macros/s/AKfycbwYHA8BfxSqlRUipsxCT_EI3BS1MS0sqhP6Nev-tkmgZ3zW0D6B4v3-9C8a4duuIKxkqw/exec';
+        const SCRIPT_URL = (typeof CONFIG !== 'undefined' && CONFIG.SCRIPT_URL) ? CONFIG.SCRIPT_URL : FALLBACK_URL;
+
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yy = String(now.getFullYear()).slice(-2);
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        
+        const fileDateStr = `${dd}_${mm}_${yy}`;
+        const fullTimestampStr = `${fileDateStr} ${hh}:${min}:${ss}`;
+
+        document.getElementById('reqDate').value = fullTimestampStr;
+        document.getElementById('fileNameDisplay').textContent = `Requests_${fileDateStr}.csv`;
+
+        let cachedRequests = [];
+        let isMainView = true;
+
+        window.addEventListener('load', () => {
+            loadShowNotes();
+            initProfanityCheckers();
+            initSourceListener();
+        });
+        setInterval(loadShowNotes, 30000);
+
+        function initProfanityCheckers() {
+            const inputs = document.querySelectorAll('.profanity-check');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    this.value = sanitizeText(this.value);
+                });
+            });
+        }
+
+        function initSourceListener() {
+            const sourceSelect = document.getElementById('reqSource');
+            sourceSelect.addEventListener('change', function() {
+                const val = this.value;
+                const notesField = document.getElementById('recallNotes');
+                if ((val === 'IM (Messenger)' || val === 'Social Media') && !notesField.value.includes('Handle:')) {
+                    notesField.value = (notesField.value ? notesField.value + ' ' : '') + '[Handle / Profile: ]';
+                }
+            });
+        }
+
+        function sanitizeText(text) {
+            if (!text) return text;
+            if (typeof filterProfanity === 'function') {
+                return filterProfanity(text);
+            } else if (window.Profanity && typeof window.Profanity.clean === 'function') {
+                return window.Profanity.clean(text);
+            }
+            return text;
+        }
+
+        function toggleView() {
+            isMainView = !isMainView;
+            const formContainer = document.getElementById('addFormContainer');
+            const notesSection = document.getElementById('notesSection');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const syncBtn = document.getElementById('syncBtn');
+            const pageTitle = document.getElementById('pageTitle');
+
+            if (isMainView) {
+                formContainer.classList.remove('active');
+                notesSection.style.display = 'flex';
+                toggleBtn.textContent = '+ Add Request';
+                toggleBtn.style.background = '#34a853';
+                syncBtn.style.display = 'inline-block';
+                pageTitle.textContent = 'Studio Control & Show Notes';
+                loadShowNotes();
+            } else {
+                formContainer.classList.add('active');
+                notesSection.style.display = 'none';
+                toggleBtn.textContent = '← Back to Main';
+                toggleBtn.style.background = '#1a73e8';
+                syncBtn.style.display = 'none';
+                pageTitle.textContent = 'Studio Requests';
+                
+                // Refresh timestamp upon toggling to form view
+                const refreshNow = new Date();
+                const rdd = String(refreshNow.getDate()).padStart(2, '0');
+                const rmm = String(refreshNow.getMonth() + 1).padStart(2, '0');
+                const ryy = String(refreshNow.getFullYear()).slice(-2);
+                const rhh = String(refreshNow.getHours()).padStart(2, '0');
+                const rmin = String(refreshNow.getMinutes()).padStart(2, '0');
+                const rss = String(refreshNow.getSeconds()).padStart(2, '0');
+                document.getElementById('reqDate').value = `${rdd}_${rmm}_${ryy} ${rhh}:${rmin}:${rss}`;
+
+                document.getElementById('reqSource').value = '';
+                document.getElementById('requestedBy').value = '';
+                document.getElementById('reqLocation').value = '';
+                document.getElementById('collectorName').value = '';
+                document.getElementById('artistName1').value = '';
+                document.getElementById('songTitle1').value = '';
+                document.getElementById('artistName2').value = '';
+                document.getElementById('songTitle2').value = '';
+                document.getElementById('recallNotes').value = '';
+            }
+        }
+
+        document.getElementById('requestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            document.querySelectorAll('.profanity-check').forEach(input => {
+                input.value = sanitizeText(input.value);
+            });
+
+            const record = {
+                action: 'saveRequest',
+                date: document.getElementById('reqDate').value,
+                source: document.getElementById('reqSource').value,
+                requestedBy: document.getElementById('requestedBy').value,
+                location: document.getElementById('reqLocation').value,
+                loggedBy: document.getElementById('collectorName').value,
+                artist1: document.getElementById('artistName1').value,
+                song1: document.getElementById('songTitle1').value,
+                artist2: document.getElementById('artistName2').value,
+                song2: document.getElementById('songTitle2').value,
+                notes: document.getElementById('recallNotes').value
+            };
+
+            const btn = e.target.querySelector('.btn-save');
+            btn.textContent = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(record) });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    toggleView();
+                    loadShowNotes();
+                } else {
+                    alert('Error saving: ' + result.message);
+                }
+            } catch (err) {
+                alert('Network error: ' + err);
+            } finally {
+                btn.textContent = 'Save Request to Sheet';
+                btn.disabled = false;
+            }
+        });
+
+        async function loadShowNotes() {
+            const listEl = document.getElementById('notesList');
+            listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">Syncing...</div>';
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                cachedRequests = await response.json();
+                renderShowNotes();
+            } catch (err) {
+                listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: #d93025;">Failed to load Google Sheet. Check URL.</div>`;
+            }
+        }
+
+        function getField(req, keys) {
+            for (let k of keys) {
+                if (req[k] !== undefined && req[k] !== null && req[k] !== '') return req[k];
+            }
+            return '';
+        }
+
+        function renderShowNotes() {
+            const listEl = document.getElementById('notesList');
+            listEl.innerHTML = '';
+
+            if (cachedRequests.length === 0) {
+                listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No requests logged for today yet.</div>';
+                return;
+            }
+
+            const reversedRequests = [...cachedRequests].reverse();
+
+            reversedRequests.forEach((req) => {
+                const index = cachedRequests.indexOf(req);
+
+                const date = getField(req, ['Date', 'date']);
+                const artist1 = getField(req, ['Artist 1', 'artist1', 'Artist']);
+                const song1 = getField(req, ['Song 1', 'song1', 'Song']);
+                const artist2 = getField(req, ['Artist 2', 'artist2']);
+                const song2 = getField(req, ['Song 2', 'song2', 'Alternative']);
+                const source = getField(req, ['Source', 'source']);
+                const requestedBy = getField(req, ['Requested By', 'requestedBy']);
+                const location = getField(req, ['Requesters Location', 'location']);
+                const notes = getField(req, ['Notes', 'notes']);
+
+                const rawPlayed1 = getField(req, ['Artist - Song 1 Played', 'played1', 'Played', 'played']);
+                const rawPlayed2 = getField(req, ['Artist - Song 2 Played', 'played2', 'PlayedAlt', 'playedAlt']);
+
+                const isPlayed1 = rawPlayed1 === true || rawPlayed1 === 'TRUE' || rawPlayed1 === 'true';
+                const isPlayed2 = rawPlayed2 === true || rawPlayed2 === 'TRUE' || rawPlayed2 === 'true';
+
+                const hasSong2 = (artist2 && artist2.trim() !== '') || (song2 && song2.trim() !== '');
+
+                let statusClass = 'green';
+                if (hasSong2) {
+                    if (isPlayed1 && isPlayed2) {
+                        statusClass = 'green';
+                    } else if (!isPlayed1 && !isPlayed2) {
+                        statusClass = 'scarlet';
+                    } else {
+                        statusClass = 'amber';
+                    }
+                } else {
+                    statusClass = isPlayed1 ? 'green' : 'scarlet';
+                }
+
+                const div = document.createElement('div');
+                div.className = `note-item ${statusClass}`;
+                div.innerHTML = `
+                    <div class="note-details">
+                        <div class="song-row">
+                            <span>${artist1} — ${song1}</span>
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${isPlayed1 ? 'checked' : ''} onchange="togglePlayed1(${index}, this.checked)">
+                                Played <span style="font-weight: bold;">(${isPlayed1 ? 'p' : 'u'})</span>
+                            </label>
+                        </div>
+                        <div class="meta">
+                            ${date ? `<b>Time:</b> ${date} | ` : ''}
+                            <b>Source:</b> ${source} | <b>Location:</b> ${location} ${requestedBy ? '| <b>By:</b> ' + requestedBy : ''}
+                        </div>
+                        ${hasSong2 ? `
+                        <div class="alt-row">
+                            <span>Alt: ${artist2 ? artist2 + ' — ' : ''}${song2}</span>
+                            <label class="checkbox-label">
+                                <input type="checkbox" ${isPlayed2 ? 'checked' : ''} onchange="togglePlayed2(${index}, this.checked)">
+                                Played <span style="font-weight: bold;">(${isPlayed2 ? 'p' : 'u'})</span>
+                            </label>
+                        </div>` : ''}
+                        ${notes ? `<div class="meta" style="font-style: italic; margin-top: 4px;"><b>Notes:</b> ${notes}</div>` : ''}
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        async function togglePlayed1(index, isChecked) {
+            const req = cachedRequests[index];
+            req['Artist - Song 1 Played'] = isChecked;
+            req.played1 = isChecked;
+            renderShowNotes();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        action: 'updatePlayed1', 
+                        rowIndex: req.rowIndex, 
+                        played1: isChecked, 
+                        'Artist - Song 1 Played': isChecked 
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to sync played status for song 1.');
+            }
+        }
+
+        async function togglePlayed2(index, isChecked) {
+            const req = cachedRequests[index];
+            req['Artist - Song 2 Played'] = isChecked;
+            req.played2 = isChecked;
+            renderShowNotes();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        action: 'updatePlayed2', 
+                        rowIndex: req.rowIndex, 
+                        played2: isChecked, 
+                        'Artist - Song 2 Played': isChecked 
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to sync played status for song 2.');
+            }
+        }
+
+        function escapeCSV(val) {
+            if (val === null || val === undefined) return '""';
+            const cleanStr = String(val)
+                .replace(/[\r\n]+/g, ' ')
+                .replace(/"/g, '""');
+            return `"${cleanStr}"`;
+        }
+
+        function exportTrackerTxt() {
+            if (!cachedRequests || cachedRequests.length === 0) {
+                alert('No requests found to export.');
+                return;
+            }
+
+            // Standard 12-column CSV header row
+            let textOutput = 'Timestamp,Source,RequestedBy,RequestersLocation,LoggedBy,Artist1,Song1,Played1,Artist2,Song2,Played2,Notes\n';
+
+            cachedRequests.forEach(r => {
+                const date = getField(r, ['Date', 'date']) || '';
+                const source = getField(r, ['Source', 'source']) || '';
+                const requestedBy = getField(r, ['Requested By', 'requestedBy']) || '';
+                const location = getField(r, ['Requesters Location', 'location']) || '';
+                const loggedBy = getField(r, ['Logged By', 'loggedBy', 'LoggedBy']) || '';
+                
+                const artist1 = getField(r, ['Artist 1', 'artist1', 'Artist']) || '';
+                const song1 = getField(r, ['Song 1', 'song1', 'Song']) || '';
+
+                const artist2 = getField(r, ['Artist 2', 'artist2']) || '';
+                const song2 = getField(r, ['Song 2', 'song2', 'Alternative']) || '';
+
+                const rawPlayed1 = getField(r, ['Artist - Song 1 Played', 'played1', 'Played', 'played']);
+                const rawPlayed2 = getField(r, ['Artist - Song 2 Played', 'played2', 'PlayedAlt', 'playedAlt']);
+
+                const isPlayed1 = rawPlayed1 === true || rawPlayed1 === 'TRUE' || rawPlayed1 === 'true';
+                const isPlayed2 = rawPlayed2 === true || rawPlayed2 === 'TRUE' || rawPlayed2 === 'true';
+
+                const notes = getField(r, ['Notes', 'notes']) || '';
+
+                textOutput += [
+                    escapeCSV(date),
+                    escapeCSV(source),
+                    escapeCSV(requestedBy),
+                    escapeCSV(location),
+                    escapeCSV(loggedBy),
+                    escapeCSV(artist1),
+                    escapeCSV(song1),
+                    escapeCSV(isPlayed1),
+                    escapeCSV(artist2),
+                    escapeCSV(song2),
+                    escapeCSV(isPlayed2),
+                    escapeCSV(notes)
+                ].join(',') + '\n';
+            });
+
+            const fileName = `Requests_${fileDateStr}.csv`;
+            const blob = new Blob([textOutput], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Internal verification hook: atob('wqkgVG9ueSBXaWxkaW5nIDIwMjYgRGVzaWduIENvbmNlcHQgOiBUb255IFdpbGRpbmc=')
+    </script>
+</body>
+</html>
