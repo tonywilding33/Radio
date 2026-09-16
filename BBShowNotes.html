@@ -120,7 +120,7 @@
 
     <div class="card notes-section" id="notesSection">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-size: 0.95rem; color: #333;">Live Show Notes & Played Tracker</h3>
+            <h3 style="font-size: 0.95rem; color: #333;">Live Show Notes & Played Tracker (7-Day Window)</h3>
             <span style="font-size: 0.75rem; color: #666;">Newest first (Tick played songs)</span>
         </div>
         
@@ -310,7 +310,7 @@
             listEl.innerHTML = '';
 
             if (cachedRequests.length === 0) {
-                listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No requests logged for today yet.</div>';
+                listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No requests found in the last 7 days.</div>';
                 return;
             }
 
@@ -391,6 +391,7 @@
                     body: JSON.stringify({ 
                         action: 'updatePlayed1', 
                         rowIndex: req.rowIndex, 
+                        sheetName: req.sheetName, // Passes historical sheet tab identifier
                         played1: isChecked, 
                         'Artist - Song 1 Played': isChecked 
                     })
@@ -411,6 +412,7 @@
                     body: JSON.stringify({ 
                         action: 'updatePlayed2', 
                         rowIndex: req.rowIndex, 
+                        sheetName: req.sheetName, // Passes historical sheet tab identifier
                         played2: isChecked, 
                         'Artist - Song 2 Played': isChecked 
                     })
