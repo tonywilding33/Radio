@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whiteboard Reader</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #ffffff;
+      color: #182026;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .login-card {
+      max-width: 380px;
+      margin: 80px auto;
+      background: #ffffff;
+      border: 1px solid #d8e1e8;
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .login-card h1 {
+      margin: 0 0 16px;
+      font-size: 1.25rem;
+    }
+    .field {
+      margin-bottom: 12px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.875rem;
+      margin-bottom: 4px;
+      color: #394b59;
+    }
+    .field input {
+      width: 100%;
+      padding: 9px 10px;
+      font-size: 0.95rem;
+      border: 1px solid #bfccd6;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: #137cbd;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover { background: #106ba3; }
+    button:disabled {
+      background: #8ab8d6;
+      cursor: not-allowed;
+    }
+    .error {
+      margin-top: 10px;
+      font-size: 0.875rem;
+      color: #c23030;
+      min-height: 1.2em;
+      word-break: break-word;
+    }
+    #feed {
+      display: none;
+    }
+    .post {
+      border: 1px solid #d8e1e8;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    .post-meta {
+      font-size: 0.82rem;
+      color: #394b59;
+      margin-bottom: 8px;
+    }
+    .post-msg {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .empty {
+      background: #ffffff;
+      border: 1px solid #d8e1e8;
+      border-radius: 8px;
+      padding: 20px;
+      color: #5c7080;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="loginBox" class="login-card">
+      <h1>Sign In</h1>
+      <div id="loginPanel">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="off" />
+        </div>
+        <button id="submitBtn" type="button">Continue</button>
+        <div id="loginError" class="error"></div>
+      </div>
+    </div>
+
+    <div id="feed" aria-live="polite"></div>
+  </div>
+
+  <script>
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    const GATEWAY_URL = "/api/gateway";
+    const POLL_MS = 30000;
+
+    // Full rainbow spectrum across departments (new departments step around the hue wheel)
+    const RAINBOW_PALETTE = [
+      { bg: "#ff9aa2", border: "#e06c75" }, // Red
+      { bg: "#ffb86c", border: "#e08e36" }, // Orange
+      { bg: "#ffe66d", border: "#d4b82a" }, // Yellow
+      { bg: "#95e1a4", border: "#56b86b" }, // Green
+      { bg: "#7dd3fc", border: "#38a3d8" }, // Cyan / Blue
+      { bg: "#a5b4fc", border: "#6c7ee8" }, // Indigo
+      { bg: "#d8b4fe", border: "#a876e8" }  // Violet
+    ];
+
+    const deptColorMap = new Map();
+    let nextHueIndex = 0;
+
+    function getDeptStyle(dept) {
+      const key = String(dept ?? "").trim().toLowerCase() || "__default__";
+      if (!deptColorMap.has(key)) {
+        const chosen = RAINBOW_PALETTE[nextHueIndex % RAINBOW_PALETTE.length];
+        nextHueIndex += 1;
+        deptColorMap.set(key, chosen);
+      }
+      return deptColorMap.get(key);
+    }
+
+    let isAuthed = false;
+    let pollTimer = null;
+
+    const loginBox = document.getElementById("loginBox");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const submitBtn = document.getElementById("submitBtn");
+    const loginError = document.getElementById("loginError");
+    const feedEl = document.getElementById("feed");
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, {
+          ...options,
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(id);
+      }
+    }
+
+    async function authenticate(username, password) {
+      const payload = JSON.stringify({
+        action: "reader_login",
+        username: username,
+        password: password
+      });
+
+      const res = await fetchWithTimeout(GATEWAY_URL, {
+        method: "POST",
+        body: payload
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (_) {
+        throw new Error("Unexpected response from gateway.");
+      }
+
+      if (!res.ok || !data || !data.ok) {
+        throw new Error((data && data.error) || "Sign in failed");
+      }
+      return data;
+    }
+
+    function renderPosts(posts) {
+      if (!Array.isArray(posts) || posts.length === 0) {
+        feedEl.innerHTML = '<div class="empty">No posts available.</div>';
+        return;
+      }
+
+      feedEl.innerHTML = posts.map(p => {
+        const stamp = [p.date, p.day, p.time].filter(Boolean).join(" ");
+        const deptAuthor = [p.dept, p.author].filter(Boolean).join(" • ");
+        const idTag = p.id !== undefined && p.id !== "" ? " #" + escapeHtml(p.id) : "";
+        const metaParts = [stamp, deptAuthor].filter(Boolean).map(escapeHtml).join(" — ") + idTag;
+        const style = getDeptStyle(p.dept);
+
+        return `
+          <article class="post" style="background:${style.bg};border-color:${style.border};">
+            <div class="post-meta">${metaParts}</div>
+            <p class="post-msg">${escapeHtml(p.msg)}</p>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function loadFeed() {
+      if (!isAuthed) return;
+      try {
+        const res = await fetchWithTimeout(`${GATEWAY_URL}?action=poll&_t=${Date.now()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.ok) return;
+
+        if (Array.isArray(data.recentPosts) && data.recentPosts.length > 0) {
+          renderPosts(data.recentPosts);
+        } else if (data.postMsg) {
+          renderPosts([{
+            id: data.postId,
+            date: data.postDate,
+            day: data.postDay,
+            time: data.postTime,
+            dept: data.postDept,
+            author: data.postAuthor,
+            msg: data.postMsg
+          }]);
+        } else {
+          renderPosts([]);
+        }
+      } catch (_) {
+        // Keep current feed visible on transient network errors
+      }
+    }
+
+    async function handleLogin() {
+      loginError.textContent = "";
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!username || !password) {
+        loginError.textContent = "Enter both username and password.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Signing in...";
+
+      try {
+        await authenticate(username, password);
+        isAuthed = true;
+        loginBox.style.display = "none";
+        feedEl.style.display = "block";
+        await loadFeed();
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(loadFeed, POLL_MS);
+      } catch (err) {
+        if (err && err.name === "AbortError") {
+          loginError.textContent = "Gateway timed out after 20 seconds.";
+        } else {
+          loginError.textContent = (err && err.message) || "Unable to sign in";
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Continue";
+      }
+    }
+
+    submitBtn.addEventListener("click", handleLogin);
+    passwordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleLogin();
+    });
+  </script>
+</body>
+</html>

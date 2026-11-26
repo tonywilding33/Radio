@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whiteboard Publisher</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #ffffff;
+      color: #182026;
+    }
+
+    .wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* Login Card matching reader_2.html */
+    .login-card {
+      max-width: 380px;
+      margin: 80px auto;
+      background: #ffffff;
+      border: 1px solid #d8e1e8;
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    .login-card h1 {
+      margin: 0 0 16px;
+      font-size: 1.25rem;
+      color: #182026;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.875rem;
+      margin-bottom: 4px;
+      color: #394b59;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 9px 10px;
+      font-size: 0.95rem;
+      background: #ffffff;
+      color: #182026;
+      border: 1px solid #bfccd6;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+
+    button {
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: #137cbd;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: #106ba3;
+    }
+
+    button:disabled {
+      background: #8ab8d6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary-full {
+      width: 100%;
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: #182026;
+      border: 1px solid #bfccd6;
+    }
+
+    .btn-secondary:hover {
+      background: #f5f8fa;
+    }
+
+    .btn-danger {
+      background: #c23030;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background: #a82525;
+    }
+
+    .error {
+      margin-top: 10px;
+      font-size: 0.875rem;
+      color: #c23030;
+      min-height: 1.2em;
+      word-break: break-word;
+    }
+
+    .error.info {
+      color: #5c7080;
+    }
+
+    /* Main Publisher View matching reader_2.html palette */
+    #publisherApp {
+      display: none;
+    }
+
+    .panel {
+      background: #ffffff;
+      border: 1px solid #d8e1e8;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #182026;
+    }
+
+    .header-sub {
+      font-size: 0.85rem;
+      color: #394b59;
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-actions button,
+    .inline-row button,
+    .banner-btn {
+      padding: 8px 12px;
+      font-size: 0.875rem;
+    }
+
+    .alert-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #7dd3fc;
+      border: 1px solid #38a3d8;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      color: #182026;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .alert-banner.visible {
+      display: flex;
+    }
+
+    .composer-grid {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .composer-dept {
+      min-width: 150px;
+      margin-bottom: 0;
+    }
+
+    .composer-msg {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+
+    .inline-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .manage-id-field {
+      width: 90px;
+      margin-bottom: 0;
+    }
+
+    .manage-msg-field {
+      flex: 1;
+      min-width: 180px;
+      margin-bottom: 0;
+    }
+
+    .status-note {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #394b59;
+      min-height: 1.1em;
+    }
+
+    .status-note.err {
+      color: #c23030;
+    }
+
+    .status-note.ok {
+      color: #137cbd;
+      font-weight: 600;
+    }
+
+    .feed-meta-bar {
+      font-size: 0.82rem;
+      color: #394b59;
+      margin-bottom: 10px;
+    }
+
+    .post {
+      border: 1px solid #d8e1e8;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+
+    .post-meta {
+      font-size: 0.82rem;
+      color: #394b59;
+      margin-bottom: 8px;
+    }
+
+    .post-msg {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      color: #182026;
+    }
+
+    .empty {
+      background: #ffffff;
+      border: 1px solid #d8e1e8;
+      border-radius: 8px;
+      padding: 20px;
+      color: #5c7080;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="loginBox" class="login-card">
+      <h1>Publisher Sign In</h1>
+      <div id="loginPanel">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="off" />
+        </div>
+        <button id="submitBtn" class="btn-primary-full" type="button">Continue</button>
+        <div id="loginError" class="error"></div>
+      </div>
+    </div>
+
+    <div id="publisherApp">
+      <div class="panel header-bar">
+        <div>
+          <h1 id="lblTitle" class="header-title">Whiteboard Publisher</h1>
+          <div id="lblUserMeta" class="header-sub"></div>
+        </div>
+        <div class="header-actions">
+          <button id="btnRefresh" class="btn-secondary" type="button">Refresh Feed</button>
+          <button id="btnSignOut" type="button">Sign Out</button>
+        </div>
+      </div>
+
+      <div id="loginAlertPanel" class="alert-banner" aria-live="polite">
+        <span id="lblLoginAlert"></span>
+        <button id="btnDismissLogin" class="banner-btn" type="button">Dismiss</button>
+      </div>
+
+      <div class="panel">
+        <div class="composer-grid">
+          <div class="field composer-dept">
+            <label for="cmbDept">Department</label>
+            <select id="cmbDept"></select>
+          </div>
+          <div class="field composer-msg">
+            <label for="txtAlertMsg">Alert Note</label>
+            <input id="txtAlertMsg" type="text" placeholder="Enter whiteboard alert note..." />
+          </div>
+          <button id="btnSendAlert" type="button">Send Post Alert</button>
+        </div>
+        <div id="lblPostStatus" class="status-note"></div>
+      </div>
+
+      <div id="lblFeedHeader" class="feed-meta-bar">Whiteboard Updates (Refreshes when you post or click Refresh Feed)</div>
+      <div id="feed" aria-live="polite">
+        <div class="empty">Waiting for latest gateway update...</div>
+      </div>
+
+      <div class="panel">
+        <div class="inline-row">
+          <div class="field manage-id-field">
+            <label for="txtPostId">Post #</label>
+            <input id="txtPostId" type="text" />
+          </div>
+          <div class="field manage-msg-field">
+            <label for="txtEditMsg">Updated Text</label>
+            <input id="txtEditMsg" type="text" placeholder="Click a post above or enter updated text..." />
+          </div>
+          <button id="btnEditPost" type="button">Save Edit</button>
+          <button id="btnDeletePost" class="btn-danger" type="button">Delete Post</button>
+        </div>
+        <div id="lblManageStatus" class="status-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ALL_DEPTS = ["Chairman", "ITSupport", "Membership", "Engineering", "Librarian", "General"];
+    const GATEWAY_URL = "/api/gateway";
+
+    // Full rainbow spectrum across departments (new departments step around the hue wheel)
+    const RAINBOW_PALETTE = [
+      { bg: "#ff9aa2", border: "#e06c75" }, // Red
+      { bg: "#ffb86c", border: "#e08e36" }, // Orange
+      { bg: "#ffe66d", border: "#d4b82a" }, // Yellow
+      { bg: "#95e1a4", border: "#56b86b" }, // Green
+      { bg: "#7dd3fc", border: "#38a3d8" }, // Cyan / Blue
+      { bg: "#a5b4fc", border: "#6c7ee8" }, // Indigo
+      { bg: "#d8b4fe", border: "#a876e8" }  // Violet
+    ];
+
+    const deptColorMap = new Map();
+    let nextHueIndex = 0;
+
+    function getDeptStyle(dept) {
+      const key = String(dept ?? "").trim().toLowerCase() || "__default__";
+      if (!deptColorMap.has(key)) {
+        const chosen = RAINBOW_PALETTE[nextHueIndex % RAINBOW_PALETTE.length];
+        nextHueIndex += 1;
+        deptColorMap.set(key, chosen);
+      }
+      return deptColorMap.get(key);
+    }
+
+    const loginBox = document.getElementById("loginBox");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const submitBtn = document.getElementById("submitBtn");
+    const loginError = document.getElementById("loginError");
+
+    const publisherApp = document.getElementById("publisherApp");
+    const lblUserMeta = document.getElementById("lblUserMeta");
+    const btnRefresh = document.getElementById("btnRefresh");
+    const btnSignOut = document.getElementById("btnSignOut");
+
+    const loginAlertPanel = document.getElementById("loginAlertPanel");
+    const lblLoginAlert = document.getElementById("lblLoginAlert");
+    const btnDismissLogin = document.getElementById("btnDismissLogin");
+
+    const cmbDept = document.getElementById("cmbDept");
+    const txtAlertMsg = document.getElementById("txtAlertMsg");
+    const btnSendAlert = document.getElementById("btnSendAlert");
+    const lblPostStatus = document.getElementById("lblPostStatus");
+
+    const lblFeedHeader = document.getElementById("lblFeedHeader");
+    const feedEl = document.getElementById("feed");
+    const txtPostId = document.getElementById("txtPostId");
+    const txtEditMsg = document.getElementById("txtEditMsg");
+    const btnEditPost = document.getElementById("btnEditPost");
+    const btnDeletePost = document.getElementById("btnDeletePost");
+    const lblManageStatus = document.getElementById("lblManageStatus");
+
+    let sessionState = null;
+    let recentPosts = [];
+    let lastLoginSignature = "";
+    let firstLoginPoll = true;
+    let lastPostId = null;
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatNowDate() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function formatNowTime() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      const ss = String(d.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, {
+          ...options,
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(id);
+      }
+    }
+
+    async function invokeGatewayPost(bodyObj) {
+      const res = await fetchWithTimeout(GATEWAY_URL, {
+        method: "POST",
+        body: JSON.stringify(bodyObj)
+      }, 20000);
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (_) {
+        throw new Error("Unexpected response from gateway.");
+      }
+
+      if (!res.ok || !data || data.ok !== true) {
+        throw new Error((data && data.error) || `HTTP ${res.status}`);
+      }
+      return data;
+    }
+
+    async function invokeGatewayPoll() {
+      const sep = GATEWAY_URL.includes("?") ? "&" : "?";
+      const pollUrl = `${GATEWAY_URL}${sep}action=poll&_t=${Date.now()}`;
+      const res = await fetchWithTimeout(pollUrl, {
+        method: "GET"
+      }, 20000);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    function renderEmptyFeed(text) {
+      feedEl.innerHTML = `<div class="empty">${escapeHtml(text)}</div>`;
+    }
+
+    function renderPosts() {
+      if (!Array.isArray(recentPosts) || recentPosts.length === 0) {
+        renderEmptyFeed("No posts available.");
+        return;
+      }
+
+      feedEl.innerHTML = recentPosts.map((p, idx) => {
+        const stamp = [p.dateStr, p.timeStr].filter(Boolean).join(" ");
+        const deptAuthor = [p.dept, p.author].filter(Boolean).join(" • ");
+        const idTag = p.postId !== undefined && p.postId !== "" ? " #" + escapeHtml(p.postId) : "";
+        const metaParts = [stamp, deptAuthor].filter(Boolean).map(escapeHtml).join(" — ") + idTag;
+        const style = getDeptStyle(p.dept);
+
+        return `
+          <article class="post" data-idx="${idx}" style="background:${style.bg};border-color:${style.border};">
+            <div class="post-meta">${metaParts}</div>
+            <p class="post-msg">${escapeHtml(p.message)}</p>
+          </article>
+        `;
+      }).join("");
+
+      feedEl.querySelectorAll(".post").forEach((card) => {
+        card.addEventListener("click", () => {
+          const idx = Number(card.getAttribute("data-idx"));
+          const post = recentPosts[idx];
+          if (!post) return;
+          if (post.postId) txtPostId.value = post.postId;
+          txtEditMsg.value = post.message;
+        });
+      });
+    }
+
+    function addGatewayFeedEntry(postId, dept, author, dateStr, timeStr, message) {
+      if (!message) return;
+      const entry = {
+        postId: String(postId ?? ""),
+        dept: String(dept ?? "General"),
+        author: String(author ?? ""),
+        dateStr: String(dateStr ?? ""),
+        timeStr: String(timeStr ?? ""),
+        message: String(message),
+        signature: `[#${postId}] (${dateStr} ${timeStr}) [${dept}] ${author} : ${message}`
+      };
+
+      if (recentPosts.length === 0 || recentPosts[0].signature !== entry.signature) {
+        recentPosts.unshift(entry);
+        if (recentPosts.length > 50) {
+          recentPosts.pop();
+        }
+        renderPosts();
+      }
+    }
+
+    function showLoginBanner(text) {
+      lblLoginAlert.textContent = text;
+      loginAlertPanel.classList.add("visible");
+    }
+
+    async function checkLoginAlerts() {
+      if (!sessionState) return;
+      try {
+        const status = await invokeGatewayPoll();
+        if (status && status.ok === true) {
+          if (!status.postMsg && recentPosts.length === 0) {
+            renderEmptyFeed("Connected to gateway (no posts in sheet yet).");
+          }
+
+          if (status.loginUser) {
+            const sig = `${status.loginDate}|${status.loginTime}|${status.loginUser}|${status.loginRole}`;
+            if (firstLoginPoll) {
+              firstLoginPoll = false;
+              lastLoginSignature = sig;
+            } else if (sig !== lastLoginSignature) {
+              lastLoginSignature = sig;
+              showLoginBanner(
+                `USER LOGIN: ${status.loginUser} (${status.loginRole}) logged in on ${status.loginDay} ${status.loginDate} at ${status.loginTime}`
+              );
+            }
+          }
+
+          if (Array.isArray(status.recentPosts) && status.recentPosts.length > 0) {
+            const ordered = [...status.recentPosts].reverse();
+            for (const p of ordered) {
+              if (p && p.msg !== null && p.msg !== undefined && String(p.msg) !== "") {
+                addGatewayFeedEntry(
+                  String(p.id ?? ""),
+                  String(p.dept ?? ""),
+                  String(p.author ?? ""),
+                  String(p.date ?? ""),
+                  String(p.time ?? ""),
+                  String(p.msg)
+                );
+              }
+            }
+          } else if (status.postId !== null && status.postId !== undefined && String(status.postId) !== "") {
+            addGatewayFeedEntry(
+              String(status.postId),
+              String(status.postDept ?? ""),
+              String(status.postAuthor ?? ""),
+              String(status.postDate ?? ""),
+              String(status.postTime ?? ""),
+              String(status.postMsg ?? "")
+            );
+          }
+
+          if (status.postId !== null && status.postId !== undefined && String(status.postId) !== "") {
+            const currentPostId = String(status.postId);
+            if (lastPostId === null) {
+              lastPostId = currentPostId;
+            } else if (currentPostId !== lastPostId) {
+              lastPostId = currentPostId;
+              showLoginBanner(
+                `NEW POST (#${currentPostId}) [${status.postDept}] by ${status.postAuthor}: ${status.postMsg}`
+              );
+            }
+          }
+        }
+      } catch (_) {
+        // Ignore transient poll errors
+      }
+    }
+
+    function configureDepartments(isAdmin, userDept) {
+      cmbDept.innerHTML = "";
+      if (isAdmin) {
+        for (const d of ALL_DEPTS) {
+          const opt = document.createElement("option");
+          opt.value = d;
+          opt.textContent = d;
+          cmbDept.appendChild(opt);
+        }
+        cmbDept.value = ALL_DEPTS.includes(userDept) ? userDept : ALL_DEPTS[0];
+        cmbDept.disabled = false;
+      } else {
+        const opt = document.createElement("option");
+        opt.value = userDept;
+        opt.textContent = userDept;
+        cmbDept.appendChild(opt);
+        cmbDept.value = userDept;
+        cmbDept.disabled = true;
+      }
+    }
+
+    function enterPublisher(resp) {
+      const userName = String(resp.username ?? "");
+      const userRole = String(resp.role ?? "");
+      const userDept = resp.department ? String(resp.department) : "General";
+      const isAdmin = userRole.toLowerCase() === "admin";
+
+      sessionState = { userName, userRole, userDept, isAdmin };
+      recentPosts = [];
+      lastLoginSignature = "";
+      firstLoginPoll = true;
+      lastPostId = null;
+      renderEmptyFeed("Waiting for latest gateway update...");
+      loginAlertPanel.classList.remove("visible");
+
+      document.title = `Whiteboard Publisher (${userName} | ${userRole} - ${userDept})`;
+      lblUserMeta.textContent = `${userName} (${userRole}) • Department: ${userDept}`;
+      configureDepartments(isAdmin, userDept);
+
+      loginBox.style.display = "none";
+      publisherApp.style.display = "block";
+      lblFeedHeader.textContent = "Whiteboard Updates (Refreshes when you post or click Refresh Feed)";
+      checkLoginAlerts();
+    }
+
+    async function handleLogin() {
+      loginError.className = "error";
+      loginError.textContent = "";
+      const u = usernameInput.value.trim();
+      const p = passwordInput.value;
+
+      if (!u || !p) {
+        loginError.textContent = "Enter both username and password.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Signing in...";
+
+      try {
+        const resp = await invokeGatewayPost({
+          action: "login",
+          username: u,
+          password: p
+        });
+
+        const roleVal = String(resp.role ?? "");
+        if (roleVal.toLowerCase() === "admin" || roleVal.toLowerCase() === "editor") {
+          passwordInput.value = "";
+          enterPublisher(resp);
+        } else {
+          loginError.textContent = "Reader accounts cannot use Whiteboard Publisher.";
+        }
+      } catch (err) {
+        if (err && err.name === "AbortError") {
+          loginError.textContent = "Gateway timed out after 20 seconds.";
+        } else {
+          loginError.textContent = (err && err.message) || "Unable to sign in";
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Continue";
+      }
+    }
+
+    submitBtn.addEventListener("click", handleLogin);
+    passwordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleLogin();
+    });
+
+    btnSignOut.addEventListener("click", () => {
+      sessionState = null;
+      publisherApp.style.display = "none";
+      loginBox.style.display = "block";
+      loginError.className = "error";
+      loginError.textContent = "";
+      passwordInput.focus();
+    });
+
+    btnDismissLogin.addEventListener("click", () => {
+      loginAlertPanel.classList.remove("visible");
+    });
+
+    btnRefresh.addEventListener("click", () => {
+      recentPosts = [];
+      checkLoginAlerts();
+    });
+
+    btnSendAlert.addEventListener("click", async () => {
+      if (!sessionState) return;
+      const msgText = txtAlertMsg.value.trim();
+      if (!msgText) {
+        lblPostStatus.className = "status-note err";
+        lblPostStatus.textContent = "Please enter an alert note.";
+        return;
+      }
+
+      const chosenDept = sessionState.isAdmin ? cmbDept.value : sessionState.userDept;
+      btnSendAlert.disabled = true;
+      lblPostStatus.className = "status-note";
+      lblPostStatus.textContent = "Sending...";
+
+      try {
+        const resp = await invokeGatewayPost({
+          action: "post",
+          department: chosenDept,
+          username: sessionState.userName,
+          role: sessionState.userRole,
+          message: msgText
+        });
+
+        txtAlertMsg.value = "";
+        lblPostStatus.className = "status-note ok";
+        lblPostStatus.textContent = `Sent (#${resp.postId ?? ""})`;
+        addGatewayFeedEntry(
+          String(resp.postId ?? ""),
+          chosenDept,
+          sessionState.userName,
+          formatNowDate(),
+          formatNowTime(),
+          msgText
+        );
+        await checkLoginAlerts();
+      } catch (err) {
+        lblPostStatus.className = "status-note err";
+        lblPostStatus.textContent = (err && err.message) || "Failed to send post.";
+      } finally {
+        btnSendAlert.disabled = false;
+      }
+    });
+
+    btnEditPost.addEventListener("click", async () => {
+      if (!sessionState) return;
+      const pidVal = txtPostId.value.replace(/^#/, "").trim();
+      const newText = txtEditMsg.value.trim();
+      if (!pidVal || !newText) {
+        lblManageStatus.className = "status-note err";
+        lblManageStatus.textContent = "Post # and updated text are required.";
+        return;
+      }
+
+      btnEditPost.disabled = true;
+      lblManageStatus.className = "status-note";
+      lblManageStatus.textContent = "Saving...";
+
+      try {
+        await invokeGatewayPost({
+          action: "edit_post",
+          postId: pidVal,
+          message: newText,
+          username: sessionState.userName,
+          role: sessionState.userRole,
+          department: sessionState.userDept
+        });
+
+        lblManageStatus.className = "status-note ok";
+        lblManageStatus.textContent = `Updated #${pidVal}`;
+        txtEditMsg.value = "";
+        recentPosts = [];
+        lastPostId = null;
+        await checkLoginAlerts();
+      } catch (err) {
+        lblManageStatus.className = "status-note err";
+        lblManageStatus.textContent = (err && err.message) || "Edit denied.";
+      } finally {
+        btnEditPost.disabled = false;
+      }
+    });
+
+    btnDeletePost.addEventListener("click", async () => {
+      if (!sessionState) return;
+      const pidVal = txtPostId.value.replace(/^#/, "").trim();
+      if (!pidVal) {
+        lblManageStatus.className = "status-note err";
+        lblManageStatus.textContent = "Enter a Post # to delete.";
+        return;
+      }
+
+      if (!window.confirm(`Delete Post #${pidVal}?`)) {
+        return;
+      }
+
+      btnDeletePost.disabled = true;
+      lblManageStatus.className = "status-note";
+      lblManageStatus.textContent = "Deleting...";
+
+      try {
+        await invokeGatewayPost({
+          action: "delete_post",
+          postId: pidVal,
+          username: sessionState.userName,
+          role: sessionState.userRole,
+          department: sessionState.userDept
+        });
+
+        lblManageStatus.className = "status-note ok";
+        lblManageStatus.textContent = `Deleted #${pidVal}`;
+        txtPostId.value = "";
+        txtEditMsg.value = "";
+        recentPosts = [];
+        lastPostId = null;
+        renderEmptyFeed("No posts available.");
+        await checkLoginAlerts();
+      } catch (err) {
+        lblManageStatus.className = "status-note err";
+        lblManageStatus.textContent = (err && err.message) || "Delete denied.";
+      } finally {
+        btnDeletePost.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
